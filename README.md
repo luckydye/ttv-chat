@@ -17,3 +17,4 @@ A new Desktop Twitch Client with all the jingles and bells.
 - Streamer features
     - Hide names
 - Chat commands
+- And youtube chat?
