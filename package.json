@@ -1,0 +1,15 @@
+{
+  "name": "better-twitch-chat",
+  "version": "1.0.0",
+  "description": "A lightweight Twitch Chat App with all the Twitch Chat features.",
+  "main": "index.js",
+  "scripts": {
+    "tauri": "tauri",
+    "tauri:build": "tauri:build"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@tauri-apps/cli": "^1.0.0-beta.10"
+  }
+}
