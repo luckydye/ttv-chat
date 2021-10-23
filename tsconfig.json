@@ -1,0 +1,16 @@
+{
+    "files": [
+        "./src/main.ts"
+    ],
+    "compileOnSave": true,
+    "compilerOptions": {
+        "target": "es6",
+        "strict": true,
+        "preserveConstEnums": true,
+        "removeComments": true,
+        "sourceMap": true,
+        "outDir": "client",
+        "moduleResolution": "node",
+        "experimentalDecorators": true
+    }
+}

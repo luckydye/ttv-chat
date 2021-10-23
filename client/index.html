@@ -5,58 +5,16 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        .titlebar {
-            height: 30px;
-            background: #329ea3;
-            user-select: none;
-            display: flex;
-            justify-content: flex-end;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-        }
 
-        .titlebar-button {
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-            width: 30px;
-            height: 30px;
-        }
+    <title>Better Twitch Chat</title>
 
-        .titlebar-button:hover {
-            background: #5bbec3;
-        }
-    </style>
+    <link rel="stylesheet" href="./window.css">
+
+    <script type="module" src="./main.js"></script>
 </head>
 
 <body>
-    <div data-tauri-drag-region class="titlebar">
-        <div class="titlebar-button" id="titlebar-minimize">
-            <img src="https://api.iconify.design/mdi:window-minimize.svg" alt="minimize" />
-        </div>
-        <div class="titlebar-button" id="titlebar-maximize">
-            <img src="https://api.iconify.design/mdi:window-maximize.svg" alt="maximize" />
-        </div>
-        <div class="titlebar-button" id="titlebar-close">
-            <img src="https://api.iconify.design/mdi:close.svg" alt="close" />
-        </div>
-    </div>
-
-    <script>
-        import { appWindow } from '@tauri-apps/api/window'
-        document
-            .getElementById('titlebar-minimize')
-            .addEventListener('click', () => appWindow.minimize())
-        document
-            .getElementById('titlebar-maximize')
-            .addEventListener('click', () => appWindow.toggleMaximize())
-        document
-            .getElementById('titlebar-close')
-            .addEventListener('click', () => appWindow.close())
-    </script>
+    <!-- <tauri-titlebar data-tauri-drag-region></tauri-titlebar> -->
 </body>
 
 </html>

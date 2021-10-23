@@ -4,10 +4,10 @@
     "version": "0.1.0"
   },
   "build": {
-    "distDir": "client",
-    "devPath": "http://127.0.0.1:5500/client/",
+    "distDir": "../client",
+    "devPath": "http://localhost:5500/client",
     "beforeDevCommand": "",
-    "beforeBuildCommand": ""
+    "beforeBuildCommand": "npm run build:client"
   },
   "tauri": {
     "bundle": {
@@ -57,7 +57,9 @@
         "width": 800,
         "height": 600,
         "resizable": true,
-        "fullscreen": false
+        "fullscreen": false,
+        "transparent": false,
+        "decorations": true
       }
     ],
     "security": {
