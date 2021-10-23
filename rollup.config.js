@@ -21,7 +21,7 @@ export default [
     {
         input: 'src/main.ts',
         output: {
-            file: 'client/main.js',
+            file: 'build/main.js',
             format: 'esm'
         },
         plugins: [

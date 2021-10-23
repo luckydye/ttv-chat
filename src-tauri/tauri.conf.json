@@ -53,9 +53,9 @@
     },
     "windows": [
       {
-        "title": "better-twitch-chat",
-        "width": 800,
-        "height": 600,
+        "title": "Better Twitch Chat",
+        "width": 450,
+        "height": 800,
         "resizable": true,
         "fullscreen": false,
         "transparent": false,
