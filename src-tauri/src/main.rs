@@ -7,21 +7,25 @@ use tauri::command;
 use tauri::Manager;
 
 use twitch_irc::login::StaticLoginCredentials;
+use twitch_irc::message::IRCPrefix;
 use twitch_irc::message::ServerMessage;
 use twitch_irc::TwitchIRCClient;
 use twitch_irc::{ClientConfig, SecureTCPTransport};
 
-type Callback = fn(message: ServerMessage);
-
 // the payload type must implement `Serialize`.
 // for global events, it also must implement `Clone`.
 #[derive(Clone, serde::Serialize)]
-struct Payload {
+struct ChatTransport {
   message: String,
+  prefix: String,
 }
 
-async fn connect_to_chat(callback: Callback, username: String, token: String) {
-  let config = ClientConfig::default();
+#[command]
+async fn connect_to_chat(app_handle: tauri::AppHandle, channel: String, username: String, token: String) {
+
+  let creds = StaticLoginCredentials::new(username, Some(token));
+  let config = ClientConfig::new_simple(creds);
+
   let (mut incoming_messages, client) =
     TwitchIRCClient::<SecureTCPTransport, StaticLoginCredentials>::new(config);
 
@@ -29,47 +33,41 @@ async fn connect_to_chat(callback: Callback, username: String, token: String) {
   // otherwise they will back up.
   let join_handle = tokio::spawn(async move {
     while let Some(message) = incoming_messages.recv().await {
-      println!("Incoming mesg");
-      callback(message);
+      println!("Received message: {:?}", message);
+      let irc_message = message.source();
+      let msg = serde_json::to_string(&irc_message.params).unwrap();
+
+      let prefix = irc_message.prefix;
+
+      if matches!(irc_message.prefix, IRCPrefix) {
+        let prefix = match prefix {
+          Some(p) => {
+            String::from(p)
+          },
+          None => String::from("null")
+        };
+      }
+
+      app_handle.emit_all("chat.message", ChatTransport {
+        message: msg,
+        prefix: prefix
+      }).unwrap();
     }
   });
 
-  client.join("richwcampbell".to_owned());
+  client.join(channel.to_owned());
 
   // keep the tokio executor alive.
   // If you return instead of waiting the background task will exit.
   join_handle.await.unwrap();
 }
 
-// #[command]
-// async fn joinChannel(channel: String) {
-//   // join a channel
-//   client.join(channel.to_owned());
-// }
-
-#[command]
-async fn test(channel: String) {
-  // leave a channel
-  // client.part(channel);
-}
-
 #[tokio::main]
 pub async fn main() {
   tauri::Builder::default()
-    .setup(|app| {
-      tokio::spawn(async move {
-        connect_to_chat(
-          |message| {
-            // println!("Received message: {:?}", message);
-            app.emit_all("chat.message", Payload { message: "message".to_string() }).unwrap();
-          },
-          "luckydye".to_string(),
-          "_".to_string(),
-        ).await;
-      });
-      Ok(())
-    })
-    .invoke_handler(tauri::generate_handler![test])
+    .invoke_handler(tauri::generate_handler![
+      connect_to_chat
+    ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
