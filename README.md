@@ -3,8 +3,9 @@
 A new Desktop Twitch Client with all the jingles and bells.
 
 ### To be included features:
-- Pols
-- Predictions
+- UI for
+    - Pols
+    - Predictions
 - Channel Point Redemtions
 - All the emotes
 - Notifications
@@ -22,9 +23,10 @@ A new Desktop Twitch Client with all the jingles and bells.
 - Stream Title
 - Uptime/Live indicator
 - mod tools
-- And youtube chat?
 - Spam grouping
-
+    - group messages if msg.unique_words == msg.unique_words
+- Hide messages from bots
 - Problems to solve:
     - Timestamps take to much space
-    
+        - Colored dot indicating how long ago the message got posted?
+- Chat input UI like the discord one with emote, pol/Pred feature, etc
