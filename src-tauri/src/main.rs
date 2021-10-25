@@ -8,7 +8,7 @@ use tauri::Manager;
 
 use twitch_irc::login::StaticLoginCredentials;
 use twitch_irc::message::IRCPrefix;
-use twitch_irc::message::ServerMessage;
+use twitch_irc::message::AsRawIRC;
 use twitch_irc::TwitchIRCClient;
 use twitch_irc::{ClientConfig, SecureTCPTransport};
 
@@ -17,12 +17,16 @@ use twitch_irc::{ClientConfig, SecureTCPTransport};
 #[derive(Clone, serde::Serialize)]
 struct ChatTransport {
   message: String,
-  prefix: String,
+  // prefix: String,
 }
 
 #[command]
-async fn connect_to_chat(app_handle: tauri::AppHandle, channel: String, username: String, token: String) {
-
+async fn connect_to_chat(
+  app_handle: tauri::AppHandle,
+  channel: String,
+  username: String,
+  token: String,
+) {
   let creds = StaticLoginCredentials::new(username, Some(token));
   let config = ClientConfig::new_simple(creds);
 
@@ -33,25 +37,21 @@ async fn connect_to_chat(app_handle: tauri::AppHandle, channel: String, username
   // otherwise they will back up.
   let join_handle = tokio::spawn(async move {
     while let Some(message) = incoming_messages.recv().await {
-      println!("Received message: {:?}", message);
+      // println!("Received message: {:?}", message);
+
       let irc_message = message.source();
       let msg = serde_json::to_string(&irc_message.params).unwrap();
 
-      let prefix = irc_message.prefix;
+      let prefix = &irc_message.prefix;
 
-      if matches!(irc_message.prefix, IRCPrefix) {
-        let prefix = match prefix {
-          Some(p) => {
-            String::from(p)
-          },
-          None => String::from("null")
-        };
-      }
-
-      app_handle.emit_all("chat.message", ChatTransport {
+      let transportMessage = ChatTransport {
         message: msg,
-        prefix: prefix
-      }).unwrap();
+        // prefix: prefix.user,
+      };
+
+      app_handle
+        .emit_all("chat.message", transportMessage)
+        .unwrap();
     }
   });
 
@@ -65,9 +65,7 @@ async fn connect_to_chat(app_handle: tauri::AppHandle, channel: String, username
 #[tokio::main]
 pub async fn main() {
   tauri::Builder::default()
-    .invoke_handler(tauri::generate_handler![
-      connect_to_chat
-    ])
+    .invoke_handler(tauri::generate_handler![connect_to_chat])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }

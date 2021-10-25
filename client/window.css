@@ -4,3 +4,11 @@ body {
     font-family: sans-serif;
     font-size: 14px;
 }
+
+notification {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    padding: 10px;
+    white-space: pre;
+}

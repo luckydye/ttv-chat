@@ -1,28 +1,41 @@
 // import jwt from 'jsonwebtoken';
 import { parseSearch } from '../utils';
+import { invoke } from '@tauri-apps/api/tauri';
 
 const CLIENT_ID = "8gwe8mu523g9cstukr8rnnwspqjykf";
 const REDIRECT_URI = "https://luckydye.de/auth";
 
-function openChat(username, token) {
-    const opts = {
-        identity: {
+window.addEventListener('load', e => {
+    checLogin();
+})
+
+function openChat(username: string, token: string) {
+    info("Pull chat.");
+    try {
+        invoke('connect_to_chat', {
+            channel: 'mizkif',
             username: username,
-            password: token
-        },
-        channels: [
-            username
-        ]
-    };
+            token: token
+        }).catch((e) => info(e))
+    } catch (err) {
+        info(err);
+    }
 }
 
 export async function handleAuthenticatedUser(token: string) {
     const userinfo = await fetchTwitchApi("/userinfo", token);
     const username = userinfo.preferred_username;
+
     console.log(username);
+    if (username == null) {
+        info("Token invalid.");
+        localStorage.removeItem('user-token');
+        return;
+    } else {
+        localStorage.setItem('user-token', token);
+    }
 
-    localStorage.setItem('user-token', token);
-
+    info("Logged in.");
     openChat(username, token);
 }
 
@@ -39,12 +52,27 @@ function fetchTwitchApi(path: string = "/userinfo", token: string) {
         })
 }
 
-export async function authClientUser() {
-
-    // check if already logged in
+function checLogin() {
     if (localStorage.getItem('user-token')) {
+        info("Found token.");
         const token = localStorage.getItem('user-token');
         handleAuthenticatedUser(token);
+        return true;
+    }
+    return false;
+}
+
+function info(str) {
+    const nots = document.querySelector('notification');
+    nots.innerHTML += str + "\n";
+}
+
+export async function authClientUser() {
+
+    info("Logging in.");
+
+    // check if already logged in
+    if (checLogin()) {
         return;
     }
 

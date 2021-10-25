@@ -5,7 +5,7 @@ export default [
     {
         input: 'src/main.ts',
         output: {
-            file: 'build/main.js',
+            file: 'client/main.js',
             format: 'esm'
         },
         plugins: [

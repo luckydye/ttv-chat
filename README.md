@@ -23,6 +23,7 @@ A new Desktop Twitch Client with all the jingles and bells.
 - Uptime/Live indicator
 - mod tools
 - And youtube chat?
+- Spam grouping
 
 - Problems to solve:
     - Timestamps take to much space
