@@ -1,5 +1,6 @@
 import './components/Titlebar';
 import './components/Authenticator';
+import './components/ChatInput';
 import TwitchChat from './components/Chat';
 import './services/Twitch';
 import { emit, listen } from '@tauri-apps/api/event';

@@ -6,7 +6,7 @@ export default class TwitchChat extends LitElement {
         return css`
             :host {
                 display: block;
-                max-height: 90vh;
+                max-height: 85vh;
                 width: 100%;
                 overflow: auto;
                 overflow-y: scroll;

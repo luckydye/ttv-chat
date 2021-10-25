@@ -1,14 +1,14 @@
 body {
     background: #0c0c0c;
     color: #eee;
-    font-family: sans-serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 14px;
 }
 
 notification {
     position: fixed;
     bottom: 0;
-    left: 0;
+    right: 0;
     padding: 10px;
     white-space: pre;
 }
