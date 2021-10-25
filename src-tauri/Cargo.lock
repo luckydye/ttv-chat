@@ -332,6 +332,7 @@ dependencies = [
  "libc",
  "num-integer",
  "num-traits",
+ "serde",
  "time",
  "winapi",
 ]
@@ -3273,6 +3274,7 @@ dependencies = [
  "futures-util",
  "itertools",
  "log",
+ "serde",
  "smallvec",
  "thiserror",
  "tokio",

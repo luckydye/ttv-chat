@@ -1,6 +1,6 @@
 // import jwt from 'jsonwebtoken';
 import { parseSearch } from '../utils';
-import { invoke } from '@tauri-apps/api/tauri';
+import IRCChatClient from './IRCChatClient';
 
 const CLIENT_ID = "8gwe8mu523g9cstukr8rnnwspqjykf";
 const REDIRECT_URI = "https://luckydye.de/auth";
@@ -12,14 +12,21 @@ window.addEventListener('load', e => {
 function openChat(username: string, token: string) {
     info("Pull chat.");
     try {
-        invoke('connect_to_chat', {
-            channel: 'mizkif',
-            username: username,
-            token: token
-        }).catch((e) => info(e))
+        console.log('connecting');
+        
+        IRCChatClient.connectoToChat(username, token);
+
+        setTimeout(() => {
+            joinChannel("cyr");
+        }, 1000);
     } catch (err) {
         info(err);
     }
+}
+
+function joinChannel(channel: string) {
+    console.log('Joining channel');
+    IRCChatClient.joinChatRoom(channel);
 }
 
 export async function handleAuthenticatedUser(token: string) {

@@ -3,11 +3,7 @@ import './components/Authenticator';
 import './components/ChatInput';
 import TwitchChat from './components/Chat';
 import './services/Twitch';
-import { emit, listen } from '@tauri-apps/api/event';
-
-window.addEventListener('load', e => {
-    console.log(e);
-})
+import IRCChatClient from './services/IRCChatClient';
 
 async function main() {
     const chat = new TwitchChat();
@@ -15,21 +11,12 @@ async function main() {
     
 
     function handleMessage(msg) {
-        const data = JSON.parse(msg);
-    
-        const channel = data[0];
-        const text = data[1];
-    
-        // console.log(channel, text);
-    
-        chat.appendLine(text);
+        chat.appendMessage(msg);
     }
 
     document.body.append(chat);
 
-    const unlisten = await listen('chat.message', event => {
-        handleMessage(event?.payload?.message);
-    })
+    IRCChatClient.listen(handleMessage);
 }
 
 main();

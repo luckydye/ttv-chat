@@ -8,3 +8,12 @@ export function parseSearch(str: string = "", res: Params = {}) {
     });
     return res;
 }
+
+function componentToHex(c) {
+    const hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+}
+
+export function rgbToHex(...rgb: number[]) {
+    return "#" + componentToHex(rgb[0]) + componentToHex(rgb[1]) + componentToHex(rgb[2]);
+}
