@@ -1,4 +1,5 @@
 import { css, html, LitElement } from 'lit-element';
+import IRCChatClient from '../services/IRCChatClient';
 
 export default class ChatInput extends LitElement {
 
@@ -49,7 +50,20 @@ export default class ChatInput extends LitElement {
     constructor() {
         super();
 
-        
+    }
+
+    submit(e: KeyboardEvent) {
+        const ele = e.target;
+        const value = ele.value;
+        ele.value = "";
+        IRCChatClient.sendMessage('luckydye', value);
+    }
+
+    handleKeyDown(e: KeyboardEvent) {
+        if(e.key == "Enter") {
+            this.submit(e);
+            e.preventDefault();
+        }
     }
 
     render() {
@@ -57,7 +71,7 @@ export default class ChatInput extends LitElement {
             <div class="wrapper">
                 <div class="input-field">
                     <div class="text-input">
-                        <textarea placeholder="Message"></textarea>
+                        <textarea @keydown="${this.handleKeyDown}" placeholder="Message"></textarea>
                     </div>
                     <div class="util">
                         <button name="create poll">Y</button>

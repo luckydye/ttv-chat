@@ -4,19 +4,30 @@ import './components/ChatInput';
 import TwitchChat from './components/Chat';
 import './services/Twitch';
 import IRCChatClient from './services/IRCChatClient';
+import { ChatMessage, UserState } from '../services/IRCChatClient';
 
 async function main() {
     const chat = new TwitchChat();
-    console.log(chat);
-    
-
-    function handleMessage(msg) {
-        chat.appendMessage(msg);
-    }
-
     document.body.append(chat);
 
-    IRCChatClient.listen(handleMessage);
+    const room = "luckydye";
+
+    IRCChatClient.listen('chat.message', (msg: ChatMessage) => {
+        console.log('message', msg);
+        
+        if(msg.channel == room) {
+            chat.appendMessage(msg);
+        }
+    });
+
+    IRCChatClient.listen('chat.user', (msg: UserState) => {
+        console.log('user', msg);
+    });
+
+    setTimeout(() => {
+        chat.setRoom(room);
+        IRCChatClient.joinChatRoom(room);
+    }, 1000);
 }
 
 main();

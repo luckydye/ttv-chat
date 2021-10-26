@@ -15,16 +15,12 @@ function openChat(username: string, token: string) {
         console.log('connecting');
         
         IRCChatClient.connectoToChat(username, token);
-
-        setTimeout(() => {
-            joinChannel("cyr");
-        }, 1000);
     } catch (err) {
         info(err);
     }
 }
 
-function joinChannel(channel: string) {
+export function joinChannel(channel: string) {
     console.log('Joining channel');
     IRCChatClient.joinChatRoom(channel);
 }
@@ -102,6 +98,7 @@ export async function authClientUser() {
         "channel:read:redemptions",
         "channel:moderate",
         "chat:read",
+        "chat:edit",
         "whispers:read",
 
         "openid"

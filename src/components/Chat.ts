@@ -8,9 +8,21 @@ export default class TwitchChat extends LitElement {
     scrollTarget = 0;
     scrollLock = true;
 
+    roomName: string = "";
+
     appendMessage(msg: ChatMessage) {
         const line = new ChatLine(msg);
         this.appendChild(line);
+    }
+
+    appenLine(text: string) {
+        const line = new ChatInfo(text);
+        this.appendChild(line);
+    }
+
+    setRoom(roomName: string) {
+        this.roomName = roomName;
+        this.update();
     }
 
     constructor() {
@@ -73,7 +85,7 @@ export default class TwitchChat extends LitElement {
 
     render() {
         return html`
-            <div>Chat</div>
+            <div>Room: ${this.roomName}</div>
             <div class="lines">
                 <slot></slot>
             </div>
@@ -122,3 +134,38 @@ class ChatLine extends LitElement {
 }
 
 customElements.define('chat-line', ChatLine);
+
+class ChatInfo extends LitElement {
+
+    message: string = "";
+
+    constructor(msg: string) {
+        super();
+
+        this.message = msg;
+    }
+
+    static get styles() {
+        return css`
+            :host {
+                display: block;
+            }
+            .message {
+                display: inline;
+            }
+        `;
+    }
+
+    render() {
+        if(this.message) {
+            return html`
+                <div class="line">
+                    <div class="message">${this.message}</div>
+                </div>
+            `;
+        }
+    }
+
+}
+
+customElements.define('chat-info', ChatInfo);

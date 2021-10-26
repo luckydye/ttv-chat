@@ -33,6 +33,17 @@ struct ChatTransport {
   server_timestamp: String,
 }
 
+// the payload type must implement `Serialize`.
+// for global events, it also must implement `Clone`.
+#[derive(Clone, serde::Serialize)]
+struct ChatUser {
+  channel: String,
+  username: String,
+  badges: Vec<Badge>,
+  badge_info: Vec<Badge>,
+  name_color: Vec<u8>,
+}
+
 struct ChatState {
   connected_channels: Vec<String>,
   chat_client: Option<TwitchIRCClient<SecureTCPTransport, StaticLoginCredentials>>,
@@ -46,22 +57,34 @@ impl ChatState {
     self.chat_client = Some(client);
   }
 
+  pub async fn send(&mut self, channel_name: String, message: String) {
+    if self.chat_client.is_some() {
+      println!("sending {}: {}", channel_name, message);
+      match &self.chat_client {
+        Some(client) => {
+          client.say(channel_name, message).await.unwrap();
+        }
+        None => {}
+      }
+    }
+  }
+
   pub fn join_room(&mut self, channel_name: String) {
     if self.chat_client.is_some() {
       // only join if not already joined to that room
       if !self.connected_channels.contains(&channel_name) {
         self.connected_channels.push(channel_name.to_owned());
 
-        let x = self.chat_client.as_ref().unwrap();
-        x.join(channel_name.to_owned());
+        let client = self.chat_client.as_ref().unwrap();
+        client.join(channel_name.to_owned());
       }
     }
   }
 
   pub fn leave_room(&mut self, channel_name: String) {
     if self.chat_client.is_some() {
-      let x = self.chat_client.as_ref().unwrap();
-      x.part(channel_name.to_owned());
+      let client = self.chat_client.as_ref().unwrap();
+      client.part(channel_name.to_owned());
 
       let index = self
         .connected_channels
@@ -88,36 +111,55 @@ async fn connect_to_chat(app_handle: tauri::AppHandle, username: String, token: 
       // println!("Received message: {:?}", message);
       match message {
         ServerMessage::Privmsg(msg) => {
-          app_handle
-            .emit_all(
-              "chat.message",
-              ChatTransport {
-                message: msg.message_text.to_owned(),
-                sender: msg.sender.name.to_owned(),
-                channel: msg.channel_login.to_owned(),
-                is_action: msg.is_action,
-                badges: msg.badges,
-                badge_info: msg.badge_info,
-                bits: match msg.bits {
-                  Some(nc) => nc,
-                  None => 0,
-                },
-                name_color: match msg.name_color {
-                  Some(nc) => {
-                    vec![nc.r, nc.g, nc.b]
-                  }
-                  None => vec![240u8, 240u8, 240u8],
-                },
-                // emotes: vec![],
-                server_timestamp: msg.server_timestamp.to_rfc2822(),
-              },
-            )
-            .unwrap()
+          let transport = ChatTransport {
+            message: msg.message_text.to_owned(),
+            sender: msg.sender.name.to_owned(),
+            channel: msg.channel_login.to_owned(),
+            is_action: msg.is_action,
+            badges: msg.badges,
+            badge_info: msg.badge_info,
+            bits: match msg.bits {
+              Some(nc) => nc,
+              None => 0,
+            },
+            name_color: match msg.name_color {
+              Some(nc) => {
+                vec![nc.r, nc.g, nc.b]
+              }
+              None => vec![240u8, 240u8, 240u8],
+            },
+            // emotes: vec![],
+            server_timestamp: msg.server_timestamp.to_rfc2822(),
+          };
+          app_handle.emit_all("chat.message", transport).unwrap();
+        }
+        ServerMessage::UserState(msg) => {
+          let transport = ChatUser {
+            channel: msg.channel_login.to_owned(),
+            username: msg.user_name.to_owned(),
+            badges: msg.badges,
+            badge_info: msg.badge_info,
+            name_color: match msg.name_color {
+              Some(nc) => {
+                vec![nc.r, nc.g, nc.b]
+              }
+              None => vec![240u8, 240u8, 240u8],
+            },
+          };
+          app_handle.emit_all("chat.user", transport).unwrap();
         }
         ServerMessage::Whisper(msg) => {
-          println!("(w) {}: {}", msg.sender.name, msg.message_text);
+          println!("(whisper) {}: {}", msg.sender.name, msg.message_text);
         }
-        _ => {}
+        ServerMessage::GlobalUserState(msg) => {
+          println!("(user) {}", msg.user_id);
+        }
+        ServerMessage::RoomState(msg) => {
+          println!("(room) {}", msg.channel_id);
+        }
+        msg => {
+          println!("{:?}", msg);
+        }
       }
     }
   });
@@ -148,6 +190,13 @@ async fn chat_leave_room(channel: String) {
   }
 }
 
+#[command]
+async fn chat_send_message(channel: String, message: String) {
+  unsafe {
+    app_chat_state.send(channel, message).await;
+  }
+}
+
 #[tokio::main]
 pub async fn main() {
   tauri::Builder::default()
@@ -155,6 +204,7 @@ pub async fn main() {
       connect_to_chat,
       chat_join_room,
       chat_leave_room,
+      chat_send_message
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
