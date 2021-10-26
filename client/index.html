@@ -14,21 +14,23 @@
 </head>
 
 <body>
-    <!-- <tauri-titlebar data-tauri-drag-region></tauri-titlebar> -->
+    <div class="app">
 
-    <notification></notification>
+        <div class="sidebar">
+            <chat-rooms></chat-rooms>
+            <twitch-auth></twitch-auth>
+        </div>
 
-    <gyro-layout>
-
-        <gyro-layout-column>
-            <gyro-group show-tabs>
-                <twitch-chat tab="richwcampbell"></twitch-chat>
-            </gyro-group>
-        </gyro-layout-column>
-
-    </gyro-layout>
-
-    <chat-input></chat-input>
+        <div class="body">
+            <div class="chat">
+                <!-- Chat element goes here -->
+            </div>
+            <div class="chat-input">
+                <chat-input></chat-input>
+            </div>
+        </div>
+        
+    </div>
 </body>
 
 </html>

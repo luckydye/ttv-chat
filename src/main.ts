@@ -1,23 +1,49 @@
-// layout
-import './components/layout/Column';
-import './components/layout/Group';
-import './components/layout/Panel';
 //
 import './components/Titlebar';
 import './components/Authenticator';
 import './components/ChatInput';
+import './components/ChatRooms';
 import './components/Chat';
 import './services/Twitch';
 import IRCChatClient from './services/IRCChatClient';
 import { ChatMessage, UserState } from './services/IRCChatClient';
+import { Application } from './App';
+
+// // ui layout components
+// import { render } from 'preact';
+// import Main from './pages/Main';
 
 async function main() {
-    const chat = document.querySelector("twitch-chat");
 
-    const room = "richwcampbell";
+    await Application.init();
+
+    // sort incoming messages into chats: TODO
+    const chatElements = {};
+
+    // join all channels
+    for(let channel of Application.getRooms()) {
+        IRCChatClient.joinChatRoom(channel);
+        const chatElement = document.createElement("twitch-chat");
+        chatElements[channel] = chatElement;
+        chatElement.setRoom(channel);
+    }
+
+    window.addEventListener('selectroom', e => {
+        renderSelecetdChat();
+    });
+
+    function renderSelecetdChat() {
+        const room = Application.getSelectedRoom();
+        const container = document.querySelector('.chat');
+        for(let child of container?.children) {
+            child.remove();
+        }
+        container?.append(chatElements[room]);
+    }
 
     IRCChatClient.listen('chat.message', (msg: ChatMessage) => {
-        if(msg.channel == room) {
+        const chat = chatElements[msg.channel];
+        if(chat) {
             chat.appendMessage(msg);
         }
     });
@@ -26,10 +52,7 @@ async function main() {
         console.log('user', msg);
     });
 
-    setTimeout(() => {
-        chat.setRoom(room);
-        IRCChatClient.joinChatRoom(room);
-    }, 1000);
+    renderSelecetdChat();
 }
 
 window.addEventListener('DOMContentLoaded', e => {

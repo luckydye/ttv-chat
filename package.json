@@ -23,6 +23,8 @@
   },
   "dependencies": {
     "jsonwebtoken": "^8.5.1",
+    "preact": "^10.5.15",
+    "rollup-plugin-preact": "^0.5.2",
     "tmi.js": "^1.8.5",
     "twitch-js": "^2.0.0-beta.42"
   }

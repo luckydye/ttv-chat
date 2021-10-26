@@ -3,8 +3,6 @@ body {
     color: #eee;
     font-family: 'Open Sans', sans-serif;
     font-size: 14px;
-    display: grid;
-    grid-template-rows: 1fr 100px;
     height: 100vh;
     margin: 0;
     box-sizing: border-box;
@@ -16,4 +14,37 @@ notification {
     right: 0;
     padding: 10px;
     white-space: pre;
+}
+
+.app {
+    height: 100%;
+    display: flex;
+}
+
+.sidebar {
+    background: #1F1F23;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    width: 42px;
+    flex: none;
+    z-index: 1000000;
+    position: relative;
+    border-right: 1px solid rgb(48, 48, 48);
+}
+
+.body {
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
+    width: 100%;
+}
+
+.chat {
+    height: 100%;
+    flex: 1;
+    position: relative;
+}
+
+.chat-input {
+    background: #19191C;
 }

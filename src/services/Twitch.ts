@@ -10,13 +10,11 @@ window.addEventListener('load', e => {
 })
 
 function openChat(username: string, token: string) {
-    info("Pull chat.");
     try {
         console.log('connecting');
         
         IRCChatClient.connectoToChat(username, token);
     } catch (err) {
-        info(err);
     }
 }
 
@@ -31,14 +29,12 @@ export async function handleAuthenticatedUser(token: string) {
 
     console.log(username);
     if (username == null) {
-        info("Token invalid.");
         localStorage.removeItem('user-token');
         return;
     } else {
         localStorage.setItem('user-token', token);
     }
 
-    info("Logged in.");
     openChat(username, token);
 }
 
@@ -50,7 +46,11 @@ export async function getLoggedInUser() {
 
 export async function getUserInfo(user_login: string) {
     const userinfo = await fetchTwitchApi("/users", `login=${user_login}`);
-    return userinfo.data[0];
+    const user = userinfo.data[0];
+    const stream = await TwitchAPI.getStreams(user.id);
+    const data = user;
+    data.stream = stream[0];
+    return data;
 }
 
 function fetchTwitchAuthApi(path: string = "/oauth2/userinfo", token: string) {
@@ -83,7 +83,6 @@ export function fetchTwitchApi(path: string = "/users", query = "") {
 
 export function checLogin() {
     if (localStorage.getItem('user-token')) {
-        info("Found token.");
         const token = localStorage.getItem('user-token');
         handleAuthenticatedUser(token);
         return true;
@@ -91,14 +90,8 @@ export function checLogin() {
     return false;
 }
 
-function info(str) {
-    const nots = document.querySelector('notification');
-    nots.innerHTML += str + "\n";
-}
-
 export async function authClientUser() {
 
-    info("Logging in.");
 
     // check if already logged in
     if (checLogin()) {
@@ -160,4 +153,13 @@ export async function authClientUser() {
     } else {
         throw new Error('could not open authentication window');
     }
+}
+
+
+export default class TwitchAPI {
+
+    static async getStreams(user_id: string) {
+        return (await fetchTwitchApi("/streams", "user_id=" + user_id)).data;
+    }
+
 }

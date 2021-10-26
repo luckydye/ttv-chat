@@ -7,16 +7,13 @@ export default class ChatInput extends LitElement {
         return css`
             :host {
                 display: block;
-                position: fixed;
-                bottom: 0;
-                left: 0;
                 width: 100%;
             }
             .wrapper {
                 padding: 10px;
             }
             .input-field {
-                background: rgb(51, 51, 51);
+                background: #101010;
                 position: relative;
                 display: grid;
                 grid-template-columns: 1fr auto;
@@ -40,9 +37,6 @@ export default class ChatInput extends LitElement {
             }
             button {
 
-            }
-            .identity {
-                margin-top: 4px;
             }
         `;
     }
@@ -78,9 +72,6 @@ export default class ChatInput extends LitElement {
                         <button name="create prediction">X</button>
                         <button name="Emotes">X</button>
                     </div>
-                </div>
-                <div class="identity">
-                    <twitch-auth></twitch-auth>
                 </div>
             </div>
         `;

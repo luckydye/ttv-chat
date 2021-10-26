@@ -1,5 +1,6 @@
 import typescript from '@rollup/plugin-typescript';
 import node_resolve from '@rollup/plugin-node-resolve';
+import preact from 'rollup-plugin-preact';
 
 export default [
     {

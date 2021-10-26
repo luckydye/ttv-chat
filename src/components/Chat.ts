@@ -3,8 +3,7 @@ import { ChatMessage } from '../services/IRCChatClient';
 import Badges from '../services/Badges';
 import { getUserInfo } from '../services/Twitch';
 import Emotes from '../services/Emotes';
-
-Emotes;
+import TwitchAPI from '../services/Twitch';
 
 export default class TwitchChat extends LitElement {
 
@@ -14,6 +13,11 @@ export default class TwitchChat extends LitElement {
     scrollLock = true;
 
     roomName: string = "";
+    stream_title: string = "";
+
+    info = {};
+    channel_badges = {};
+    channel_emotes = {};
 
     appendMessage(msg: ChatMessage) {
         const line = new ChatLine(this, msg);
@@ -30,6 +34,23 @@ export default class TwitchChat extends LitElement {
 
         getUserInfo(this.roomName).then(async info => {
             this.info = info;
+
+            const stream = await TwitchAPI.getStreams(info.id);
+            if(stream[0]) {
+
+                const viewers = stream[0].viewer_count;
+                const uptimems = Date.now() - new Date(stream[0].started_at).valueOf();
+                const uptime = {
+                    hours: Math.floor(uptimems / 1000 / 60 / 60),
+                    minutes: Math.floor((uptimems / 1000 / 60) % 60),
+                    seconds: Math.floor((uptimems / 1000) % 60),
+                }
+                const uptimestring = `${uptime.hours}h${uptime.minutes}m${uptime.seconds}s`;
+
+                this.stream_title = viewers + " - " + uptimestring + " - " + stream[0].game_name  + " - " + stream[0].title;
+
+                this.update();
+            }
 
             const badges = await Badges.getChannelBadges(info.id);
             this.channel_badges = badges;
@@ -48,10 +69,6 @@ export default class TwitchChat extends LitElement {
     constructor() {
         super();
 
-        this.info = {};
-        this.channel_badges = {};
-        this.channel_emotes = {};
-
         window.addEventListener('wheel', e => {
             if (e.deltaY < 0) {
                 this.scrollLock = false;
@@ -59,31 +76,34 @@ export default class TwitchChat extends LitElement {
         })
 
         const update = () => {
+            requestAnimationFrame(update);
 
-            const latest = this.scrollHeight - this.clientHeight;
+            const scrollEle = this.shadowRoot?.querySelector('.lines');
+            
+            if(!scrollEle) return;
+
+            const latest = scrollEle.scrollHeight - scrollEle.clientHeight;
             // if(this.scrollTarget >= latest - 10) {
             //     this.scrollLock = true;
             // } 
-            
-            if(this.scrollTarget - 10 <= latest) {
+
+            if (this.scrollTarget - 10 <= latest) {
                 this.scrollLock = true;
             }
 
             // update scroll position
             if (this.scrollLock) {
                 this.scrollTarget = latest;
-                this.scrollTo(0, this.scrollTarget);
+                scrollEle.scrollTo(0, this.scrollTarget);
             }
 
             // clean out buffer
             if (this.children.length > this.MAX_BUFFER_SIZE && this.scrollLock === true) {
                 const rest = (this.children.length - this.MAX_BUFFER_SIZE);
-                for(let i = 0; i < rest; i++) {
+                for (let i = 0; i < rest; i++) {
                     this.children[i].remove();
                 }
             }
-
-            requestAnimationFrame(update);
         }
 
         update();
@@ -93,26 +113,84 @@ export default class TwitchChat extends LitElement {
         return css`
             :host {
                 display: block;
-                max-height: 85vh;
+                height: 100%;
                 width: 100%;
-                overflow: auto;
-                overflow-y: scroll;
-                padding: 8px;
-                box-sizing: border-box;
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
             }
             .lines {
-                
+                padding-top: 30px;
+                padding-bottom: 10px;
+                box-sizing: border-box;
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                overflow: auto;
+                overflow-y: scroll;
             }
             .line {
 
+            }
+            .info {
+                opacity: 0.5;
+                padding: 10px;
+            }
+
+            .chat-title {
+                position: relative;
+                z-index: 1000;
+                width: 100%;
+                background: rgb(25, 25, 28);
+                padding: 5px 10px;
+                box-sizing: border-box;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                align-items: center;
+                white-space: nowrap;
+                font-size: 12px;
+                color: #ababab;
+            }
+
+            .chat-title span {
+                opacity: 0.5;
+            }
+
+            /* // webkit scrollbars */
+            ::-webkit-scrollbar {
+                width: 8px;
+                margin: 5px 0;
+            }
+            ::-webkit-scrollbar-button {
+                display: none;
+            }
+            ::-webkit-scrollbar-track-piece  {
+                background: transparent;
+            }
+            ::-webkit-scrollbar-thumb {
+                background: var(--color-scrollbar-thumb, #1c1c1c);
+                border-radius: 5px;
+            }
+            ::-webkit-scrollbar-thumb:hover {
+                background: var(--color-scrollbar-thumb-hover, #333333);
+            }
+            ::-webkit-scrollbar-corner {
+                background: transparent;
             }
         `;
     }
 
     render() {
         return html`
-            <div>Room: ${this.roomName}</div>
+            <div class="chat-title">${this.stream_title == "" ? "Offline" : this.stream_title}</div>
             <div class="lines">
+                ${this.roomName ? html`
+                    <div class="info">Connected to ${this.roomName}</div>
+                `: ""}
                 <slot></slot>
             </div>
         `;
@@ -137,7 +215,7 @@ class ChatLine extends LitElement {
         return css`
             :host {
                 display: block;
-                margin-top: 8px;
+                padding: 5px 15px;
             }
             .username {
                 color: var(--color);
@@ -160,13 +238,13 @@ class ChatLine extends LitElement {
     }
 
     render() {
-        if(this.message) {
+        if (this.message) {
             const msg = this.message.message;
             const parsed_msg = msg.split(" ").map(str => {
-                if(str in this.chat.channel_emotes) {
+                if (str in this.chat.channel_emotes) {
                     return html`<img class="emote" src="${this.chat.channel_emotes[str]}" height="32">`;
                 }
-                if(str in Emotes.global_emotes) {
+                if (str in Emotes.global_emotes) {
                     return html`<img class="emote" src="${Emotes.global_emotes[str]}" height="32">`;
                 }
                 return str + " ";
@@ -176,16 +254,16 @@ class ChatLine extends LitElement {
                 <div class="line">
                     <span class="bages">
                         ${this.message.badges.map(badge => {
-                            let badge_url = "";
+                let badge_url = "";
 
-                            if(badge.name == "subscriber") {
-                                badge_url = this.chat.getSubBadge(badge.version);
-                            } else {
-                                badge_url = Badges.getBadgeByName(badge.name, badge.version);
-                            }
+                if (badge.name == "subscriber") {
+                    badge_url = this.chat.getSubBadge(badge.version);
+                } else {
+                    badge_url = Badges.getBadgeByName(badge.name, badge.version);
+                }
 
-                            return html`<img class="badge" src="${badge_url}" width="18" height="18">`;
-                        })}
+                return html`<img class="badge" src="${badge_url}" width="18" height="18">`;
+            })}
                     </span>
                     <span class="username" style="--color: ${this.message.color}">${this.message.username}</span>:
                     <span class="message">${parsed_msg}</span>
@@ -220,7 +298,7 @@ class ChatInfo extends LitElement {
     }
 
     render() {
-        if(this.message) {
+        if (this.message) {
             return html`
                 <div class="line">
                     <div class="message">${this.message}</div>
