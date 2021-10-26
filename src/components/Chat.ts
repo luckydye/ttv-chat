@@ -1,5 +1,10 @@
 import { css, html, LitElement } from 'lit-element';
 import { ChatMessage } from '../services/IRCChatClient';
+import Badges from '../services/Badges';
+import { getUserInfo } from '../services/Twitch';
+import Emotes from '../services/Emotes';
+
+Emotes;
 
 export default class TwitchChat extends LitElement {
 
@@ -11,7 +16,7 @@ export default class TwitchChat extends LitElement {
     roomName: string = "";
 
     appendMessage(msg: ChatMessage) {
-        const line = new ChatLine(msg);
+        const line = new ChatLine(this, msg);
         this.appendChild(line);
     }
 
@@ -22,11 +27,30 @@ export default class TwitchChat extends LitElement {
 
     setRoom(roomName: string) {
         this.roomName = roomName;
+
+        getUserInfo(this.roomName).then(async info => {
+            this.info = info;
+
+            const badges = await Badges.getChannelBadges(info.id);
+            this.channel_badges = badges;
+
+            const emotes = await Emotes.getChannelEmotes(info.id);
+            this.channel_emotes = emotes;
+        })
+
         this.update();
+    }
+
+    getSubBadge(version: number) {
+        return this.channel_badges["subscriber"].versions[version].image_url_2x;
     }
 
     constructor() {
         super();
+
+        this.info = {};
+        this.channel_badges = {};
+        this.channel_emotes = {};
 
         window.addEventListener('wheel', e => {
             if (e.deltaY < 0) {
@@ -98,10 +122,12 @@ customElements.define('twitch-chat', TwitchChat);
 class ChatLine extends LitElement {
 
     message: ChatMessage | null = null;
+    chat: TwitchChat | null = null;
 
-    constructor(msg: ChatMessage) {
+    constructor(chat: TwitchChat, msg: ChatMessage) {
         super();
 
+        this.chat = chat;
         this.message = msg;
     }
 
@@ -109,6 +135,7 @@ class ChatLine extends LitElement {
         return css`
             :host {
                 display: block;
+                margin-top: 8px;
             }
             .username {
                 color: var(--color);
@@ -117,15 +144,49 @@ class ChatLine extends LitElement {
             .message {
                 display: inline;
             }
+            .badge {
+                display: inline-block;
+                margin-bottom: -0.2em;
+                margin-right: 3px;
+            }
+            .emote {
+                display: inline-block;
+                margin-bottom: -0.2em;
+                margin-right: 3px;
+            }
         `;
     }
 
     render() {
         if(this.message) {
+            const msg = this.message.message;
+            const parsed_msg = msg.split(" ").map(str => {
+                if(str in this.chat.channel_emotes) {
+                    return html`<img class="emote" src="${this.chat.channel_emotes[str]}" height="32">`;
+                }
+                if(str in Emotes.global_emotes) {
+                    return html`<img class="emote" src="${Emotes.global_emotes[str]}" height="32">`;
+                }
+                return str + " ";
+            });
+
             return html`
                 <div class="line">
-                    <div class="username" style="--color: ${this.message.color}">${this.message.username}</div>:
-                    <div class="message">${this.message.message}</div>
+                    <span class="bages">
+                        ${this.message.badges.map(badge => {
+                            let badge_url = "";
+
+                            if(badge.name == "subscriber") {
+                                badge_url = this.chat.getSubBadge(badge.version);
+                            } else {
+                                badge_url = Badges.getBadgeByName(badge.name, badge.version);
+                            }
+
+                            return html`<img class="badge" src="${badge_url}" width="18" height="18">`;
+                        })}
+                    </span>
+                    <span class="username" style="--color: ${this.message.color}">${this.message.username}</span>:
+                    <span class="message">${parsed_msg}</span>
                 </div>
             `;
         }

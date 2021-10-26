@@ -26,7 +26,7 @@ export function joinChannel(channel: string) {
 }
 
 export async function handleAuthenticatedUser(token: string) {
-    const userinfo = await fetchTwitchApi("/userinfo", token);
+    const userinfo = await fetchTwitchAuthApi("/oauth2/userinfo", token);
     const username = userinfo.preferred_username;
 
     console.log(username);
@@ -42,11 +42,31 @@ export async function handleAuthenticatedUser(token: string) {
     openChat(username, token);
 }
 
-function fetchTwitchApi(path: string = "/userinfo", token: string) {
-    const url = `https://id.twitch.tv/oauth2${path}`;
+export async function getUserInfo(user_login: string) {
+    const userinfo = await fetchTwitchApi("/users", `login=${user_login}`);
+    return userinfo.data[0];
+}
+
+function fetchTwitchAuthApi(path: string = "/oauth2/userinfo", token: string) {
+    const url = `https://id.twitch.tv${path}`;
     return fetch(url, {
         headers: {
             'Authorization': 'Bearer ' + token
+        }
+    })
+        .then(res => res.json())
+        .catch(err => {
+            console.error(err);
+        })
+}
+
+export function fetchTwitchApi(path: string = "/users", query = "") {
+    const token = localStorage.getItem('user-token');
+    const url = `https://api.twitch.tv/helix${path}?${query}&client_id=${CLIENT_ID}`;
+    return fetch(url, {
+        headers: {
+            'Authorization': 'Bearer ' + token,
+            'Client-Id': CLIENT_ID
         }
     })
         .then(res => res.json())

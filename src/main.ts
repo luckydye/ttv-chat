@@ -10,11 +10,9 @@ async function main() {
     const chat = new TwitchChat();
     document.body.append(chat);
 
-    const room = "luckydye";
+    const room = "richwcampbell";
 
     IRCChatClient.listen('chat.message', (msg: ChatMessage) => {
-        console.log('message', msg);
-        
         if(msg.channel == room) {
             chat.appendMessage(msg);
         }
