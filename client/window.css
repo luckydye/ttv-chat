@@ -3,6 +3,11 @@ body {
     color: #eee;
     font-family: 'Open Sans', sans-serif;
     font-size: 14px;
+    display: grid;
+    grid-template-rows: 1fr 100px;
+    height: 100vh;
+    margin: 0;
+    box-sizing: border-box;
 }
 
 notification {

@@ -42,6 +42,12 @@ export async function handleAuthenticatedUser(token: string) {
     openChat(username, token);
 }
 
+export async function getLoggedInUser() {
+    const token = localStorage.getItem('user-token');
+    const userinfo = await fetchTwitchAuthApi("/oauth2/userinfo", token);
+    return userinfo;
+}
+
 export async function getUserInfo(user_login: string) {
     const userinfo = await fetchTwitchApi("/users", `login=${user_login}`);
     return userinfo.data[0];
@@ -75,7 +81,7 @@ export function fetchTwitchApi(path: string = "/users", query = "") {
         })
 }
 
-function checLogin() {
+export function checLogin() {
     if (localStorage.getItem('user-token')) {
         info("Found token.");
         const token = localStorage.getItem('user-token');

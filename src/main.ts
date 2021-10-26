@@ -1,14 +1,18 @@
+// layout
+import './components/layout/Column';
+import './components/layout/Group';
+import './components/layout/Panel';
+//
 import './components/Titlebar';
 import './components/Authenticator';
 import './components/ChatInput';
-import TwitchChat from './components/Chat';
+import './components/Chat';
 import './services/Twitch';
 import IRCChatClient from './services/IRCChatClient';
-import { ChatMessage, UserState } from '../services/IRCChatClient';
+import { ChatMessage, UserState } from './services/IRCChatClient';
 
 async function main() {
-    const chat = new TwitchChat();
-    document.body.append(chat);
+    const chat = document.querySelector("twitch-chat");
 
     const room = "richwcampbell";
 
@@ -28,4 +32,6 @@ async function main() {
     }, 1000);
 }
 
-main();
+window.addEventListener('DOMContentLoaded', e => {
+    main(); 
+})

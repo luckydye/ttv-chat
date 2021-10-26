@@ -157,6 +157,10 @@ async fn connect_to_chat(app_handle: tauri::AppHandle, username: String, token: 
         ServerMessage::RoomState(msg) => {
           println!("(room) {}", msg.channel_id);
         }
+        ServerMessage::UserNotice(msg) => {
+          // sub messages and stuff
+          println!("(notice) {}", msg.channel_id);
+        }
         msg => {
           println!("{:?}", msg);
         }

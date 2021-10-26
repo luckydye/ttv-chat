@@ -97,6 +97,8 @@ export default class TwitchChat extends LitElement {
                 width: 100%;
                 overflow: auto;
                 overflow-y: scroll;
+                padding: 8px;
+                box-sizing: border-box;
             }
             .lines {
                 

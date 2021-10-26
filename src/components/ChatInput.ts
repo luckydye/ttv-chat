@@ -42,7 +42,7 @@ export default class ChatInput extends LitElement {
 
             }
             .identity {
-
+                margin-top: 4px;
             }
         `;
     }
@@ -80,7 +80,7 @@ export default class ChatInput extends LitElement {
                     </div>
                 </div>
                 <div class="identity">
-                    Identity
+                    <twitch-auth></twitch-auth>
                 </div>
             </div>
         `;
