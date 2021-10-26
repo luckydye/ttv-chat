@@ -10,7 +10,6 @@ export default class TwitchChat extends LitElement {
 
     MAX_BUFFER_SIZE = 1000;
 
-    scrollTarget = 0;
     scrollLock = true;
 
     roomName: string = "";
@@ -23,11 +22,41 @@ export default class TwitchChat extends LitElement {
     appendMessage(msg: ChatMessage) {
         const line = new ChatLine(this, msg);
         this.appendChild(line);
+        setTimeout(() => {
+            this.afterAppend();
+        })
     }
 
     appenLine(text: string) {
         const line = new ChatInfo(text);
         this.appendChild(line);
+        setTimeout(() => {
+            this.afterAppend();
+        })
+    }
+
+    afterAppend() {
+        const scrollEle = this.shadowRoot?.querySelector('.lines');
+        if(!scrollEle) return;
+
+        const latest = (scrollEle.scrollHeight - scrollEle.clientHeight);
+
+        if(scrollEle.scrollTop >= latest - 100) {
+            this.scrollLock = true;
+        }
+
+        // update scroll position
+        if (this.scrollLock) {
+            scrollEle.scrollTo(0, latest + 100);
+        }
+
+        // clean out buffer
+        if (this.children.length > this.MAX_BUFFER_SIZE && this.scrollLock === true) {
+            const rest = (this.children.length - this.MAX_BUFFER_SIZE);
+            for (let i = 0; i < rest; i++) {
+                this.children[i].remove();
+            }
+        }
     }
 
     setRoom(roomName: string) {
@@ -70,44 +99,11 @@ export default class TwitchChat extends LitElement {
     constructor() {
         super();
 
-        window.addEventListener('wheel', e => {
+        this.addEventListener('wheel', e => {
             if (e.deltaY < 0) {
                 this.scrollLock = false;
             }
         })
-
-        const update = () => {
-            requestAnimationFrame(update);
-
-            const scrollEle = this.shadowRoot?.querySelector('.lines');
-            
-            if(!scrollEle) return;
-
-            const latest = scrollEle.scrollHeight - scrollEle.clientHeight;
-            // if(this.scrollTarget >= latest - 10) {
-            //     this.scrollLock = true;
-            // } 
-
-            if (this.scrollTarget - 10 <= latest) {
-                this.scrollLock = true;
-            }
-
-            // update scroll position
-            if (this.scrollLock) {
-                this.scrollTarget = latest;
-                scrollEle.scrollTo(0, this.scrollTarget);
-            }
-
-            // clean out buffer
-            if (this.children.length > this.MAX_BUFFER_SIZE && this.scrollLock === true) {
-                const rest = (this.children.length - this.MAX_BUFFER_SIZE);
-                for (let i = 0; i < rest; i++) {
-                    this.children[i].remove();
-                }
-            }
-        }
-
-        update();
     }
 
     static get styles() {
@@ -123,14 +119,14 @@ export default class TwitchChat extends LitElement {
                 height: 100%;
             }
             .lines {
-                padding-top: 30px;
+                margin-top: 30px;
                 padding-bottom: 10px;
                 box-sizing: border-box;
                 position: absolute;
                 top: 0;
                 left: 0;
                 width: 100%;
-                height: 100%;
+                height: calc(100% - 30px);
                 overflow: auto;
                 overflow-y: scroll;
             }
