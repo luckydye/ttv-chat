@@ -4,6 +4,7 @@ import Badges from '../services/Badges';
 import { getUserInfo } from '../services/Twitch';
 import Emotes from '../services/Emotes';
 import TwitchAPI from '../services/Twitch';
+import Webbrowser from '../services/Webbrowser';
 
 export default class TwitchChat extends LitElement {
 
@@ -138,7 +139,7 @@ export default class TwitchChat extends LitElement {
             }
             .info {
                 opacity: 0.5;
-                padding: 10px;
+                padding: 10px 15px;
             }
 
             .chat-title {
@@ -154,6 +155,15 @@ export default class TwitchChat extends LitElement {
                 white-space: nowrap;
                 font-size: 12px;
                 color: #ababab;
+                border-bottom: 1px solid black;
+            }
+
+            .chat-title:hover {
+                cursor: pointer;
+                background: rgb(33, 33, 36);
+            }
+            .chat-title:active {
+                background: rgb(25, 25, 28);
             }
 
             .chat-title span {
@@ -186,7 +196,11 @@ export default class TwitchChat extends LitElement {
 
     render() {
         return html`
-            <div class="chat-title">${this.stream_title == "" ? "Offline" : this.stream_title}</div>
+            <div class="chat-title" @click="${() => {
+                Webbrowser.openURL(`https://www.twitch.tv/${this.roomName}`);
+            }}">
+                ${this.stream_title == "" ? "Offline" : this.stream_title}
+            </div>
             <div class="lines">
                 ${this.roomName ? html`
                     <div class="info">Connected to ${this.roomName}</div>
@@ -290,6 +304,9 @@ class ChatInfo extends LitElement {
         return css`
             :host {
                 display: block;
+                background: #211b25;
+                padding: 5px 15px;
+                margin: 2px 0;
             }
             .message {
                 display: inline;

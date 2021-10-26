@@ -3,6 +3,8 @@
   windows_subsystem = "windows"
 )]
 
+use webbrowser;
+
 use tauri::command;
 use tauri::Manager;
 
@@ -157,9 +159,24 @@ async fn connect_to_chat(app_handle: tauri::AppHandle, username: String, token: 
         ServerMessage::RoomState(msg) => {
           println!("(room) {}", msg.channel_id);
         }
+        ServerMessage::ClearChat(msg) => {
+          // message deletes
+        }
         ServerMessage::UserNotice(msg) => {
           // sub messages and stuff
-          println!("(notice) {}", msg.channel_id);
+          let transport = ChatTransport {
+            message: msg.system_message.to_owned(),
+            sender: msg.sender.name.to_owned(),
+            channel: msg.channel_login.to_owned(),
+            is_action: false,
+            badges: msg.badges,
+            badge_info: msg.badge_info,
+            bits: 0,
+            name_color: vec![240u8, 240u8, 240u8],
+            // emotes: vec![],
+            server_timestamp: msg.server_timestamp.to_rfc2822(),
+          };
+          app_handle.emit_all("chat.info", transport).unwrap();
         }
         msg => {
           println!("{:?}", msg);
@@ -201,6 +218,13 @@ async fn chat_send_message(channel: String, message: String) {
   }
 }
 
+#[command]
+fn open_link(url: String) {
+  if webbrowser::open(&url).is_ok() {
+    println!("opened link");
+  }
+}
+
 #[tokio::main]
 pub async fn main() {
   tauri::Builder::default()
@@ -208,7 +232,8 @@ pub async fn main() {
       connect_to_chat,
       chat_join_room,
       chat_leave_room,
-      chat_send_message
+      chat_send_message,
+      open_link
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

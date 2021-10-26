@@ -48,6 +48,15 @@ async function main() {
         }
     });
 
+    IRCChatClient.listen('chat.info', (msg: ChatMessage) => {
+        console.log('notice', msg);
+        
+        const chat = chatElements[msg.channel];
+        if(chat) {
+            chat.appenLine(msg.message);
+        }
+    });
+
     IRCChatClient.listen('chat.user', (msg: UserState) => {
         console.log('user', msg);
     });

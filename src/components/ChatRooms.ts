@@ -8,12 +8,11 @@ export default class ChatRooms extends LitElement {
     static get styles() {
         return css`
             :host {
-                display: block;
                 width: 100%;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                padding: 10px 0;
+                padding: 10px 0px;
             }
             .icon-list {
                 display: grid;
@@ -25,14 +24,17 @@ export default class ChatRooms extends LitElement {
                 position: relative;
                 cursor: pointer;
             }
+            .room-icon:active {
+                transform: scale(0.98);
+            }
             .room-icon[selected]::before {
                 content: "";
-                width: 5px;
+                width: 4px;
+                height: 8px;
                 position: absolute;
-                right: calc(100% + 5px);
+                left: -10px;
                 top: 50%;
                 transform: translate(0, -50%);
-                padding: 4px 8px;
                 border-radius: 3px;
                 z-index: 10000;
                 background: #eee;

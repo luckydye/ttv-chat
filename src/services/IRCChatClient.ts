@@ -120,7 +120,6 @@ export default class IRCChatClient {
                 case 'chat.user': {
                     if (event.payload) {
                         const payload: ChatUser = event.payload as ChatUser;
-                        // payload.channel seperation needed
                         const message_data: UserState = {
                             channel: payload.channel,
                             username: payload.username,
@@ -128,6 +127,22 @@ export default class IRCChatClient {
                             color: rgbToHex(...payload.name_color),
                         };
                         this.user = message_data;
+                        callback(message_data);
+                    }
+                    break;
+                }
+                case 'chat.info': {
+                    if (event.payload) {
+                        const payload: ChatTransport = event.payload as ChatTransport;
+                        const message_data: ChatMessage = {
+                            channel: payload.channel,
+                            username: payload.sender,
+                            is_action: payload.is_action,
+                            badges: payload.badges,
+                            message: payload.message,
+                            color: rgbToHex(...payload.name_color),
+                            timestamp: new Date(payload.server_timestamp)
+                        }
                         callback(message_data);
                     }
                     break;
