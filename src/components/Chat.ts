@@ -5,6 +5,7 @@ import { getUserInfo } from '../services/Twitch';
 import Emotes from '../services/Emotes';
 import TwitchAPI from '../services/Twitch';
 import Webbrowser from '../services/Webbrowser';
+import TwitchEmotes from '../services/emotes/TwitchEmotes';
 
 export default class TwitchChat extends LitElement {
 
@@ -308,30 +309,53 @@ class ChatLine extends LitElement {
     render() {
         if (this.message) {
             const msg = this.message.message;
-            const parsed_msg = msg.split(" ").map(str => {
+
+            const wordEmoteMap = {};
+            
+            const emotes = this.message.emotes;
+            if(emotes) {
+                for(let emote of emotes) {
+                    const start = emote.char_range.start;
+                    const end = emote.char_range.end;
+    
+                    const wordToReplace = msg.slice(start, end);
+                    const emoteURL = TwitchEmotes.parseEmoteUrl(emote);
+    
+                    wordEmoteMap[wordToReplace] = emoteURL;
+                }
+            }
+
+            msg.split(" ").forEach(str => {
                 if (str in this.chat.channel_emotes) {
-                    return html`<img class="emote" src="${this.chat.channel_emotes[str]}" height="32">`;
+                    wordEmoteMap[str] = this.chat.channel_emotes[str];
                 }
                 if (str in Emotes.global_emotes) {
-                    return html`<img class="emote" src="${Emotes.global_emotes[str]}" height="32">`;
+                    wordEmoteMap[str] = Emotes.global_emotes[str];
                 }
-                return str + " ";
+            });
+
+            const msg_split = msg.split(" ");
+            let parsed_msg = msg_split.map(word => {
+                if(wordEmoteMap[word]) {
+                    return html`<img class="emote" src="${wordEmoteMap[word]}" height="24">`;
+                }
+                return word + " ";
             });
 
             return html`
                 <div class="line">
                     <span class="bages">
                         ${this.message.badges.map(badge => {
-                let badge_url = "";
+                            let badge_url = "";
 
-                if (badge.name == "subscriber") {
-                    badge_url = this.chat.getSubBadge(badge.version);
-                } else {
-                    badge_url = Badges.getBadgeByName(badge.name, badge.version);
-                }
+                            if (badge.name == "subscriber") {
+                                badge_url = this.chat.getSubBadge(badge.version);
+                            } else {
+                                badge_url = Badges.getBadgeByName(badge.name, badge.version);
+                            }
 
-                return html`<img class="badge" src="${badge_url}" width="18" height="18">`;
-            })}
+                            return html`<img class="badge" src="${badge_url}" width="18" height="18">`;
+                        })}
                     </span>
                     <span class="username" style="--color: ${this.message.color}">${this.message.username}</span>:
                     <span class="message">${parsed_msg}</span>

@@ -11,6 +11,7 @@ use tauri::Manager;
 use twitch_irc::login::StaticLoginCredentials;
 use twitch_irc::message::Badge;
 use twitch_irc::message::ServerMessage;
+use twitch_irc::message::Emote;
 use twitch_irc::TwitchIRCClient;
 use twitch_irc::{ClientConfig, SecureTCPTransport};
 
@@ -31,7 +32,7 @@ struct ChatTransport {
   badge_info: Vec<Badge>,
   bits: u64,
   name_color: Vec<u8>,
-  // emotes: vec![],
+  emotes: Vec<Emote>,
   server_timestamp: String,
 }
 
@@ -130,7 +131,7 @@ async fn connect_to_chat(app_handle: tauri::AppHandle, username: String, token: 
               }
               None => vec![240u8, 240u8, 240u8],
             },
-            // emotes: vec![],
+            emotes: msg.emotes,
             server_timestamp: msg.server_timestamp.to_rfc2822(),
           };
           app_handle.emit_all("chat.message", transport).unwrap();
@@ -173,7 +174,7 @@ async fn connect_to_chat(app_handle: tauri::AppHandle, username: String, token: 
             badge_info: msg.badge_info,
             bits: 0,
             name_color: vec![240u8, 240u8, 240u8],
-            // emotes: vec![],
+            emotes: msg.emotes,
             server_timestamp: msg.server_timestamp.to_rfc2822(),
           };
           app_handle.emit_all("chat.info", transport).unwrap();

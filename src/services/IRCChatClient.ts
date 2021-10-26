@@ -11,7 +11,7 @@ interface ChatTransport {
     badge_info: Array<object>,
     bits: number,
     name_color: Array<number>,
-    // emotes: vec![],
+    emotes: Array<any>,
     server_timestamp: string,
 }
 
@@ -23,6 +23,7 @@ export interface ChatMessage {
     badges: Array<object>,
     timestamp: Date,
     is_action: Boolean,
+    emotes: Array<any>,
 }
 
 export interface ChatUser {
@@ -111,7 +112,8 @@ export default class IRCChatClient {
                             badges: payload.badges,
                             message: payload.message,
                             color: rgbToHex(...payload.name_color),
-                            timestamp: new Date(payload.server_timestamp)
+                            timestamp: new Date(payload.server_timestamp),
+                            emotes: payload.emotes
                         }
                         callback(message_data);
                     }
@@ -141,7 +143,8 @@ export default class IRCChatClient {
                             badges: payload.badges,
                             message: payload.message,
                             color: rgbToHex(...payload.name_color),
-                            timestamp: new Date(payload.server_timestamp)
+                            timestamp: new Date(payload.server_timestamp),
+                            emotes: payload.emotes
                         }
                         callback(message_data);
                     }

@@ -32,3 +32,4 @@ A new Desktop Twitch Client with all the jingles and bells.
 - Chat input UI like the discord one with emote, pol/Pred feature, etc
 - Input emote parsing
 - Youtube chats
+- Put the bio n stuff at the top of the chatroom

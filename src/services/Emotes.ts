@@ -1,33 +1,44 @@
 import { fetchTwitchApi } from './Twitch';
+import TwitchEmotes from './emotes/TwitchEmotes';
+import BTTVEmotes from './emotes/BTTVEmotes';
+import FFZEmotes from './emotes/FFZEmotes';
 
 let globalEmotes = {};
+let emoteTemplate = "";
+
+const EMOTE_SERVICES = [
+    TwitchEmotes,
+    BTTVEmotes,
+    FFZEmotes,
+]
+
+function flattenMap(arr: Array<object>) {
+    let result = {};
+    for(let map of arr) {
+        result = Object.assign(result, map);
+    }
+    return result;
+}
 
 export default class Emotes {
+
+    static get template() {
+        return emoteTemplate;
+    }
 
     static get global_emotes() {
         return globalEmotes;
     }
 
-    static getGlobalEmotes() {
-        return fetchTwitchApi("/chat/emotes/global").then(data => {
-            const template = data.template;
-            for(let emote of data.data) {
-                globalEmotes[emote.name] = emote.images.url_2x;
-            }
-            console.log(globalEmotes);
-        });
+    static async getGlobalEmotes() {
+        const maps = await Promise.all([...EMOTE_SERVICES].map(Service => Service.getGlobalEmotes()));
+        globalEmotes = flattenMap(maps);
+        return globalEmotes;
     }
 
-    static getChannelEmotes(id: string) {
-        return fetchTwitchApi("/chat/emotes", "broadcaster_id=" + id).then(data => {
-            const template = data.template;
-            const channelEmotes = {};
-            for(let emote of data.data) {
-                channelEmotes[emote.name] = emote.images.url_2x;
-            }
-            console.log(channelEmotes);
-            return channelEmotes;
-        });
+    static async getChannelEmotes(id: string) {
+        const maps = await Promise.all([...EMOTE_SERVICES].map(Service => Service.getChannelEmotes(id)));
+        return flattenMap(maps);
     }
 
 }
