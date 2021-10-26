@@ -24,7 +24,7 @@ export default class TwitchChat extends LitElement {
         this.appendChild(line);
         setTimeout(() => {
             this.afterAppend();
-        })
+        }, 1)
     }
 
     appenLine(text: string) {
@@ -32,7 +32,28 @@ export default class TwitchChat extends LitElement {
         this.appendChild(line);
         setTimeout(() => {
             this.afterAppend();
-        })
+        }, 1);
+    }
+
+    lock() {
+        this.scrollLock = true;
+        this.setAttribute('locked', '');
+        this.scrollToLatest();
+    }
+
+    unlock() {
+        this.scrollLock = false;
+        this.removeAttribute('locked');
+    }
+
+    scrollToLatest() {
+        const scrollEle = this.shadowRoot?.querySelector('.lines');
+        if(!scrollEle) return;
+
+        const latest = (scrollEle.scrollHeight - scrollEle.clientHeight);
+        if (this.scrollLock) {
+            scrollEle.scrollTo(0, latest + 100);
+        }
     }
 
     afterAppend() {
@@ -41,17 +62,18 @@ export default class TwitchChat extends LitElement {
 
         const latest = (scrollEle.scrollHeight - scrollEle.clientHeight);
 
-        if(scrollEle.scrollTop >= latest - 100) {
-            this.scrollLock = true;
+        if(scrollEle.scrollTop >= latest - 50) {
+            this.lock();
+        } 
+        if(scrollEle.scrollTop < latest - 1000) {
+            this.unlock();
         }
 
         // update scroll position
-        if (this.scrollLock) {
-            scrollEle.scrollTo(0, latest + 100);
-        }
+        this.scrollToLatest();
 
         // clean out buffer
-        if (this.children.length > this.MAX_BUFFER_SIZE && this.scrollLock === true) {
+        if (this.children.length > this.MAX_BUFFER_SIZE) {
             const rest = (this.children.length - this.MAX_BUFFER_SIZE);
             for (let i = 0; i < rest; i++) {
                 this.children[i].remove();
@@ -96,12 +118,19 @@ export default class TwitchChat extends LitElement {
         return this.channel_badges["subscriber"].versions[version].image_url_2x;
     }
 
+    connectedCallback() {
+        super.connectedCallback();
+        setTimeout(() => {
+            this.scrollToLatest();
+        }, 10);
+    }
+
     constructor() {
         super();
 
         this.addEventListener('wheel', e => {
             if (e.deltaY < 0) {
-                this.scrollLock = false;
+                this.unlock();
             }
         })
     }
@@ -129,6 +158,7 @@ export default class TwitchChat extends LitElement {
                 height: calc(100% - 30px);
                 overflow: auto;
                 overflow-y: scroll;
+                overflow-x: hidden;
             }
             .line {
 
@@ -166,6 +196,31 @@ export default class TwitchChat extends LitElement {
                 opacity: 0.5;
             }
 
+            :host(:not([locked])) .scroll-to-bottom {
+                display: block;
+            }
+
+            .scroll-to-bottom {
+                display: none;
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                background: #080808;
+                padding: 8px 15px;
+                text-align: center;
+                box-sizing: border-box;
+                z-index: 100000;
+                opacity: 0.9;
+                cursor: pointer;
+            }
+            .scroll-to-bottom:hover {
+                opacity: 0.95;
+            }
+            .scroll-to-bottom:active {
+                opacity: 1;
+            }
+
             /* // webkit scrollbars */
             ::-webkit-scrollbar {
                 width: 8px;
@@ -196,6 +251,9 @@ export default class TwitchChat extends LitElement {
                 Webbrowser.openURL(`https://www.twitch.tv/${this.roomName}`);
             }}">
                 ${this.stream_title == "" ? "Offline" : this.stream_title}
+            </div>
+            <div class="scroll-to-bottom" @click="${() => this.lock()}">
+                <span>Scroll to bottom</span>
             </div>
             <div class="lines">
                 ${this.roomName ? html`
