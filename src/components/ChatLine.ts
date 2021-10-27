@@ -24,6 +24,9 @@ export class ChatLine extends LitElement {
                 display: block;
                 padding: 5px 15px;
             }
+            /* :host(:nth-child(even)) {
+                background: hsl(240deg 4% 10%);
+            } */
             :host([highlighted]) {
                 background: rgb(255 0 0 / 22%);
             }
@@ -96,7 +99,8 @@ export class ChatLine extends LitElement {
                     wordMentionMap[str] = str;
                 }
                 // highlight mentions
-                if (str.toLocaleLowerCase().match(getLoggedInUsername().toLocaleLowerCase())) {
+                const client_user = getLoggedInUsername().toLocaleLowerCase();
+                if (client_user != "" && str.toLocaleLowerCase().match(client_user)) {
                     wordMentionMap[str] = str;
                     this.setAttribute('highlighted', '');
                 }
@@ -106,13 +110,13 @@ export class ChatLine extends LitElement {
             let parsed_msg = msg_split.map(word => {
                 // replace emotes
                 if(wordEmoteMap[word]) {
-                    return html`<img class="emote" alt="${word}" src="${wordEmoteMap[word]}" height="32">`;
+                    return html`<img class="emote" alt="${word}" src="${wordEmoteMap[word]}" height="32"> `;
                 }
                 // replace links
                 if(wordLinkMap[word]) {
                     return html`<a class="inline-link" href="javascript:()" @click="${() => {
                         Webbrowser.openURL(wordLinkMap[word]);
-                    }}">${wordLinkMap[word]}</a>`;
+                    }}">${wordLinkMap[word]}</a> `;
                 }
                 // replace mentions
                 if(wordMentionMap[word]) {

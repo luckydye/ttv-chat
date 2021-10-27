@@ -1,7 +1,7 @@
 import { css, html, LitElement } from 'lit-element';
 import { Application } from '../App';
-import { getUserInfo } from '../services/Twitch';
 import ProfileIndicator from './ProfileIndicator';
+import AddChannelDialog from './AddChannelDialog';
 
 export default class ChatRooms extends LitElement {
 
@@ -66,6 +66,8 @@ export default class ChatRooms extends LitElement {
         `;
     }
 
+    icons = [];
+
     constructor() {
         super();
         
@@ -73,15 +75,14 @@ export default class ChatRooms extends LitElement {
             this.update();
         });
 
-        this.icons = [];
-
-        const rooms = Application.getRooms();
-        rooms.forEach(room => {
-            const selected = Application.getSelectedRoom() == room;
-            const pfp = new ProfileIndicator(room);
-
-            this.icons.push(pfp);
-        })
+        window.addEventListener('stateloaded', e => {
+            const rooms = Application.getRooms();
+            rooms.forEach(room => {
+                const pfp = new ProfileIndicator(room);
+                this.icons.push(pfp);
+            })
+            this.update();
+        });
     }
 
     render() {
@@ -99,8 +100,10 @@ export default class ChatRooms extends LitElement {
                     `;
                 })}
 
-                <div class="room-icon new-room" @click="${() => {
-                        // Application.addRoomDialog();
+                <div class="room-icon new-room" @click="${(e) => {
+                        const rect = e.target.getClientRects()[0];
+                        const ele = new AddChannelDialog(rect.x, rect.y);
+                        document.body.append(ele);
                     }}" hint="Join Room" >
                     +
                 </div>

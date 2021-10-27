@@ -1,5 +1,5 @@
 
-const applicationState = {
+let applicationState = {
     selectedRoom: localStorage.getItem('selected') || "luckydye",
     chatRooms: [
         "luckydye",
@@ -18,9 +18,17 @@ const applicationState = {
 }
 
 export class Application {
+
+    static saveState() {
+        localStorage.setItem('save-state', JSON.stringify(applicationState));
+    }
     
     static async init() {
-        // load resources etc
+        const state = localStorage.getItem('save-state');
+        if(state) {
+            applicationState = JSON.parse(state);
+        }
+        window.dispatchEvent(new Event('stateloaded'));
     }
 
     static getSelectedRoom() {
@@ -35,6 +43,13 @@ export class Application {
         applicationState.selectedRoom = room_name;
         window.dispatchEvent(new Event('selectroom'));
         localStorage.setItem('selected', room_name);
+        this.saveState();
+    }
+
+    static addRoom(username: string) {
+        applicationState.chatRooms.push(username);
+        window.dispatchEvent(new Event('addedroom'));
+        this.saveState();
     }
 
 }

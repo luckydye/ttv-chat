@@ -8,10 +8,6 @@ import IRCChatClient from './services/IRCChatClient';
 import { ChatMessage, UserState } from './services/IRCChatClient';
 import { Application } from './App';
 
-// // ui layout components
-// import { render } from 'preact';
-// import Main from './pages/Main';
-
 async function main() {
 
     await Application.init();
@@ -63,6 +59,4 @@ async function main() {
     renderSelecetdChat();
 }
 
-window.addEventListener('DOMContentLoaded', e => {
-    main(); 
-})
+main(); 

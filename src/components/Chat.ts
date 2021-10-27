@@ -69,7 +69,7 @@ export default class TwitchChat extends LitElement {
 
         const latest = (scrollEle.scrollHeight - scrollEle.clientHeight);
 
-        if(scrollEle.scrollTop >= latest - 50) {
+        if(scrollEle.scrollTop >= latest - 100) {
             this.lock();
         } 
         if(scrollEle.scrollTop < latest - 1000) {
@@ -134,6 +134,7 @@ export default class TwitchChat extends LitElement {
         super.connectedCallback();
         setTimeout(() => {
             this.scrollToLatest();
+            this.afterAppend();
         }, 10);
     }
 
@@ -144,6 +145,7 @@ export default class TwitchChat extends LitElement {
             if (e.deltaY < 0) {
                 this.unlock();
             }
+            this.afterAppend();
         })
     }
 

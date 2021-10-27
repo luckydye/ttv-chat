@@ -63,7 +63,7 @@ export default class ChatInput extends LitElement {
 
         window.addEventListener('paste', e => {
             const ele = this.shadowRoot?.querySelector('textarea');
-            if(!(document.activeElement == ele)) {
+            if(document.activeElement == document.body) {
                 const data = e.clipboardData.items[0];
                 data.getAsString(str => {
                     ele?.value += str;
