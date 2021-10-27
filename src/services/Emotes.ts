@@ -1,7 +1,7 @@
-import { fetchTwitchApi } from './Twitch';
 import TwitchEmotes from './emotes/TwitchEmotes';
 import BTTVEmotes from './emotes/BTTVEmotes';
 import FFZEmotes from './emotes/FFZEmotes';
+import SevenTVEmotes from './emotes/SevenTVEmotes';
 
 let globalEmotes = {};
 let emoteTemplate = "";
@@ -10,6 +10,7 @@ const EMOTE_SERVICES = [
     TwitchEmotes,
     BTTVEmotes,
     FFZEmotes,
+    SevenTVEmotes
 ]
 
 function flattenMap(arr: Array<object>) {

@@ -352,9 +352,10 @@ export default class TwitchChat extends LitElement {
                 <div>
                     <button title="Follower Mode">o</button>
                     <button title="Sub mode">y</button>
+                    <button title="User list">u</button>
                     <button title="Open Stream" @click="${() => {
                         Webbrowser.openURL(`https://www.twitch.tv/${this.roomName}`);
-                    }}">y</button>
+                    }}">-</button>
                 </div>
             </div>
             <div class="scroll-to-bottom" @click="${() => this.lock()}">
