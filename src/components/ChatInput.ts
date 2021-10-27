@@ -13,26 +13,29 @@ export default class ChatInput extends LitElement {
                 padding: 10px;
             }
             .input-field {
-                background: #101010;
                 position: relative;
                 display: grid;
                 grid-template-columns: 1fr auto;
                 align-items: center;
-                border-radius: 4px;
             }
             .text-input {
 
             }
             .text-input textarea {
+                border-radius: 4px;
+                background: hsl(240deg 4% 19%);
                 width: 100%;
-                background: transparent;
                 border: none;
                 outline: none;
                 padding: 5px;
                 color: #eee;
                 font-family: 'Open Sans', sans-serif;
+                box-sizing: border-box;
             }
             .util {
+                position: absolute;
+                right: 0;
+                top: 12px;
                 padding: 0 10px;
             }
             button {

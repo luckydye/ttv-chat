@@ -162,4 +162,8 @@ export default class TwitchAPI {
         return (await fetchTwitchApi("/streams", "user_id=" + user_id)).data;
     }
 
+    static async getChannel(user_id: string) {
+        return (await fetchTwitchApi("/channels", "broadcaster_id=" + user_id)).data;
+    }
+
 }

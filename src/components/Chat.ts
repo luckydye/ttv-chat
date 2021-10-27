@@ -7,6 +7,12 @@ import TwitchAPI from '../services/Twitch';
 import Webbrowser from '../services/Webbrowser';
 import TwitchEmotes from '../services/emotes/TwitchEmotes';
 
+const NumberFormat = new Intl.NumberFormat('en-IN');
+const langFormat = new Intl.DisplayNames(['en'], { type: 'language' });
+
+const formatLang = (langshort: string) => langFormat.of(langshort);
+const formatNumber = (n: number) => NumberFormat.format(n);
+
 export default class TwitchChat extends LitElement {
 
     MAX_BUFFER_SIZE = 1000;
@@ -16,7 +22,7 @@ export default class TwitchChat extends LitElement {
     roomName: string = "";
     stream_title: string = "";
 
-    info = {};
+    info = null;
     channel_badges = {};
     channel_emotes = {};
 
@@ -88,6 +94,9 @@ export default class TwitchChat extends LitElement {
         getUserInfo(this.roomName).then(async info => {
             this.info = info;
 
+            const channel = await TwitchAPI.getChannel(info.id);
+            info.channel_info = channel[0];
+            
             const stream = await TwitchAPI.getStreams(info.id);
             if(stream[0]) {
 
@@ -110,6 +119,8 @@ export default class TwitchChat extends LitElement {
 
             const emotes = await Emotes.getChannelEmotes(info.id);
             this.channel_emotes = emotes;
+
+            this.update();
         })
 
         this.update();
@@ -222,6 +233,46 @@ export default class TwitchChat extends LitElement {
                 opacity: 1;
             }
 
+            .bio {
+                display: grid;
+                grid-template-columns: auto 1fr;
+                padding: 30px 30px 40px 30px;
+                margin-bottom: 10px;
+                background: #0c0c0c;
+            }
+            .profile-image {
+                border-radius: 50%;
+                overflow: hidden;
+                width: 125px;
+                height: 125px;
+                border: 3px solid rgb(148, 74, 255);
+            }
+
+            .pin {
+                margin-left: 20px;
+            }
+            .profile-name {
+                font-size: 32px;
+                margin-bottom: 5px;
+            }
+            .profile-desc {
+                margin-top: 20px;
+                grid-column: 1 / span 2;
+            }
+            .viewcount {
+                opacity: 0.5;
+                margin-bottom: 5px;
+            }
+            .game {
+                opacity: 0.5;
+                margin-bottom: 5px;
+                font-weight: bold;
+            }
+            .language {
+                opacity: 0.5;
+                margin-bottom: 5px;
+            }
+
             /* // webkit scrollbars */
             ::-webkit-scrollbar {
                 width: 8px;
@@ -258,6 +309,30 @@ export default class TwitchChat extends LitElement {
             </div>
             <div class="lines">
                 ${this.roomName ? html`
+                    ${this.info ? html`
+                        <div class="bio">
+                            <div class="profile-image">
+                                <img src="${this.info.profile_image_url}" width="125px" />
+                            </div>
+                            <div class="pin">
+                                <div class="profile-name">
+                                    ${this.info.display_name}
+                                </div>
+                                <div class="game">
+                                    ${this.info.channel_info.game_name}
+                                </div>
+                                <div class="language">
+                                    ${formatLang(this.info.channel_info.broadcaster_language)}
+                                </div>
+                                <div class="viewcount">
+                                    ${formatNumber(this.info.view_count)} views
+                                </div>
+                            </div>
+                            <div class="profile-desc">
+                                ${this.info.description}
+                            </div>
+                        </div>
+                    ` : ""}
                     <div class="info">Connected to ${this.roomName}</div>
                 `: ""}
                 <slot></slot>
@@ -295,13 +370,16 @@ class ChatLine extends LitElement {
             }
             .badge {
                 display: inline-block;
-                margin-bottom: -0.2em;
+                margin-bottom: -0.3em;
                 margin-right: 3px;
             }
             .emote {
                 display: inline-block;
-                margin-bottom: -0.2em;
+                margin-bottom: -0.8em;
                 margin-right: 3px;
+            }
+            .line[action] .message {
+                color: var(--color);
             }
         `;
     }
@@ -337,13 +415,13 @@ class ChatLine extends LitElement {
             const msg_split = msg.split(" ");
             let parsed_msg = msg_split.map(word => {
                 if(wordEmoteMap[word]) {
-                    return html`<img class="emote" src="${wordEmoteMap[word]}" height="24">`;
+                    return html`<img class="emote" src="${wordEmoteMap[word]}" height="32">`;
                 }
                 return word + " ";
             });
 
             return html`
-                <div class="line">
+                <div class="line" style="--color: ${this.message.color}" ?action="${this.message.is_action}">
                     <span class="bages">
                         ${this.message.badges.map(badge => {
                             let badge_url = "";
@@ -357,7 +435,7 @@ class ChatLine extends LitElement {
                             return html`<img class="badge" src="${badge_url}" width="18" height="18">`;
                         })}
                     </span>
-                    <span class="username" style="--color: ${this.message.color}">${this.message.username}</span>:
+                    <span class="username">${this.message.username}:</span>
                     <span class="message">${parsed_msg}</span>
                 </div>
             `;
@@ -383,7 +461,7 @@ class ChatInfo extends LitElement {
             :host {
                 display: block;
                 background: #211b25;
-                padding: 5px 15px;
+                padding: 6px 15px;
                 margin: 2px 0;
             }
             .message {
