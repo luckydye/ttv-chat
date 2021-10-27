@@ -17,6 +17,26 @@ let applicationState = {
     ],
 }
 
+class AddedRoomEvent extends Event {
+
+    room_name: string;
+
+    constructor(room_name: string) {
+        super("addedroom");
+        this.room_name = room_name;
+    }
+}
+
+class CloseRoomEvent extends Event {
+
+    room_name: string;
+
+    constructor(room_name: string) {
+        super("closeroom");
+        this.room_name = room_name;
+    }
+}
+
 export class Application {
 
     static saveState() {
@@ -48,7 +68,15 @@ export class Application {
 
     static addRoom(username: string) {
         applicationState.chatRooms.push(username);
-        window.dispatchEvent(new Event('addedroom'));
+        window.dispatchEvent(new AddedRoomEvent(username));
+        this.saveState();
+    }
+
+    static closeRoom(username: string) {
+        const index = applicationState.chatRooms.indexOf(username);
+        applicationState.chatRooms.splice(index, 1);
+        window.dispatchEvent(new CloseRoomEvent(username));
+        this.selectRoom(this.getRooms()[Math.max(0, index)]);
         this.saveState();
     }
 

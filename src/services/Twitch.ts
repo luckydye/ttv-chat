@@ -15,7 +15,9 @@ function openChat(username: string, token: string) {
     try {
         console.log('connecting');
         
-        IRCChatClient.connectoToChat(username, token);
+        IRCChatClient.connectoToChat(username, token).then(() => {
+            window.dispatchEvent(new Event("loggedin"));
+        })
     } catch (err) {
     }
 }

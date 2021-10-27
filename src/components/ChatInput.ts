@@ -49,6 +49,7 @@ export default class ChatInput extends LitElement {
                 background: hsl(240deg, 2%, 41%);
                 margin: 0;
                 cursor: pointer;
+                color: #fff;
             }
             button:hover {
                 background: hsl(240deg, 2%, 44%);

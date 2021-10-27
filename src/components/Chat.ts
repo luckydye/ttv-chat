@@ -6,6 +6,7 @@ import Emotes from '../services/Emotes';
 import TwitchAPI from '../services/Twitch';
 import Webbrowser from '../services/Webbrowser';
 import { ChatLine, ChatInfo } from './ChatLine';
+import { Application } from '../App';
 
 const NumberFormat = new Intl.NumberFormat('en-IN');
 const langFormat = new Intl.DisplayNames(['en'], { type: 'language' });
@@ -149,6 +150,15 @@ export default class TwitchChat extends LitElement {
             }
             this.afterAppend();
         })
+
+        // update room info at interval
+        const update_info = () => getUserInfo(this.roomName).then(info => {
+            this.setRoom(this.roomName);
+            setTimeout(() => update_info(), 1000 * 60);
+        });
+        window.addEventListener('loggedin', e => {
+            update_info();
+        })
     }
 
     static get styles() {
@@ -164,14 +174,14 @@ export default class TwitchChat extends LitElement {
                 height: 100%;
             }
             .lines {
-                margin-top: 30px;
+                margin-top: 58px;
                 padding-bottom: 10px;
                 box-sizing: border-box;
                 position: absolute;
                 top: 0;
                 left: 0;
                 width: 100%;
-                height: calc(100% - 30px);
+                height: calc(100% - 58px);
                 overflow: auto;
                 overflow-y: scroll;
                 overflow-x: hidden;
@@ -210,6 +220,31 @@ export default class TwitchChat extends LitElement {
 
             .chat-title span {
                 opacity: 0.5;
+            }
+
+            .chat-actions {
+                width: 100%;
+                background: rgb(25 25 28);
+                position: relative;
+                z-index: 1000;
+                display: flex;
+                justify-content: space-between;
+                padding: 4px 8px;
+                box-sizing: border-box;
+            }
+
+            .chat-actions button {
+                border: none;
+                padding: 4px;
+                line-height: 100%;
+                margin: 0;
+                background: rgb(102, 102, 107);
+                min-width: 24px;
+                cursor: pointer;
+            }
+
+            .chat-actions button:hover {
+                background: rgb(110, 110, 114);
             }
 
             :host(:not([locked])) .scroll-to-bottom {
@@ -307,6 +342,20 @@ export default class TwitchChat extends LitElement {
                 Webbrowser.openURL(`https://www.twitch.tv/${this.roomName}`);
             }}">
                 ${this.stream_title == "" ? "Offline" : this.stream_title}
+            </div>
+            <div class="chat-actions">
+                <div>
+                    <button title="Close chat" @click="${(e) => {
+                        Application.closeRoom(this.roomName);
+                    }}">x</button>
+                </div>
+                <div>
+                    <button title="Follower Mode">o</button>
+                    <button title="Sub mode">y</button>
+                    <button title="Open Stream" @click="${() => {
+                        Webbrowser.openURL(`https://www.twitch.tv/${this.roomName}`);
+                    }}">y</button>
+                </div>
             </div>
             <div class="scroll-to-bottom" @click="${() => this.lock()}">
                 <span>Scroll to the bottom</span>

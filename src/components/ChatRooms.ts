@@ -75,9 +75,26 @@ export default class ChatRooms extends LitElement {
 
     constructor() {
         super();
-        
+
         window.addEventListener('selectroom', e => {
             this.update();
+        });
+        window.addEventListener('addedroom', e => {
+            const pfp = new ProfileIndicator(e.room_name);
+            this.icons.push(pfp);
+            this.update();
+        });
+
+        window.addEventListener('closeroom', e => {
+            let i = 0;
+            for(let icon of this.icons) {
+                if(icon.username == e.room_name) {
+                    this.icons.splice(i, 1);
+                    this.update();
+                    return;
+                }
+                i++;
+            }
         });
 
         window.addEventListener('stateloaded', e => {

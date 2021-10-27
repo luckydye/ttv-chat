@@ -47,9 +47,10 @@ const listeners = new Map();
 export default class IRCChatClient {
 
     static user: UserState | null = null;
+    static usermap = {};
 
     static connectoToChat(username: string, token: string) {
-        invoke('connect_to_chat', {
+        return invoke('connect_to_chat', {
             username: username,
             token: token
         })
@@ -58,6 +59,12 @@ export default class IRCChatClient {
 
     static joinChatRoom(channel: string) {
         return invoke('chat_join_room', {
+            channel,
+        }).catch((e) => console.error)
+    }
+
+    static partChatRoom(channel: string) {
+        return invoke('chat_leave_room', {
             channel,
         }).catch((e) => console.error)
     }
@@ -74,16 +81,17 @@ export default class IRCChatClient {
                 
                 // loop message back to display in chat
                 for(let callback of listeners.get("chat.message")) {
-                    if(!this.user) {
+                    if(!this.usermap[channel]) {
                         throw new Error('User not listed');
                     }
+                    const user = this.usermap[channel];
                     const message_data: ChatMessage = {
-                        username: this.user.username || "user not found",
+                        username: user.username || "user not found",
                         channel: channel,
                         is_action: false,
-                        badges: this.user.badges || [],
+                        badges: user.badges || [],
                         message: message,
-                        color: this.user.color,
+                        color: user.color,
                         timestamp: new Date()
                     }
                     callback(message_data);
@@ -128,7 +136,7 @@ export default class IRCChatClient {
                             badges: payload.badges,
                             color: rgbToHex(...payload.name_color),
                         };
-                        this.user = message_data;
+                        this.usermap[payload.channel] = message_data;
                         callback(message_data);
                     }
                     break;

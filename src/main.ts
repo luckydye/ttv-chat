@@ -16,12 +16,25 @@ async function main() {
     const chatElements = {};
 
     // join all channels
-    for(let channel of Application.getRooms()) {
+
+    function createChat(channel) {
         IRCChatClient.joinChatRoom(channel);
         const chatElement = document.createElement("twitch-chat");
         chatElements[channel] = chatElement;
         chatElement.setRoom(channel);
     }
+
+    for(let channel of Application.getRooms()) {
+        createChat(channel);
+    }
+
+    window.addEventListener('addedroom', e => {
+        createChat(e.room_name);
+    });
+    window.addEventListener('closeroom', e => {
+        IRCChatClient.partChatRoom(e.room_name);
+        delete chatElements[e.room_name];
+    });
 
     window.addEventListener('selectroom', e => {
         renderSelecetdChat();
@@ -59,4 +72,6 @@ async function main() {
     renderSelecetdChat();
 }
 
-main(); 
+window.addEventListener('loggedin', e => {
+    main();
+})
