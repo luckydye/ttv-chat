@@ -2,6 +2,26 @@
 
 A new Desktop Twitch Client with all the jingles and bells.
 
+#### Todo:
+Auth flow
+Bugfixes
+[x] chat not loading
+[x] added rooms not appearing
+[x] colse chats
+[x] per chat user appearence
+
+Title button bar:
+[x] close chat
+[ ] open user list
+[ ] follower mode + mode dropdown
+[ ] sub mode toggle
+[x] open in browser
+
+[ ] User panel
+[ ] Zoom chat
+
+
+
 ### To be included features:
 - UI for
     - Pols

@@ -346,14 +346,15 @@ export default class TwitchChat extends LitElement {
                     <button title="Close chat" @click="${(e) => {
                         Application.closeRoom(this.roomName);
                     }}">x</button>
+                    <button title="Auto hide input">t</button>
+                    <button title="Open Stream" @click="${() => {
+                        Webbrowser.openURL(`https://www.twitch.tv/${this.roomName}`);
+                    }}">-</button>
                 </div>
                 <div>
                     <button title="Follower Mode">o</button>
                     <button title="Sub mode">y</button>
                     <button title="User list">u</button>
-                    <button title="Open Stream" @click="${() => {
-                        Webbrowser.openURL(`https://www.twitch.tv/${this.roomName}`);
-                    }}">-</button>
                 </div>
             </div>
             <div class="chat-title" @click="${() => {
