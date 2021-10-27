@@ -286,6 +286,9 @@ export default class TwitchChat extends LitElement {
                 height: 112px;
                 border: 3px solid rgb(148, 74, 255);
             }
+            .profile-image img {
+                width: 100%;
+            }
             .pin {
                 margin-left: 30px;
             }
@@ -338,11 +341,6 @@ export default class TwitchChat extends LitElement {
 
     render() {
         return html`
-            <div class="chat-title" @click="${() => {
-                Webbrowser.openURL(`https://www.twitch.tv/${this.roomName}`);
-            }}">
-                ${this.stream_title == "" ? "Offline" : this.stream_title}
-            </div>
             <div class="chat-actions">
                 <div>
                     <button title="Close chat" @click="${(e) => {
@@ -357,6 +355,11 @@ export default class TwitchChat extends LitElement {
                         Webbrowser.openURL(`https://www.twitch.tv/${this.roomName}`);
                     }}">-</button>
                 </div>
+            </div>
+            <div class="chat-title" @click="${() => {
+                Webbrowser.openURL(`https://www.twitch.tv/${this.roomName}`);
+            }}">
+                ${this.stream_title == "" ? "Offline" : this.stream_title}
             </div>
             <div class="scroll-to-bottom" @click="${() => this.lock()}">
                 <span>Scroll to the bottom</span>

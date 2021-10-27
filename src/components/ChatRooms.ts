@@ -16,7 +16,7 @@ export default class ChatRooms extends LitElement {
             }
             .icon-list {
                 display: grid;
-                grid-gap: 10px;
+                grid-gap: 15px;
             }
             .room-icon {
                 width: 24px;

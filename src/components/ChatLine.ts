@@ -47,12 +47,15 @@ export class ChatLine extends LitElement {
                 display: inline-block;
                 margin-bottom: -0.8em;
                 margin-right: 3px;
+                max-width: 120px;
+                object-fit: contain;
             }
             .mention {
                 font-weight: bold;
             }
             .inline-link {
                 color: #2c7fcc;
+                word-break: break-all;
             }
             .line[action] .message {
                 color: var(--color);
@@ -77,18 +80,27 @@ export class ChatLine extends LitElement {
                     const wordToReplace = msg.slice(start, end);
                     const emoteURL = TwitchEmotes.parseEmoteUrl(emote);
     
-                    wordEmoteMap[wordToReplace] = emoteURL;
+                    wordEmoteMap[wordToReplace] = {
+                        name: wordToReplace,
+                        url: emoteURL,
+                    };
                 }
             }
 
             msg.split(" ").forEach(str => {
                 // channel emote repalcement
                 if (str in this.chat.channel_emotes) {
-                    wordEmoteMap[str] = this.chat.channel_emotes[str];
+                    wordEmoteMap[str] = {
+                        name: str,
+                        url: this.chat.channel_emotes[str],
+                    };
                 }
                 // global emotes repalcement
                 if (str in Emotes.global_emotes) {
-                    wordEmoteMap[str] = Emotes.global_emotes[str];
+                    wordEmoteMap[str] = {
+                        name: str,
+                        url: Emotes.global_emotes[str],
+                    };
                 }
                 // url repalcement
                 const urlMatch = Webbrowser.matchURL(str);
@@ -111,7 +123,7 @@ export class ChatLine extends LitElement {
             let parsed_msg = msg_split.map(word => {
                 // replace emotes
                 if(wordEmoteMap[word]) {
-                    return html`<img class="emote" alt="${word}" src="${wordEmoteMap[word]}" height="32"> `;
+                    return html`<img class="emote" name="${wordEmoteMap[word].name}" alt="${word}" src="${wordEmoteMap[word].url}" height="32"> `;
                 }
                 // replace links
                 if(wordLinkMap[word]) {
