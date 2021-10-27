@@ -127,7 +127,9 @@ export default class TwitchChat extends LitElement {
     }
 
     getSubBadge(version: number) {
-        return this.channel_badges["subscriber"].versions[version].image_url_2x;
+        if(this.channel_badges["subscriber"]) {
+            return this.channel_badges["subscriber"].versions[version].image_url_2x;
+        }
     }
 
     connectedCallback() {

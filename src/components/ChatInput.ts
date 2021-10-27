@@ -1,5 +1,6 @@
 import { css, html, LitElement } from 'lit-element';
 import IRCChatClient from '../services/IRCChatClient';
+import { Application } from '../App';
 
 export default class ChatInput extends LitElement {
 
@@ -62,13 +63,20 @@ export default class ChatInput extends LitElement {
         super();
 
         window.addEventListener('paste', e => {
-            const ele = this.shadowRoot?.querySelector('textarea');
             if(document.activeElement == document.body) {
+                const ele = this.shadowRoot?.querySelector('textarea');
                 const data = e.clipboardData.items[0];
                 data.getAsString(str => {
                     ele?.value += str;
                     ele?.focus();
                 });
+            }
+        })
+
+        window.addEventListener('keydown', e => {
+            if(document.activeElement == document.body) {
+                const ele = this.shadowRoot?.querySelector('textarea');
+                ele?.focus();
             }
         })
     }
@@ -77,7 +85,7 @@ export default class ChatInput extends LitElement {
         const ele = e.target;
         const value = ele.value;
         ele.value = "";
-        IRCChatClient.sendMessage('luckydye', value);
+        IRCChatClient.sendMessage(Application.getSelectedRoom(), value);
     }
 
     handleKeyDown(e: KeyboardEvent) {

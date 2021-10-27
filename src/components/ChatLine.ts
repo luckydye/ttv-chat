@@ -33,6 +33,7 @@ export class ChatLine extends LitElement {
             .username {
                 color: var(--color);
                 display: inline;
+                font-weight: 500;
             }
             .message {
                 display: inline;
@@ -132,7 +133,7 @@ export class ChatLine extends LitElement {
                             let badge_url = "";
 
                             if (badge.name == "subscriber") {
-                                badge_url = this.chat.getSubBadge(badge.version);
+                                badge_url = this.chat.getSubBadge(badge.version) || Badges.getBadgeByName(badge.name, badge.version);
                             } else {
                                 badge_url = Badges.getBadgeByName(badge.name, badge.version);
                             }
