@@ -5,7 +5,7 @@ import { getUserInfo } from '../services/Twitch';
 import Emotes from '../services/Emotes';
 import TwitchAPI from '../services/Twitch';
 import Webbrowser from '../services/Webbrowser';
-import TwitchEmotes from '../services/emotes/TwitchEmotes';
+import { ChatLine, ChatInfo } from './ChatLine';
 
 const NumberFormat = new Intl.NumberFormat('en-IN');
 const langFormat = new Intl.DisplayNames(['en'], { type: 'language' });
@@ -243,8 +243,8 @@ export default class TwitchChat extends LitElement {
             .profile-image {
                 border-radius: 50%;
                 overflow: hidden;
-                width: 125px;
-                height: 125px;
+                width: 112px;
+                height: 112px;
                 border: 3px solid rgb(148, 74, 255);
             }
 
@@ -252,7 +252,7 @@ export default class TwitchChat extends LitElement {
                 margin-left: 20px;
             }
             .profile-name {
-                font-size: 32px;
+                font-size: 28px;
                 margin-bottom: 5px;
             }
             .profile-desc {
@@ -342,144 +342,3 @@ export default class TwitchChat extends LitElement {
 }
 
 customElements.define('twitch-chat', TwitchChat);
-
-class ChatLine extends LitElement {
-
-    message: ChatMessage | null = null;
-    chat: TwitchChat | null = null;
-
-    constructor(chat: TwitchChat, msg: ChatMessage) {
-        super();
-
-        this.chat = chat;
-        this.message = msg;
-    }
-
-    static get styles() {
-        return css`
-            :host {
-                display: block;
-                padding: 5px 15px;
-            }
-            .username {
-                color: var(--color);
-                display: inline;
-            }
-            .message {
-                display: inline;
-            }
-            .badge {
-                display: inline-block;
-                margin-bottom: -0.3em;
-                margin-right: 3px;
-            }
-            .emote {
-                display: inline-block;
-                margin-bottom: -0.8em;
-                margin-right: 3px;
-            }
-            .line[action] .message {
-                color: var(--color);
-            }
-        `;
-    }
-
-    render() {
-        if (this.message) {
-            const msg = this.message.message;
-
-            const wordEmoteMap = {};
-            
-            const emotes = this.message.emotes;
-            if(emotes) {
-                for(let emote of emotes) {
-                    const start = emote.char_range.start;
-                    const end = emote.char_range.end;
-    
-                    const wordToReplace = msg.slice(start, end);
-                    const emoteURL = TwitchEmotes.parseEmoteUrl(emote);
-    
-                    wordEmoteMap[wordToReplace] = emoteURL;
-                }
-            }
-
-            msg.split(" ").forEach(str => {
-                if (str in this.chat.channel_emotes) {
-                    wordEmoteMap[str] = this.chat.channel_emotes[str];
-                }
-                if (str in Emotes.global_emotes) {
-                    wordEmoteMap[str] = Emotes.global_emotes[str];
-                }
-            });
-
-            const msg_split = msg.split(" ");
-            let parsed_msg = msg_split.map(word => {
-                if(wordEmoteMap[word]) {
-                    return html`<img class="emote" src="${wordEmoteMap[word]}" height="32">`;
-                }
-                return word + " ";
-            });
-
-            return html`
-                <div class="line" style="--color: ${this.message.color}" ?action="${this.message.is_action}">
-                    <span class="bages">
-                        ${this.message.badges.map(badge => {
-                            let badge_url = "";
-
-                            if (badge.name == "subscriber") {
-                                badge_url = this.chat.getSubBadge(badge.version);
-                            } else {
-                                badge_url = Badges.getBadgeByName(badge.name, badge.version);
-                            }
-
-                            return html`<img class="badge" src="${badge_url}" width="18" height="18">`;
-                        })}
-                    </span>
-                    <span class="username">${this.message.username}:</span>
-                    <span class="message">${parsed_msg}</span>
-                </div>
-            `;
-        }
-    }
-
-}
-
-customElements.define('chat-line', ChatLine);
-
-class ChatInfo extends LitElement {
-
-    message: string = "";
-
-    constructor(msg: string) {
-        super();
-
-        this.message = msg;
-    }
-
-    static get styles() {
-        return css`
-            :host {
-                display: block;
-                background: #211b25;
-                padding: 6px 15px;
-                margin: 2px 0;
-            }
-            .message {
-                display: inline;
-            }
-        `;
-    }
-
-    render() {
-        if (this.message) {
-            return html`
-                <div class="line">
-                    <div class="message">${this.message}</div>
-                </div>
-            `;
-        }
-    }
-
-}
-
-customElements.define('chat-info', ChatInfo);

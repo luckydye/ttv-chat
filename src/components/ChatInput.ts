@@ -22,6 +22,7 @@ export default class ChatInput extends LitElement {
 
             }
             .text-input textarea {
+                resize: none;
                 border-radius: 4px;
                 background: hsl(240deg 4% 19%);
                 width: 100%;
@@ -60,6 +61,16 @@ export default class ChatInput extends LitElement {
     constructor() {
         super();
 
+        window.addEventListener('paste', e => {
+            const ele = this.shadowRoot?.querySelector('textarea');
+            if(!(document.activeElement == ele)) {
+                const data = e.clipboardData.items[0];
+                data.getAsString(str => {
+                    ele?.value += str;
+                    ele?.focus();
+                });
+            }
+        })
     }
 
     submit(e: KeyboardEvent) {

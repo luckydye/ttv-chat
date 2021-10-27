@@ -5,6 +5,8 @@ import IRCChatClient from './IRCChatClient';
 const CLIENT_ID = "8gwe8mu523g9cstukr8rnnwspqjykf";
 const REDIRECT_URI = "https://luckydye.de/auth";
 
+let logged_in_username = "";
+
 window.addEventListener('load', e => {
     checLogin();
 })
@@ -41,7 +43,12 @@ export async function handleAuthenticatedUser(token: string) {
 export async function getLoggedInUser() {
     const token = localStorage.getItem('user-token');
     const userinfo = await fetchTwitchAuthApi("/oauth2/userinfo", token);
+    logged_in_username = userinfo.preferred_username;
     return userinfo;
+}
+
+export function getLoggedInUsername() {
+    return logged_in_username;
 }
 
 export async function getUserInfo(user_login: string) {

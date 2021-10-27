@@ -1,5 +1,4 @@
 //
-import './components/Titlebar';
 import './components/Authenticator';
 import './components/ChatInput';
 import './components/ChatRooms';
