@@ -1,5 +1,7 @@
 import { css, html, LitElement } from 'lit-element';
 import { getUserInfo } from '../services/Twitch';
+import IRCChatClient from '../services/IRCChatClient';
+import { Application } from '../App';
 
 export default class ProfileIndicator extends LitElement {
 
@@ -14,13 +16,36 @@ export default class ProfileIndicator extends LitElement {
             .profile-icon[live]::after {
                 content: "";
                 position: absolute;
-                bottom: -2px;
-                right: -2px;
+                bottom: -3px;
+                right: -3px;
                 width: 8px;
                 height: 8px;
                 border-radius: 50%;
                 overflow: hidden;
-                background: #d40b0b;
+                background: rgb(225 43 43);
+                border: 2px solid rgb(31, 31, 35);
+            }
+            .profile-icon[newmessage] {
+                transition: all .2s ease;
+            }
+            @keyframes appear {
+                0% { transform: scale(0.75) }
+                75% { transform: scale(1.02) }
+                100% { transform: scale(1.0) }
+            }
+            .profile-icon[newmessage]::before {
+                animation: appear .2s ease;
+                content: "";
+                position: absolute; 
+                top: -3px;
+                right: -3px;
+                width: calc(100% + 4px);
+                height: calc(100% + 4px);
+                border-radius: 50%;
+                background: #1f1f23;
+                z-index: -1;
+                border: 1px solid white;
+                opacity: 0.5;
             }
             .profile-icon .image {
                 overflow: hidden;
@@ -40,6 +65,7 @@ export default class ProfileIndicator extends LitElement {
     }
 
     live = false;
+    new_message = false;
     username = "";
 
     constructor(user_login: string) {
@@ -65,11 +91,25 @@ export default class ProfileIndicator extends LitElement {
             setTimeout(() => update_info(), 1000 * 30);
         });
         update_info();
+
+        // check if there are new unread messages
+        IRCChatClient.listen('chat.message', (msg: ChatMessage) => {
+            if(msg.channel === this.username && Application.getSelectedRoom() !== this.username) {
+                this.new_message = true;
+                this.update();
+            }
+        });
+        window.addEventListener('selectroom', e => {
+            if(Application.getSelectedRoom() === this.username) {
+                this.new_message = false;
+                this.update();
+            }
+        });
     }
 
     render() {
         return html`
-            <div class="profile-icon" ?live="${this.live}">
+            <div class="profile-icon" ?live="${this.live}" ?newmessage="${this.new_message}">
                 <div class="image">
                     ${this.profileImage}
                 </div>

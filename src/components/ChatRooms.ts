@@ -27,8 +27,9 @@ export default class ChatRooms extends LitElement {
             .room-icon:active {
                 transform: scale(0.98);
             }
-            .room-icon[selected]::before {
+            .room-icon::before {
                 content: "";
+                transition: transform .2s ease;
                 width: 4px;
                 height: 8px;
                 position: absolute;
@@ -38,6 +39,10 @@ export default class ChatRooms extends LitElement {
                 border-radius: 3px;
                 z-index: 10000;
                 background: #eee;
+                transform: translate(-8px, -50%);
+            }
+            .room-icon[selected]::before {
+                transform: translate(0, -50%);
             }
             .room-icon[hint]:hover::after {
                 content: attr(hint);
