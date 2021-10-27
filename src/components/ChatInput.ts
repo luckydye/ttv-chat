@@ -27,7 +27,7 @@ export default class ChatInput extends LitElement {
                 width: 100%;
                 border: none;
                 outline: none;
-                padding: 5px;
+                padding: 13px 12px 15px 12px;
                 color: #eee;
                 font-family: 'Open Sans', sans-serif;
                 box-sizing: border-box;
@@ -35,11 +35,24 @@ export default class ChatInput extends LitElement {
             .util {
                 position: absolute;
                 right: 0;
-                top: 12px;
+                top: 10px;
                 padding: 0 10px;
             }
             button {
-
+                border-radius: 4px;
+                border: none;
+                padding: 4px;
+                min-width: 25px;
+                min-height: 25px;
+                background: hsl(240deg, 2%, 41%);
+                margin: 0;
+                cursor: pointer;
+            }
+            button:hover {
+                background: hsl(240deg, 2%, 44%);
+            }
+            button:active {
+                background: hsl(240deg, 2%, 30%);
             }
         `;
     }
@@ -68,7 +81,7 @@ export default class ChatInput extends LitElement {
             <div class="wrapper">
                 <div class="input-field">
                     <div class="text-input">
-                        <textarea @keydown="${this.handleKeyDown}" placeholder="Message"></textarea>
+                        <textarea @keydown="${this.handleKeyDown}" placeholder="Send a message" rows="1"></textarea>
                     </div>
                     <div class="util">
                         <button name="create poll">Y</button>
