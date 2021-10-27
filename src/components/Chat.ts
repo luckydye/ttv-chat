@@ -69,7 +69,7 @@ export default class TwitchChat extends LitElement {
 
         const latest = (scrollEle.scrollHeight - scrollEle.clientHeight);
 
-        if(scrollEle.scrollTop >= latest - 100) {
+        if(scrollEle.scrollTop >= latest - 10) {
             this.lock();
         } 
         if(scrollEle.scrollTop < latest - 1000) {
@@ -249,13 +249,13 @@ export default class TwitchChat extends LitElement {
                 height: 112px;
                 border: 3px solid rgb(148, 74, 255);
             }
-
             .pin {
-                margin-left: 20px;
+                margin-left: 30px;
             }
             .profile-name {
                 font-size: 28px;
                 margin-bottom: 5px;
+                white-space: nowrap;
             }
             .profile-desc {
                 margin-top: 20px;
@@ -307,7 +307,7 @@ export default class TwitchChat extends LitElement {
                 ${this.stream_title == "" ? "Offline" : this.stream_title}
             </div>
             <div class="scroll-to-bottom" @click="${() => this.lock()}">
-                <span>Scroll to bottom</span>
+                <span>Scroll to the bottom</span>
             </div>
             <div class="lines">
                 ${this.roomName ? html`
@@ -319,6 +319,9 @@ export default class TwitchChat extends LitElement {
                             <div class="pin">
                                 <div class="profile-name">
                                     ${this.info.display_name}
+                                    ${this.info.broadcaster_type == "partner" ? html`
+                                        <img src="./verified.svg" alt="verified"/>
+                                    ` : ""}
                                 </div>
                                 <div class="game">
                                     ${this.info.channel_info.game_name}
