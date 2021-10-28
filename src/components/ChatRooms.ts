@@ -5,72 +5,6 @@ import AddChannelDialog from './AddChannelDialog';
 
 export default class ChatRooms extends LitElement {
 
-    static get styles() {
-        return css`
-            :host {
-                width: 100%;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                padding: 10px 0px;
-            }
-            .icon-list {
-                display: grid;
-                grid-gap: 15px;
-            }
-            .room-icon {
-                width: 24px;
-                height: 24px;
-                position: relative;
-                cursor: pointer;
-            }
-            .room-icon:active {
-                transform: scale(0.98);
-            }
-            .room-icon::before {
-                content: "";
-                transition: transform .2s ease;
-                width: 4px;
-                height: 8px;
-                position: absolute;
-                left: -10px;
-                top: 50%;
-                transform: translate(0, -50%);
-                border-radius: 3px;
-                z-index: 10000;
-                background: #eee;
-                transform: translate(-8px, -50%);
-            }
-            .room-icon[selected]::before {
-                transform: translate(0, -50%);
-            }
-            .room-icon[hint]:hover::after {
-                content: attr(hint);
-                position: absolute;
-                left: calc(100% + 5px);
-                top: 50%;
-                transform: translate(0, -50%);
-                padding: 4px 8px;
-                border-radius: 3px;
-                z-index: 10000;
-                background: rgb(0 0 0 / 50%);
-                backdrop-filter: blur(4px);
-                width: max-content;
-            }
-            .new-room {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                background: #333333;
-                border-radius: 50px;
-                width: 25px;
-                height: 25px;
-                line-height: 100%;
-                margin-top: 5px;
-            }
-        `;
-    }
-
     icons = [];
 
     constructor() {
@@ -86,15 +20,7 @@ export default class ChatRooms extends LitElement {
         });
 
         window.addEventListener('closeroom', e => {
-            let i = 0;
-            for(let icon of this.icons) {
-                if(icon.username == e.room_name) {
-                    this.icons.splice(i, 1);
-                    this.update();
-                    return;
-                }
-                i++;
-            }
+            this.update();
         });
 
         window.addEventListener('stateloaded', e => {
@@ -107,18 +33,83 @@ export default class ChatRooms extends LitElement {
         });
     }
 
+    createRenderRoot() {
+        return this;
+    }
+
+    target: HTMLElement | null = null;
+
     render() {
+        const rooms = Application.getRooms();
+
+        let dragging = false;
+        let startY = 0;
+
+        const cancelDrag = (e) => {
+            if(dragging) {
+                dragging = false;
+                if(this.target) {
+                    this.target.removeAttribute("dragging");
+                    console.log('cancel');
+                    this.target = null;
+                }
+            }
+        }
+        const commitDrag = (e) => {
+            dragging = false;
+            if(this.target) {
+                this.target.removeAttribute("dragging");
+                console.log('commit');
+                this.target = null;
+            }
+        }
+        const move = (e) => {
+            if(this.target) {
+                const deltaY = e.y - startY;
+
+                if(!dragging && Math.abs(deltaY) > 10) {
+                    dragging = true;
+                    this.target.setAttribute("dragging", "");
+                    console.log(Math.sign(deltaY));
+                    moveIcon(this.target, Math.sign(deltaY));
+                }
+
+                if(dragging) {
+                    console.log('darg', deltaY);
+                }
+            }
+        }
+        const startDrag = (e) => {
+            this.target = e.target;
+            startY = e.clientY;
+            console.log('start', this.target);
+        }
+
+        // move node into direction -1/+1
+        const moveIcon = (target: ProfileIndicator, dir: number) => {
+            const parent = target.parentNode as HTMLElement;
+            const iconIndex = [...parent.children].indexOf(target);
+            const d = Math.sign(dir) * (Math.abs(dir) + 1);
+            const newNextNode = parent.children[iconIndex + d];
+            if(newNextNode) {
+                parent.removeChild(target);
+                parent.insertBefore(target, newNextNode);
+
+                Application.moveRoom(target.channel, iconIndex + dir);
+            }
+        }
+
         return html`
-            <div class="icon-list">
-                ${this.icons.map(icon => {
+            <div class="icon-list" @pointermove="${move}" @pointerup="${commitDrag}" @pointercancel="${commitDrag}">
+                ${rooms.map(room => {
                     return html`
-                        <div ?selected="${Application.getSelectedRoom() == icon.username}" 
-                            class="room-icon" hint="${icon.username}" 
-                            @click="${() => {
-                                Application.selectRoom(icon.username);
-                            }}">
-                            ${icon}
-                        </div>
+                        <profile-indicator channel="${room}" ?selected="${Application.getSelectedRoom() == room}" 
+                            class="room-icon chat-room-icon" hint="${room}" 
+                            @mousedown="${() => {
+                                Application.selectRoom(room);
+                            }}"
+                            @pointerdown="${startDrag}">
+                        </profile-indicator>
                     `;
                 })}
 

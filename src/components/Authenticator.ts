@@ -66,8 +66,8 @@ export default class TwitchAuthComp extends LitElement {
         if(!this.user) {
             return html`
                 <div class="auth">
-                    <button @click="${e => authClientUser()}">Login</button>
-                    <button @click="${e => this.pasteToken(e)}">Paste Token</button>
+                    <button @click="${e => authClientUser()}">L</button>
+                    <button @click="${e => this.pasteToken(e)}">P</button>
                 </div>
             `;
         } else {

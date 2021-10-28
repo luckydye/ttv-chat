@@ -75,9 +75,11 @@ export default class TwitchChat extends LitElement {
         const scrollEle = this.shadowRoot?.querySelector('.lines');
         if(!scrollEle) return;
 
-        const latest = (scrollEle.scrollHeight - scrollEle.clientHeight);
-        if (this.scrollLock) {
-            scrollEle.scrollTo(0, latest + 100);
+        if(scrollEle.scrollHeight > 0) {
+            const latest = (scrollEle.scrollHeight - scrollEle.clientHeight);
+            if (this.scrollLock) {
+                scrollEle.scrollTo(0, latest + 100);
+            }
         }
     }
 
@@ -121,7 +123,9 @@ export default class TwitchChat extends LitElement {
                 } = stream[0];
 
                 this.stream_title = html`
-                    ${formatNumber(viewer_count)} - <stream-timer starttime="${started_at}"></stream-timer> - ${game_name} - ${title}
+                    <div title="${title}">
+                        ${formatNumber(viewer_count)} - <stream-timer starttime="${started_at}"></stream-timer> - ${game_name} - ${title}
+                    </div>
                 `;
 
                 this.update();
@@ -480,9 +484,11 @@ export default class TwitchChat extends LitElement {
                                     ${formatNumber(this.info.view_count)} views
                                 </div>
                             </div>
-                            <div class="profile-desc">
-                                ${this.info.description}
-                            </div>
+                            ${this.info.description == "" ? "" : html`
+                                <div class="profile-desc">
+                                    ${this.info.description}
+                                </div>
+                            `}
                         </div>
                     ` : ""}
                     <div class="info">Connected to ${this.roomName}</div>

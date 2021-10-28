@@ -1,0 +1,98 @@
+chat-rooms {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 0px;
+    user-select: none;
+}
+chat-rooms .icon-list {
+    display: grid;
+    grid-gap: 15px;
+}
+chat-rooms .room-icon {
+    width: 24px;
+    height: 24px;
+    position: relative;
+    cursor: pointer;
+}
+chat-rooms .room-icon:active {
+    transform: scale(0.98);
+}
+chat-rooms .room-icon::before {
+    content: "";
+    transition: transform .2s ease;
+    width: 4px;
+    height: 8px;
+    position: absolute;
+    left: -10px;
+    top: 50%;
+    transform: translate(0, -50%);
+    border-radius: 3px;
+    z-index: 10000;
+    background: #eee;
+    transform: translate(-8px, -50%);
+}
+chat-rooms .room-icon[selected]::before {
+    transform: translate(0, -50%);
+}
+chat-rooms .room-icon[hint]:hover::after {
+    content: attr(hint);
+    position: absolute;
+    left: calc(100% + 5px);
+    top: 50%;
+    transform: translate(0, -50%);
+    padding: 4px 8px;
+    border-radius: 3px;
+    z-index: 10000;
+    background: rgb(0 0 0 / 50%);
+    backdrop-filter: blur(4px);
+    width: max-content;
+}
+chat-rooms .room-icon[dragging] {
+    transform: scale(1.02);
+}
+@keyframes room-icon-appear {
+    0% { transform: translate(-5px, 0); opacity: 0; }
+    100% { transform: scale(1.0); transform: translate(0, 0); opacity: 1; }
+}
+chat-rooms .chat-room-icon {
+    -webkit-user-drag: element;
+    animation: room-icon-appear .2s ease backwards;
+}
+chat-rooms .new-room {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #333333;
+    border-radius: 50px;
+    width: 25px;
+    height: 25px;
+    line-height: 100%;
+}
+
+chat-rooms .chat-room-icon:nth-child(1) { animation-delay: 0.02s; }
+chat-rooms .chat-room-icon:nth-child(2) { animation-delay: 0.04s; }
+chat-rooms .chat-room-icon:nth-child(3) { animation-delay: 0.06s; }
+chat-rooms .chat-room-icon:nth-child(4) { animation-delay: 0.08s; }
+chat-rooms .chat-room-icon:nth-child(5) { animation-delay: 0.10s; }
+chat-rooms .chat-room-icon:nth-child(6) { animation-delay: 0.12s; }
+chat-rooms .chat-room-icon:nth-child(7) { animation-delay: 0.14s; }
+chat-rooms .chat-room-icon:nth-child(8) { animation-delay: 0.16s; }
+chat-rooms .chat-room-icon:nth-child(9) { animation-delay: 0.18s; }
+chat-rooms .chat-room-icon:nth-child(10) { animation-delay: 0.20s; }
+chat-rooms .chat-room-icon:nth-child(11) { animation-delay: 0.22s; }
+chat-rooms .chat-room-icon:nth-child(12) { animation-delay: 0.24s; }
+chat-rooms .chat-room-icon:nth-child(13) { animation-delay: 0.26s; }
+chat-rooms .chat-room-icon:nth-child(14) { animation-delay: 0.28s; }
+chat-rooms .chat-room-icon:nth-child(15) { animation-delay: 0.30s; }
+chat-rooms .chat-room-icon:nth-child(16) { animation-delay: 0.32s; }
+chat-rooms .chat-room-icon:nth-child(17) { animation-delay: 0.34s; }
+chat-rooms .chat-room-icon:nth-child(18) { animation-delay: 0.36s; }
+chat-rooms .chat-room-icon:nth-child(19) { animation-delay: 0.38s; }
+chat-rooms .chat-room-icon:nth-child(20) { animation-delay: 0.40s; }
+chat-rooms .chat-room-icon:nth-child(21) { animation-delay: 0.42s; }
+chat-rooms .chat-room-icon:nth-child(22) { animation-delay: 0.44s; }
+chat-rooms .chat-room-icon:nth-child(23) { animation-delay: 0.46s; }
+chat-rooms .chat-room-icon:nth-child(24) { animation-delay: 0.48s; }
+chat-rooms .chat-room-icon:nth-child(25) { animation-delay: 0.50s; }

@@ -2,18 +2,7 @@
 let applicationState = {
     selectedRoom: localStorage.getItem('selected') || "luckydye",
     chatRooms: [
-        "luckydye",
-        "richwcampbell",
-        "nmplol",
-        "mizkif",
-        "nidalida",
-        "cyr",
-        "maya",
-        "cihanonstage",
-        "nymn",
-        "emiru",
-        "ludwig",
-        "esfandtv",
+        "twitch",
     ],
 }
 
@@ -63,6 +52,18 @@ export class Application {
         applicationState.selectedRoom = room_name;
         window.dispatchEvent(new Event('selectroom'));
         localStorage.setItem('selected', room_name);
+        this.saveState();
+    }
+
+    static moveRoom(room: string, newIndex: number) {
+        const rooms = applicationState.chatRooms;
+
+        const currIndex = rooms.indexOf(room);
+        rooms.splice(currIndex, 1);
+        const part1 = rooms.slice(0, newIndex);
+        const part2 = rooms.slice(newIndex);
+
+        applicationState.chatRooms = [...part1, room,...part2];
         this.saveState();
     }
 

@@ -19,6 +19,7 @@ Bugfixes
 [ ] emote and badge tool tips
 [ ] User panel
 [ ] Zoom chat
+[ ] Fix dragging rooms
 
 
 

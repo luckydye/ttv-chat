@@ -5,6 +5,55 @@ import { Application } from '../App';
 
 export default class ProfileIndicator extends LitElement {
 
+    live = false;
+    new_message = false;
+    channel: string;
+
+    static get properties() {
+        return {
+            channel: String,
+        };
+    }
+
+    attributeChangedCallback(name, oldVal, newVal) {
+        super.attributeChangedCallback(name, oldVal, newVal);
+        
+        if(name === "channel") {
+            const img = new Image();
+            img.width = 24;
+            img.alt = this.channel;
+            img.setAttribute('loading', '');
+    
+            this.profileImage = img;
+    
+            const update_info = () => getUserInfo(this.channel).then(info => {
+                setTimeout(() => update_info(), 1000 * 30);
+    
+                this.live = info.stream?.type == "live" ? true : false;
+    
+                img.src = info.profile_image_url;
+                img.removeAttribute('loading');
+    
+                this.update();
+            });
+            update_info();
+    
+            // check if there are new unread messages
+            IRCChatClient.listen('chat.message', (msg: ChatMessage) => {
+                if(msg.channel === this.channel && Application.getSelectedRoom() !== this.channel) {
+                    this.new_message = true;
+                    this.update();
+                }
+            });
+            window.addEventListener('selectroom', e => {
+                if(Application.getSelectedRoom() === this.channel) {
+                    this.new_message = false;
+                    this.update();
+                }
+            });
+        }
+    }
+
     static get styles() {
         return css`
             :host {
@@ -57,54 +106,12 @@ export default class ProfileIndicator extends LitElement {
                 width: 25px;
                 height: 25px;
                 display: block;
+                pointer-events: none;
             }
             .profile-icon img[loading] {
                 opacity: 0;
             }
         `;
-    }
-
-    live = false;
-    new_message = false;
-    username = "";
-
-    constructor(user_login: string) {
-        super();
-
-        this.username = user_login;
-
-        const img = new Image();
-        img.width = 24;
-        img.alt = user_login;
-        img.setAttribute('loading', '');
-
-        this.profileImage = img;
-
-        const update_info = () => getUserInfo(user_login).then(info => {
-            setTimeout(() => update_info(), 1000 * 30);
-
-            this.live = info.stream?.type == "live" ? true : false;
-
-            img.src = info.profile_image_url;
-            img.removeAttribute('loading');
-
-            this.update();
-        });
-        update_info();
-
-        // check if there are new unread messages
-        IRCChatClient.listen('chat.message', (msg: ChatMessage) => {
-            if(msg.channel === this.username && Application.getSelectedRoom() !== this.username) {
-                this.new_message = true;
-                this.update();
-            }
-        });
-        window.addEventListener('selectroom', e => {
-            if(Application.getSelectedRoom() === this.username) {
-                this.new_message = false;
-                this.update();
-            }
-        });
     }
 
     render() {
