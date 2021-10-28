@@ -81,14 +81,14 @@ export default class ProfileIndicator extends LitElement {
         this.profileImage = img;
 
         const update_info = () => getUserInfo(user_login).then(info => {
+            setTimeout(() => update_info(), 1000 * 30);
+
             this.live = info.stream?.type == "live" ? true : false;
 
             img.src = info.profile_image_url;
             img.removeAttribute('loading');
 
             this.update();
-
-            setTimeout(() => update_info(), 1000 * 30);
         });
         update_info();
 

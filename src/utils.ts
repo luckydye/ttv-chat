@@ -17,3 +17,9 @@ function componentToHex(c) {
 export function rgbToHex(...rgb: number[]) {
     return "#" + componentToHex(rgb[0]) + componentToHex(rgb[1]) + componentToHex(rgb[2]);
 }
+
+const NumberFormat = new Intl.NumberFormat('en-IN');
+const langFormat = new Intl.DisplayNames(['en'], { type: 'language' });
+
+export const formatLang = (langshort: string) => langFormat.of(langshort);
+export const formatNumber = (n: number) => NumberFormat.format(n);

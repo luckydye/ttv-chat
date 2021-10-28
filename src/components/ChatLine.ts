@@ -25,52 +25,24 @@ export class ChatLine extends LitElement {
         this.setAttribute('userid', this.message.sender_id);
     }
 
-    static get styles() {
-        return css`
-            :host {
-                display: block;
-                padding: 5px 15px;
-            }
-            :host([deleted]) {
-                opacity: 0.33;
-            }
-            /* :host(:nth-child(even)) {
-                background: hsl(240deg 4% 10%);
-            } */
-            :host([highlighted]) {
-                background: rgb(255 0 0 / 22%);
-            }
-            .username {
-                color: var(--color);
-                display: inline;
-                font-weight: 500;
-            }
-            .message {
-                display: inline;
-            }
-            .badge {
-                display: inline-block;
-                margin-bottom: -0.3em;
-                margin-right: 3px;
-            }
-            .emote {
-                display: inline-block;
-                margin-bottom: -0.8em;
-                margin-right: 3px;
-                max-width: 120px;
-                object-fit: contain;
-            }
-            .mention {
-                font-weight: bold;
-            }
-            .inline-link {
-                color: #2c7fcc;
-                word-break: break-all;
-            }
-            .line[action] .message {
-                color: var(--color);
-            }
-        `;
+    // static get styles() {
+    //     return css`
+    //         :host {
+    //             display: block;
+    //             padding: 5px 15px;
+    //             line-height: 1.33em;
+    //         }
+    //         :host([deleted]) {
+    //             opacity: 0.33;
+    //         }
+    //         :host([highlighted]) {
+    //             background: rgb(255 0 0 / 22%);
+    //         }
+    //     `;
+    // }
+
+    createRenderRoot() {
+        return this;
     }
 
     render() {
@@ -80,16 +52,15 @@ export class ChatLine extends LitElement {
             const wordEmoteMap = {};
             const wordLinkMap = {};
             const wordMentionMap = {};
-            
-            const emotes = this.message.emotes;
-            if(emotes) {
-                for(let emote of emotes) {
+
+            if (this.message.emotes) {
+                for (let emote of this.message.emotes) {
                     const start = emote.char_range.start;
                     const end = emote.char_range.end;
-    
+
                     const wordToReplace = msg.slice(start, end);
                     const emoteURL = TwitchEmotes.parseEmoteUrl(emote);
-    
+
                     wordEmoteMap[wordToReplace] = {
                         name: wordToReplace,
                         url: emoteURL,
@@ -132,17 +103,17 @@ export class ChatLine extends LitElement {
             const msg_split = msg.split(" ");
             let parsed_msg = msg_split.map(word => {
                 // replace emotes
-                if(wordEmoteMap[word]) {
+                if (wordEmoteMap[word]) {
                     return html`<img class="emote" name="${wordEmoteMap[word].name}" alt="${word}" src="${wordEmoteMap[word].url}" height="32"> `;
                 }
                 // replace links
-                if(wordLinkMap[word]) {
+                if (wordLinkMap[word]) {
                     return html`<a class="inline-link" href="javascript:()" @click="${() => {
                         Webbrowser.openURL(wordLinkMap[word]);
                     }}">${wordLinkMap[word]}</a> `;
                 }
                 // replace mentions
-                if(wordMentionMap[word]) {
+                if (wordMentionMap[word]) {
                     return html`<span class="mention">${word}</span> `;
                 }
                 return word + " ";
@@ -152,16 +123,16 @@ export class ChatLine extends LitElement {
                 <div class="line" style="--color: ${this.message.color}" ?action="${this.message.is_action}">
                     <span class="bages">
                         ${this.message.badges.map(badge => {
-                            let badge_url = "";
+                let badge_url = "";
 
-                            if (badge.name == "subscriber") {
-                                badge_url = this.chat.getSubBadge(badge.version) || Badges.getBadgeByName(badge.name, badge.version);
-                            } else {
-                                badge_url = Badges.getBadgeByName(badge.name, badge.version);
-                            }
+                if (badge.name == "subscriber") {
+                    badge_url = this.chat.getSubBadge(badge.version) || Badges.getBadgeByName(badge.name, badge.version);
+                } else {
+                    badge_url = Badges.getBadgeByName(badge.name, badge.version);
+                }
 
-                            return html`<img class="badge" alt="${badge.name}" src="${badge_url}" width="18" height="18">`;
-                        })}
+                return html`<img class="badge" alt="${badge.name}" src="${badge_url}" width="18" height="18">`;
+            })}
                     </span>
                     <span class="username">${this.message.username}:</span>
                     <span class="message">${parsed_msg}</span>
@@ -190,6 +161,7 @@ export class ChatInfo extends LitElement {
                 background: #211b25;
                 padding: 8px 15px;
                 margin: 2px 0;
+                line-height: 1.33em;
             }
             .message {
                 display: inline;
@@ -227,6 +199,7 @@ export class ChatNote extends LitElement {
                 padding: 8px 15px;
                 margin: 2px 0;
                 opacity: 0.5;
+                line-height: 1.33em;
             }
             .message {
                 display: inline;

@@ -7,12 +7,9 @@ import TwitchAPI from '../services/Twitch';
 import Webbrowser from '../services/Webbrowser';
 import { ChatLine, ChatInfo, ChatNote } from './ChatLine';
 import { Application } from '../App';
-
-const NumberFormat = new Intl.NumberFormat('en-IN');
-const langFormat = new Intl.DisplayNames(['en'], { type: 'language' });
-
-const formatLang = (langshort: string) => langFormat.of(langshort);
-const formatNumber = (n: number) => NumberFormat.format(n);
+import { formatLang, formatNumber } from '../utils';
+// Components
+import './Timer';
 
 export default class TwitchChat extends LitElement {
 
@@ -24,7 +21,10 @@ export default class TwitchChat extends LitElement {
     stream_title: string = "";
 
     info = null;
-    channel_badges = {};
+    channel_badges: {
+        [key: string]: any;
+    } = {};
+    
     channel_emotes = {};
 
     r9k = false;
@@ -32,6 +32,9 @@ export default class TwitchChat extends LitElement {
     emote_only = false;
     follwers_only = 0;
     slow_mode = 0;
+    
+    moderator = false;
+    broadcaster = false;
 
     appendMessage(msg: ChatMessage) {
         const line = new ChatLine(this, msg);
@@ -106,28 +109,36 @@ export default class TwitchChat extends LitElement {
     setRoom(roomName: string) {
         this.roomName = roomName;
 
-        getUserInfo(this.roomName).then(async info => {
-            this.info = info;
-
-            const channel = await TwitchAPI.getChannel(info.id);
-            info.channel_info = channel[0];
-            
-            const stream = await TwitchAPI.getStreams(info.id);
+        const updateStatus = async () => {
+            const stream = await TwitchAPI.getStreams(this.info.id);
             if(stream[0]) {
 
-                const viewers = stream[0].viewer_count;
-                const uptimems = Date.now() - new Date(stream[0].started_at).valueOf();
-                const uptime = {
-                    hours: Math.floor(uptimems / 1000 / 60 / 60),
-                    minutes: Math.floor((uptimems / 1000 / 60) % 60),
-                    seconds: Math.floor((uptimems / 1000) % 60),
-                }
-                const uptimestring = `${uptime.hours}h${uptime.minutes}m${uptime.seconds}s`;
+                const {
+                    viewer_count,
+                    started_at,
+                    game_name,
+                    title
+                } = stream[0];
 
-                this.stream_title = viewers + " - " + uptimestring + " - " + stream[0].game_name  + " - " + stream[0].title;
+                this.stream_title = html`
+                    ${formatNumber(viewer_count)} - <stream-timer starttime="${started_at}"></stream-timer> - ${game_name} - ${title}
+                `;
 
                 this.update();
             }
+        }
+
+        setInterval(() => {
+            updateStatus();
+        }, 1000 * 15);
+
+        getUserInfo(this.roomName).then(async info => {
+            this.info = info;
+
+            updateStatus();
+
+            const channel = await TwitchAPI.getChannel(info.id);
+            info.channel_info = channel[0];
 
             const badges = await Badges.getChannelBadges(info.id);
             this.channel_badges = badges;
@@ -174,6 +185,14 @@ export default class TwitchChat extends LitElement {
             update_info();
         });
 
+        IRCChatClient.listen('chat.user', msg => {
+            if(msg.channel === this.roomName) {
+                this.moderator = msg.badges.find(b => b.name == "moderator") !== undefined;
+                this.broadcaster = msg.badges.find(b => b.name == "broadcaster") !== undefined;
+                this.update();
+            }
+        })
+
         IRCChatClient.listen('chat.state', msg => {
             if(msg.channel_login == this.roomName) {
                 if(msg.r9k !== null) {
@@ -209,14 +228,14 @@ export default class TwitchChat extends LitElement {
                 height: 100%;
             }
             .lines {
-                margin-top: 58px;
+                margin-top: 54px;
                 padding-bottom: 10px;
                 box-sizing: border-box;
                 position: absolute;
                 top: 0;
                 left: 0;
                 width: 100%;
-                height: calc(100% - 58px);
+                height: calc(100% - 54px);
                 overflow: auto;
                 overflow-y: scroll;
                 overflow-x: hidden;
@@ -335,6 +354,7 @@ export default class TwitchChat extends LitElement {
             .profile-desc {
                 margin-top: 20px;
                 grid-column: 1 / span 2;
+                line-height: 1.33em;
             }
             .viewcount {
                 opacity: 0.5;
@@ -420,6 +440,12 @@ export default class TwitchChat extends LitElement {
                         <img src="./subscriber.svg" width="18px" height="18px"/>
                     </div>
                     <div class="room-state-icon" title="r9k mode" ?active="${this.r9k}">r9k</div>
+                    <div class="room-state-icon" title="Moderator" ?active="${this.moderator}">
+                        <img src="https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/2" width="18px" height="18px"/>
+                    </div>
+                    <div class="room-state-icon" title="Broadcaster" ?active="${this.broadcaster}">
+                        <img src="https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/2" width="18px" height="18px"/>
+                    </div>
                 </div>
             </div>
             <div class="chat-title" @click="${() => {

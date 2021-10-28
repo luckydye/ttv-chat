@@ -10,13 +10,13 @@ Bugfixes
 [x] colse chats
 [x] per chat user appearence
 
-Title button bar:
 [x] close chat
 [ ] open user list
 [ ] follower mode + mode dropdown
 [ ] sub mode toggle
 [x] open in browser
 
+[ ] emote and badge tool tips
 [ ] User panel
 [ ] Zoom chat
 

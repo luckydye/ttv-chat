@@ -19,6 +19,7 @@ function openChat(username: string, token: string) {
             window.dispatchEvent(new Event("loggedin"));
         })
     } catch (err) {
+        console.error('Error opening chat', err);
     }
 }
 

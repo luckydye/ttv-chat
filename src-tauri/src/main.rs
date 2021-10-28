@@ -260,8 +260,8 @@ fn open_link(url: String) {
   }
 }
 
-#[tokio::main]
-pub async fn main() {
+// #[tokio::main]
+fn main() {
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
       connect_to_chat,

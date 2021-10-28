@@ -1,0 +1,42 @@
+chat-line {
+    display: block;
+    padding: 5px 15px;
+    line-height: 1.33em;
+}
+chat-line[deleted] {
+    opacity: 0.33;
+}
+chat-line[highlighted] {
+    background: rgb(255 0 0 / 22%);
+}
+chat-line .username {
+    color: var(--color);
+    display: inline;
+    font-weight: 500;
+    margin-right: 2px;
+}
+chat-line .message {
+    display: inline;
+}
+chat-line .badge {
+    display: inline-block;
+    margin-bottom: -0.3em;
+    margin-right: 3px;
+}
+chat-line .emote {
+    display: inline-block;
+    margin-bottom: -0.8em;
+    margin-right: 3px;
+    max-width: 120px;
+    object-fit: contain;
+}
+chat-line .mention {
+    font-weight: bold;
+}
+chat-line .inline-link {
+    color: #2c7fcc;
+    word-break: break-all;
+}
+chat-line .line[action] .message {
+    color: var(--color);
+}
