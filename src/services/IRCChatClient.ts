@@ -3,8 +3,10 @@ import { emit, listen } from '@tauri-apps/api/event';
 import { rgbToHex } from '../utils';
 
 interface ChatTransport {
+    id: string,
     message: string,
     sender: string,
+    sender_id: string,
     channel: string,
     is_action: Boolean,
     badges: Array<object>,
@@ -15,9 +17,20 @@ interface ChatTransport {
     server_timestamp: string,
 }
 
+export interface ChatClearMessage {
+    id: string,
+    message: string,
+    sender: string,
+    channel: string,
+    is_action: Boolean,
+    server_timestamp: string,
+}
+
 export interface ChatMessage {
+    id: string,
     channel: string,
     username: string,
+    sender_id: string,
     message: string,
     color: string,
     badges: Array<object>,
@@ -70,15 +83,11 @@ export default class IRCChatClient {
     }
 
     static sendMessage(channel: string, message: string) {
-        console.log('sending message');
-
         return invoke('chat_send_message', {
             channel,
             message,
         })
             .then(e => {
-                console.log('message sent');
-                
                 // loop message back to display in chat
                 for(let callback of listeners.get("chat.message")) {
                     if(!this.usermap[channel]) {
@@ -86,7 +95,9 @@ export default class IRCChatClient {
                     }
                     const user = this.usermap[channel];
                     const message_data: ChatMessage = {
+                        id: "-1",
                         username: user.username || "user not found",
+                        sender_id: user.id,
                         channel: channel,
                         is_action: false,
                         badges: user.badges || [],
@@ -96,8 +107,10 @@ export default class IRCChatClient {
                     }
                     callback(message_data);
                 }
+
+                console.log('message sent');
             })
-            .catch((e) => console.error)
+            .catch((e) => console.error(e))
     }
 
     static async listen(eventName: string, callback: Function) {
@@ -109,13 +122,21 @@ export default class IRCChatClient {
 
         return listen(eventName, event => {
             switch(eventName) {
+                case 'chat.state': {
+                    if (event.payload) {
+                        callback(event.payload);
+                    }
+                    break;
+                }
                 case 'chat.message': {
                     if (event.payload) {
                         const payload: ChatTransport = event.payload as ChatTransport;
                         // payload.channel seperation needed
                         const message_data: ChatMessage = {
+                            id: payload.id,
                             channel: payload.channel,
                             username: payload.sender,
+                            sender_id: payload.sender_id,
                             is_action: payload.is_action,
                             badges: payload.badges,
                             message: payload.message,
@@ -145,8 +166,10 @@ export default class IRCChatClient {
                     if (event.payload) {
                         const payload: ChatTransport = event.payload as ChatTransport;
                         const message_data: ChatMessage = {
+                            id: payload.id,
                             channel: payload.channel,
                             username: payload.sender,
+                            sender_id: payload.sender_id,
                             is_action: payload.is_action,
                             badges: payload.badges,
                             message: payload.message,
@@ -155,6 +178,19 @@ export default class IRCChatClient {
                             emotes: payload.emotes
                         }
                         callback(message_data);
+                    }
+                    break;
+                }
+                case 'chat.clear': {
+                    if (event.payload) {
+                        const payload: ChatClearMessage = event.payload as ChatClearMessage;
+                        callback(payload);
+                    }
+                    break;
+                }
+                default: {
+                    if (event.payload) {
+                        callback(event.payload);
                     }
                     break;
                 }

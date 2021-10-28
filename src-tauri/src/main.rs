@@ -24,8 +24,10 @@ static mut app_chat_state: ChatState = ChatState {
 // for global events, it also must implement `Clone`.
 #[derive(Clone, serde::Serialize)]
 struct ChatTransport {
+  id: String,
   message: String,
   sender: String,
+  sender_id: String,
   channel: String,
   is_action: bool,
   badges: Vec<Badge>,
@@ -33,6 +35,18 @@ struct ChatTransport {
   bits: u64,
   name_color: Vec<u8>,
   emotes: Vec<Emote>,
+  server_timestamp: String,
+}
+
+// the payload type must implement `Serialize`.
+// for global events, it also must implement `Clone`.
+#[derive(Clone, serde::Serialize)]
+struct ChatClearMessage {
+  id: String,
+  message: String,
+  sender: String,
+  channel: String,
+  is_action: bool,
   server_timestamp: String,
 }
 
@@ -65,7 +79,7 @@ impl ChatState {
       println!("sending {}: {}", channel_name, message);
       match &self.chat_client {
         Some(client) => {
-          client.say(channel_name, message).await.unwrap();
+          client.privmsg(channel_name, message).await.unwrap();
         }
         None => {}
       }
@@ -115,8 +129,10 @@ async fn connect_to_chat(app_handle: tauri::AppHandle, username: String, token: 
       match message {
         ServerMessage::Privmsg(msg) => {
           let transport = ChatTransport {
+            id: msg.message_id.to_owned(),
             message: msg.message_text.to_owned(),
             sender: msg.sender.name.to_owned(),
+            sender_id: msg.sender.id.to_owned(),
             channel: msg.channel_login.to_owned(),
             is_action: msg.is_action,
             badges: msg.badges,
@@ -158,16 +174,31 @@ async fn connect_to_chat(app_handle: tauri::AppHandle, username: String, token: 
           println!("(user) {}", msg.user_id);
         }
         ServerMessage::RoomState(msg) => {
-          println!("(room) {}", msg.channel_id);
+          app_handle.emit_all("chat.state", msg).unwrap();
+        }
+        ServerMessage::ClearMsg(msg) => {
+          // message deletes
+          let transport = ChatClearMessage {
+            id: msg.message_id.to_owned(),
+            message: msg.message_text.to_owned(),
+            sender: msg.sender_login.to_owned(),
+            channel: msg.channel_login.to_owned(),
+            is_action: false,
+            server_timestamp: msg.server_timestamp.to_rfc2822(),
+          };
+          app_handle.emit_all("chat.delete.message", transport).unwrap();
         }
         ServerMessage::ClearChat(msg) => {
           // message deletes
+          app_handle.emit_all("chat.clear", msg).unwrap();
         }
         ServerMessage::UserNotice(msg) => {
           // sub messages and stuff
           let transport = ChatTransport {
+            id: msg.message_id.to_owned(),
             message: msg.system_message.to_owned(),
             sender: msg.sender.name.to_owned(),
+            sender_id: msg.sender.id.to_owned(),
             channel: msg.channel_login.to_owned(),
             is_action: false,
             badges: msg.badges,
@@ -178,6 +209,9 @@ async fn connect_to_chat(app_handle: tauri::AppHandle, username: String, token: 
             server_timestamp: msg.server_timestamp.to_rfc2822(),
           };
           app_handle.emit_all("chat.info", transport).unwrap();
+        }
+        ServerMessage::Notice(msg) => {
+          app_handle.emit_all("chat.notice", msg).unwrap();
         }
         msg => {
           println!("{:?}", msg);

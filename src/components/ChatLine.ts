@@ -18,11 +18,21 @@ export class ChatLine extends LitElement {
         this.message = msg;
     }
 
+    connectedCallback() {
+        super.connectedCallback();
+
+        this.setAttribute('messageid', this.message.id);
+        this.setAttribute('userid', this.message.sender_id);
+    }
+
     static get styles() {
         return css`
             :host {
                 display: block;
                 padding: 5px 15px;
+            }
+            :host([deleted]) {
+                opacity: 0.33;
             }
             /* :host(:nth-child(even)) {
                 background: hsl(240deg 4% 10%);
@@ -178,8 +188,45 @@ export class ChatInfo extends LitElement {
             :host {
                 display: block;
                 background: #211b25;
-                padding: 6px 15px;
+                padding: 8px 15px;
                 margin: 2px 0;
+            }
+            .message {
+                display: inline;
+            }
+        `;
+    }
+
+    render() {
+        if (this.message) {
+            return html`
+                <div class="line">
+                    <div class="message">${this.message}</div>
+                </div>
+            `;
+        }
+    }
+
+}
+
+export class ChatNote extends LitElement {
+
+    message: string = "";
+
+    constructor(msg: string) {
+        super();
+
+        this.message = msg;
+    }
+
+    static get styles() {
+        return css`
+            :host {
+                display: block;
+                background: #0c0c0c;
+                padding: 8px 15px;
+                margin: 2px 0;
+                opacity: 0.5;
             }
             .message {
                 display: inline;
@@ -202,3 +249,4 @@ export class ChatInfo extends LitElement {
 
 customElements.define('chat-line', ChatLine);
 customElements.define('chat-info', ChatInfo);
+customElements.define('chat-note', ChatNote);

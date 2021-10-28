@@ -1,11 +1,11 @@
 import { css, html, LitElement } from 'lit-element';
-import { ChatMessage } from '../services/IRCChatClient';
+import IRCChatClient, { ChatMessage } from '../services/IRCChatClient';
 import Badges from '../services/Badges';
 import { getUserInfo } from '../services/Twitch';
 import Emotes from '../services/Emotes';
 import TwitchAPI from '../services/Twitch';
 import Webbrowser from '../services/Webbrowser';
-import { ChatLine, ChatInfo } from './ChatLine';
+import { ChatLine, ChatInfo, ChatNote } from './ChatLine';
 import { Application } from '../App';
 
 const NumberFormat = new Intl.NumberFormat('en-IN');
@@ -27,6 +27,12 @@ export default class TwitchChat extends LitElement {
     channel_badges = {};
     channel_emotes = {};
 
+    r9k = false;
+    subscribers_only = false;
+    emote_only = false;
+    follwers_only = 0;
+    slow_mode = 0;
+
     appendMessage(msg: ChatMessage) {
         const line = new ChatLine(this, msg);
         this.appendChild(line);
@@ -37,6 +43,14 @@ export default class TwitchChat extends LitElement {
 
     appenLine(text: string) {
         const line = new ChatInfo(text);
+        this.appendChild(line);
+        setTimeout(() => {
+            this.afterAppend();
+        }, 1);
+    }
+
+    appenNote(text: string) {
+        const line = new ChatNote(text);
         this.appendChild(line);
         setTimeout(() => {
             this.afterAppend();
@@ -158,7 +172,28 @@ export default class TwitchChat extends LitElement {
         });
         window.addEventListener('loggedin', e => {
             update_info();
-        })
+        });
+
+        IRCChatClient.listen('chat.state', msg => {
+            if(msg.channel_login == this.roomName) {
+                if(msg.r9k !== null) {
+                    this.r9k = msg.r9k;
+                }
+                if(msg.subscribers_only !== null) {
+                    this.subscribers_only = msg.subscribers_only;
+                }
+                if(msg.emote_only !== null) {
+                    this.emote_only = msg.emote_only;
+                }
+                if(msg.follwers_only !== null) {
+                    this.follwers_only = msg.follwers_only !== "Disabled" ? msg.follwers_only.Enabled.secs : 0;
+                }
+                if(msg.slow_mode !== null) {
+                    this.slow_mode = msg.slow_mode.secs;
+                }
+                this.update();
+            }
+        });
     }
 
     static get styles() {
@@ -336,6 +371,25 @@ export default class TwitchChat extends LitElement {
             ::-webkit-scrollbar-corner {
                 background: transparent;
             }
+
+            .chat-state-icons {
+                display: grid;
+                grid-auto-flow: column;
+                grid-gap: 8px;
+                align-items: center;
+            }
+            .room-state-icon {
+                display: none;
+                color: #eee;
+                opacity: 0.5;
+                margin-left: 5px;
+                cursor: default;
+                justify-content: center;
+                align-items: center;
+            }
+            .room-state-icon[active] {
+                display: flex;
+            }
         `;
     }
 
@@ -347,14 +401,25 @@ export default class TwitchChat extends LitElement {
                         Application.closeRoom(this.roomName);
                     }}">x</button>
                     <button title="Auto hide input">t</button>
+                    <button title="User list">u</button>
                     <button title="Open Stream" @click="${() => {
                         Webbrowser.openURL(`https://www.twitch.tv/${this.roomName}`);
                     }}">-</button>
                 </div>
-                <div>
-                    <button title="Follower Mode">o</button>
-                    <button title="Sub mode">y</button>
-                    <button title="User list">u</button>
+                <div class="chat-state-icons">
+                    <div class="room-state-icon" title="Slow mode for ${this.slow_mode}s" ?active="${this.slow_mode !== 0}">
+                        <img src="./slowmode.svg" width="18px" height="18px"/>
+                    </div>
+                    <div class="room-state-icon" title="Follow mode for ${this.follwers_only}s" ?active="${this.follwers_only !== 0}">
+                        <img src="./follower.svg" width="18px" height="18px"/>
+                    </div>
+                    <div class="room-state-icon" title="Emote only mode" ?active="${this.emote_only}">
+                        <img src="./emote.svg" width="18px" height="18px"/>
+                    </div>
+                    <div class="room-state-icon" title="Sub only mode" ?active="${this.subscribers_only}">
+                        <img src="./subscriber.svg" width="18px" height="18px"/>
+                    </div>
+                    <div class="room-state-icon" title="r9k mode" ?active="${this.r9k}">r9k</div>
                 </div>
             </div>
             <div class="chat-title" @click="${() => {

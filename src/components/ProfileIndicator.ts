@@ -16,8 +16,8 @@ export default class ProfileIndicator extends LitElement {
             .profile-icon[live]::after {
                 content: "";
                 position: absolute;
-                bottom: -3px;
-                right: -3px;
+                bottom: -5px;
+                right: -5px;
                 width: 8px;
                 height: 8px;
                 border-radius: 50%;
