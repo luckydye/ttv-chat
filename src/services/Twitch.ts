@@ -145,7 +145,7 @@ export async function authClientUser() {
         `&scope=${scopes.join("%20")}` +
         `&claims=${JSON.stringify(claims)}`;
 
-    const win = window.open(url);
+    const win = open(url);
 
     if (win) {
         win.addEventListener('load', e => {

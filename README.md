@@ -18,7 +18,6 @@ n/a
 Next goal: Beta Release
 
 ## To be included features (TODOs):
-- [ ] Auth flow
 - [ ] follower mode + mode dropdown
 - [ ] seperate out the message log part of the chat for seperate mention and whisper tab wihtout, chat-input, bio and room state stuff
 
@@ -49,6 +48,7 @@ Next goal: Beta Release
 - [x] colse chats
 - [x] open user list
 - [x] mod tools
+- [x] Auth flow
 - [ ] Username color picker
 - [ ] input history navigation
 - [ ] emote and badge tool tips

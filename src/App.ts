@@ -1,6 +1,6 @@
 
 let applicationState = {
-    selectedRoom: localStorage.getItem('selected') || "luckydye",
+    selectedRoom: localStorage.getItem('selected') || "@",
     chatRooms: [],
 }
 

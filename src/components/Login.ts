@@ -1,18 +1,23 @@
 import { css, html, LitElement } from 'lit-element';
 import { authClientUser, handleAuthenticatedUser, checLogin, getLoggedInUser } from '../services/Twitch';
+import './Loader';
 
 export default class TwitchAuthComp extends LitElement {
 
     loggedin = false;
+    loading = true;
 
     constructor() {
         super();
 
         if(checLogin()) {
             getLoggedInUser().then(info => {
+                this.loading = false;
                 this.loggedin = info.preferred_username ? true : false;
                 this.update();
             })
+        } else {
+            this.loading = false;
         }
     }
 
@@ -22,12 +27,19 @@ export default class TwitchAuthComp extends LitElement {
 
     pasteToken(e) {
         navigator.clipboard.readText().then(clipText => {
-            handleAuthenticatedUser(clipText);
+            const json = JSON.parse(clipText);
+            handleAuthenticatedUser(json.access_token);
+            
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
         });
     }
 
     render() {
-        if(!this.loggedin) {
+        if(this.loading) {
+            return html`<net-loader></net-loader>`;
+        } else if(!this.loggedin) {
             return html`
                 <h3>Do not show this on stream!</h3>
                 <br/>
