@@ -12,6 +12,8 @@ use tauri::Manager;
 use twitch_irc::login::StaticLoginCredentials;
 use twitch_irc::message::Badge;
 use twitch_irc::message::Emote;
+use twitch_irc::message::IRCTags;
+use twitch_irc::message::UserNoticeEvent;
 use twitch_irc::message::ServerMessage;
 use twitch_irc::TwitchIRCClient;
 use twitch_irc::{ClientConfig, SecureTCPTransport};
@@ -36,6 +38,28 @@ struct ChatTransport {
   bits: u64,
   name_color: Vec<u8>,
   emotes: Vec<Emote>,
+  tags: IRCTags,
+  server_timestamp: String,
+}
+
+// the payload type must implement `Serialize`.
+// for global events, it also must implement `Clone`.
+#[derive(Clone, serde::Serialize)]
+struct ChatTransportNotice {
+  id: String,
+  message: String,
+  user_message: Option<String>,
+  sender: String,
+  sender_id: String,
+  channel: String,
+  is_action: bool,
+  badges: Vec<Badge>,
+  badge_info: Vec<Badge>,
+  bits: u64,
+  name_color: Vec<u8>,
+  emotes: Vec<Emote>,
+  tags: IRCTags,
+  event: UserNoticeEvent,
   server_timestamp: String,
 }
 
@@ -138,6 +162,7 @@ async fn connect_to_chat(app_handle: tauri::AppHandle, username: String, token: 
             is_action: msg.is_action,
             badges: msg.badges,
             badge_info: msg.badge_info,
+            tags: msg.source.tags,
             bits: match msg.bits {
               Some(nc) => nc,
               None => 0,
@@ -197,8 +222,9 @@ async fn connect_to_chat(app_handle: tauri::AppHandle, username: String, token: 
         }
         ServerMessage::UserNotice(msg) => {
           // sub messages and stuff
-          let transport = ChatTransport {
+          let transport = ChatTransportNotice {
             id: msg.message_id.to_owned(),
+            user_message: msg.message_text,
             message: msg.system_message.to_owned(),
             sender: msg.sender.name.to_owned(),
             sender_id: msg.sender.id.to_owned(),
@@ -206,7 +232,9 @@ async fn connect_to_chat(app_handle: tauri::AppHandle, username: String, token: 
             is_action: false,
             badges: msg.badges,
             badge_info: msg.badge_info,
+            tags: msg.source.tags,
             bits: 0,
+            event: msg.event,
             name_color: vec![240u8, 240u8, 240u8],
             emotes: msg.emotes,
             server_timestamp: msg.server_timestamp.to_rfc2822(),

@@ -12,6 +12,9 @@ interface ChatTransport {
     badges: Array<object>,
     badge_info: Array<object>,
     bits: number,
+    event: object,
+    user_message: string,
+    tags: Array<any>,
     name_color: Array<number>,
     emotes: Array<any>,
     server_timestamp: string,
@@ -33,9 +36,26 @@ export interface ChatMessage {
     sender_id: string,
     message: string,
     color: string,
+    tags: Array<any>,
     badges: Array<object>,
     timestamp: Date,
     is_action: Boolean,
+    emotes: Array<any>,
+}
+
+export interface ChatInfoMessage {
+    id: string,
+    channel: string,
+    username: string,
+    sender_id: string,
+    message: string,
+    system_message: string,
+    color: string,
+    tags: Array<any>,
+    badges: Array<object>,
+    timestamp: Date,
+    is_action: Boolean,
+    event: any,
     emotes: Array<any>,
 }
 
@@ -108,6 +128,7 @@ export default class IRCChatClient {
                             username: user.username || "user not found",
                             sender_id: user.id,
                             channel: channel,
+                            tags: [],
                             is_action: false,
                             badges: user.badges || [],
                             message: message,
@@ -160,6 +181,7 @@ export default class IRCChatClient {
                             sender_id: payload.sender_id,
                             is_action: payload.is_action,
                             badges: payload.badges,
+                            tags: payload.tags,
                             message: payload.message,
                             color: rgbToHex(limitColorContrast(...payload.name_color)),
                             timestamp: new Date(payload.server_timestamp),
@@ -186,14 +208,17 @@ export default class IRCChatClient {
                 case 'chat.info': {
                     if (event.payload) {
                         const payload: ChatTransport = event.payload as ChatTransport;
-                        const message_data: ChatMessage = {
+                        const message_data: ChatInfoMessage = {
                             id: payload.id,
                             channel: payload.channel,
+                            tags: payload.tags,
                             username: payload.sender,
                             sender_id: payload.sender_id,
                             is_action: payload.is_action,
                             badges: payload.badges,
-                            message: payload.message,
+                            event: payload.event,
+                            system_message: payload.message,
+                            message: payload.user_message,
                             color: rgbToHex(limitColorContrast(...payload.name_color)),
                             timestamp: new Date(payload.server_timestamp),
                             emotes: payload.emotes

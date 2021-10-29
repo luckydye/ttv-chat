@@ -11,12 +11,21 @@ export class ChatLine extends LitElement {
 
     message: ChatMessage | null = null;
     chat: TwitchChat | null = null;
+    isReply: boolean = false;
 
     constructor(chat: TwitchChat, msg: ChatMessage) {
         super();
 
         this.chat = chat;
         this.message = msg;
+
+        if(this.message.tags['reply-parent-msg-id']) {
+            this.isReply = true;
+        }
+
+        setTimeout(() => {
+            this.update();
+        }, 100);
     }
 
     connectedCallback() {
@@ -25,22 +34,6 @@ export class ChatLine extends LitElement {
         this.setAttribute('messageid', this.message.id);
         this.setAttribute('userid', this.message.sender_id);
     }
-
-    // static get styles() {
-    //     return css`
-    //         :host {
-    //             display: block;
-    //             padding: 5px 15px;
-    //             line-height: 1.33em;
-    //         }
-    //         :host([deleted]) {
-    //             opacity: 0.33;
-    //         }
-    //         :host([highlighted]) {
-    //             background: rgb(255 0 0 / 22%);
-    //         }
-    //     `;
-    // }
 
     createRenderRoot() {
         return this;
@@ -54,6 +47,10 @@ export class ChatLine extends LitElement {
 
     timeout(s: number = 10) {
         IRCChatClient.sendCommand(this.message.channel, `/timeout ${this.message?.username} ${s}`);
+    }
+
+    openThread() {
+        // gotta implement this and user cards
     }
 
     render() {
@@ -77,6 +74,10 @@ export class ChatLine extends LitElement {
                         url: emoteURL,
                     };
                 }
+            }
+
+            if(this.message.tags['msg-id'] == "highlighted-message") {
+                this.setAttribute('highlighted', '');
             }
 
             msg.split(" ").forEach(str => {
@@ -107,7 +108,7 @@ export class ChatLine extends LitElement {
                 const client_user = getLoggedInUsername().toLocaleLowerCase();
                 if (client_user != "" && str.toLocaleLowerCase().match(client_user)) {
                     wordMentionMap[str] = str;
-                    this.setAttribute('highlighted', '');
+                    this.setAttribute('tagged', '');
                     
                     // is current user => send to mentions chat
                     //   yeah not the ideal palce to do this... should process and parse messages elswhere
@@ -153,6 +154,11 @@ export class ChatLine extends LitElement {
                         })}
                     </span>
                     <span class="username">${this.message.username}:</span>
+                    ${this.isReply ? html`
+                        <button class="reply-icon" @click="${this.openThread}">
+                            <img src="./images/reply_white_24dp.svg" height="18px" width="18px" />
+                        </button>
+                    ` : ""}
                     <span class="message">${parsed_msg}</span>
                     
                     <div class="tools">

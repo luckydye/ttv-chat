@@ -59,6 +59,13 @@ export default class ContextMenu extends LitElement {
     connectedCallback() {
         super.connectedCallback();
 
+        const rect = this.getClientRects()[0];
+
+        if(this.x + 40 + this.clientWidth > window.innerWidth) {
+            this.y -= 100;
+            this.x -= 40;
+        }
+
         this.style.setProperty('--x', this.x.toString());
         this.style.setProperty('--y', this.y.toString());
         this.tabIndex = 0;

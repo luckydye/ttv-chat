@@ -6,7 +6,7 @@ import './components/ChatRooms';
 import './components/Chat';
 import './services/Twitch';
 import IRCChatClient from './services/IRCChatClient';
-import { ChatMessage } from './services/IRCChatClient';
+import { ChatMessage, ChatInfoMessage } from './services/IRCChatClient';
 import { Application } from './App';
 
 const chatElements: { [key: string]: any } = {};
@@ -55,10 +55,13 @@ async function main() {
         }
     });
 
-    IRCChatClient.listen('chat.info', (msg: ChatMessage) => {
+    IRCChatClient.listen('chat.info', (msg: ChatInfoMessage) => {
         const chat = chatElements[msg.channel];
         if(chat) {
-            chat.appenLine(msg.message);
+            if(msg.message) {
+                chat.appendMessage(msg);
+            }
+            chat.appenLine(msg.system_message);
         }
     });
 

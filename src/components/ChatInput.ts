@@ -1,6 +1,7 @@
 import { css, html, LitElement } from 'lit-element';
 import IRCChatClient from '../services/IRCChatClient';
 import { Application } from '../App';
+import ContextMenu from './ContextMenu';
 
 export default class ChatInput extends LitElement {
 
@@ -41,6 +42,9 @@ export default class ChatInput extends LitElement {
                 right: 0;
                 top: 10px;
                 padding: 0 10px;
+                display: grid;
+                grid-auto-flow: column;
+                grid-gap: 5px;
             }
             button {
                 border-radius: 4px;
@@ -58,6 +62,9 @@ export default class ChatInput extends LitElement {
             }
             button:active {
                 background: hsl(240deg, 2%, 30%);
+            }
+            button img {
+                display: block;
             }
         `;
     }
@@ -100,6 +107,10 @@ export default class ChatInput extends LitElement {
         }
     }
 
+    openEmotePicker(e) {
+        const menu = ContextMenu.openOn(e.target);
+    }
+
     render() {
         return html`
             <div class="wrapper">
@@ -110,7 +121,9 @@ export default class ChatInput extends LitElement {
                     <div class="util">
                         <button name="create poll">Y</button>
                         <button name="create prediction">X</button>
-                        <button name="Emotes">X</button>
+                        <button name="Emotes" @click="${this.openEmotePicker}">
+                            <img src="./images/sentiment_satisfied_alt_white_24dp.svg" width="18px" height="18px"/>
+                        </button>
                     </div>
                 </div>
             </div>

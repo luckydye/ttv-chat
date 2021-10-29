@@ -166,6 +166,16 @@ export async function authClientUser() {
 }
 
 
+// function initEventSubSubscriptions() {
+//     const ws = new WebSocket('wss://eventsub.twitch.tv');
+//     console.log(ws);
+// }
+
+// setTimeout(() => {
+//     initEventSubSubscriptions()
+// }, 2000);
+
+
 export default class TwitchAPI {
 
     static logout() {

@@ -35,6 +35,7 @@ export default class TwitchChat extends LitElement {
     emote_only = false;
     follwers_only = 0;
     slow_mode = 0;
+    chatter_count = 0;
     
     moderator = false;
     broadcaster = false;
@@ -114,7 +115,9 @@ export default class TwitchChat extends LitElement {
     setRoom(roomName: string) {
         this.roomName = roomName;
 
-        this.appenNote(`Connecting`);
+        if(!this.connect) {
+            this.appenNote(`Connecting`);
+        }
 
         const updateStatus = async () => {
             const stream = await TwitchAPI.getStreams(this.info.id);
@@ -167,6 +170,13 @@ export default class TwitchChat extends LitElement {
         }
     }
 
+    async updateChatterCount() {
+        return IRCChatClient.getUserlist(this.roomName).then(chatters => {
+            this.chatter_count = chatters.chatter_count;
+            this.update();
+        });
+    }
+
     connectedCallback() {
         super.connectedCallback();
         
@@ -189,6 +199,7 @@ export default class TwitchChat extends LitElement {
         // update room info at interval
         const update_info = () => getUserInfo(this.roomName).then(info => {
             this.setRoom(this.roomName);
+            this.updateChatterCount();
             setTimeout(() => update_info(), 1000 * 60);
         });
         window.addEventListener('loggedin', e => {
@@ -230,6 +241,8 @@ export default class TwitchChat extends LitElement {
 
                 if(!this.connect) {
                     this.appenNote(`Connected to ${this.roomName}`);
+                    this.updateChatterCount();
+
                     this.connect = true;
                 }
             }
@@ -636,7 +649,9 @@ export default class TwitchChat extends LitElement {
                 </div>
             </div>
             <div class="chat-title">
-                ${this.stream_title == "" ? "Offline" : this.stream_title}
+                ${this.stream_title == "" ? 
+                    (this.chatter_count > 0 ? `Offline - ${formatNumber(this.chatter_count)} chatters` : "Offline") 
+                : this.stream_title}
             </div>
             <div class="scroll-to-bottom" @click="${() => this.lock()}">
                 <span>Scroll to the bottom</span>
