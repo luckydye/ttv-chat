@@ -54,3 +54,4 @@ Bugfixes
 - Input emote parsing
 - Youtube chats
 - Put the bio n stuff at the top of the chatroom
+- Reccomend channels from follow list

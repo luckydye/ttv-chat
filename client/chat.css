@@ -7,7 +7,7 @@ chat-line[deleted] {
     opacity: 0.33;
 }
 chat-line[highlighted] {
-    background: rgb(255 0 0 / 22%);
+    background: hsl(0deg 90% 70% / 22%);
 }
 chat-line .username {
     color: var(--color);

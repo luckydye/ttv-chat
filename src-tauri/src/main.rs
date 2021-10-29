@@ -3,6 +3,7 @@
   windows_subsystem = "windows"
 )]
 
+use reqwest::Error;
 use webbrowser;
 
 use tauri::command;
@@ -10,8 +11,8 @@ use tauri::Manager;
 
 use twitch_irc::login::StaticLoginCredentials;
 use twitch_irc::message::Badge;
-use twitch_irc::message::ServerMessage;
 use twitch_irc::message::Emote;
+use twitch_irc::message::ServerMessage;
 use twitch_irc::TwitchIRCClient;
 use twitch_irc::{ClientConfig, SecureTCPTransport};
 
@@ -186,7 +187,9 @@ async fn connect_to_chat(app_handle: tauri::AppHandle, username: String, token: 
             is_action: false,
             server_timestamp: msg.server_timestamp.to_rfc2822(),
           };
-          app_handle.emit_all("chat.delete.message", transport).unwrap();
+          app_handle
+            .emit_all("chat.delete.message", transport)
+            .unwrap();
         }
         ServerMessage::ClearChat(msg) => {
           // message deletes
@@ -260,6 +263,21 @@ fn open_link(url: String) {
   }
 }
 
+#[command]
+async fn get_userlist(channel: String) -> Option<String> {
+  let request_url = format!("http://tmi.twitch.tv/group/user/{c}/chatters", c = channel);
+  println!("{}", request_url);
+  let response = reqwest::get(request_url).await;
+
+  match response {
+    Err(e) => {
+      println!("Error fetching userlist: {}", e);
+      Some("".to_owned())
+    },
+    Ok(r) => r.text().await.ok(),
+  }
+}
+
 // #[tokio::main]
 fn main() {
   tauri::Builder::default()
@@ -268,6 +286,7 @@ fn main() {
       chat_join_room,
       chat_leave_room,
       chat_send_message,
+      get_userlist,
       open_link
     ])
     .run(tauri::generate_context!())

@@ -62,27 +62,35 @@ export default class IRCChatClient {
     static user: UserState | null = null;
     static usermap = {};
 
-    static connectoToChat(username: string, token: string) {
+    static async connectoToChat(username: string, token: string) {
         return invoke('connect_to_chat', {
             username: username,
             token: token
         })
-            .catch((e) => console.error);
+            .catch((e) => console.error(e));
     }
 
-    static joinChatRoom(channel: string) {
+    static async getUserlist(channel: string) {
+        return invoke('get_userlist', {
+            channel,
+        })
+            .then((text: any) => JSON.parse(text))
+            .catch((e) => console.error(e))
+    }
+
+    static async joinChatRoom(channel: string) {
         return invoke('chat_join_room', {
             channel,
-        }).catch((e) => console.error)
+        }).catch((e) => console.error(e))
     }
 
-    static partChatRoom(channel: string) {
+    static async partChatRoom(channel: string) {
         return invoke('chat_leave_room', {
             channel,
-        }).catch((e) => console.error)
+        }).catch((e) => console.error(e))
     }
 
-    static sendMessage(channel: string, message: string) {
+    static async sendMessage(channel: string, message: string) {
         return invoke('chat_send_message', {
             channel,
             message,

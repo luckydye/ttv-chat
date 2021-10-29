@@ -53,7 +53,7 @@ notification {
     grid-template-rows: 1fr auto;
     width: 42px;
     flex: none;
-    z-index: 1000000;
+    z-index: 10000;
     position: relative;
     border-right: 1px solid rgb(48, 48, 48);
 }

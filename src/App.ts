@@ -1,9 +1,7 @@
 
 let applicationState = {
     selectedRoom: localStorage.getItem('selected') || "luckydye",
-    chatRooms: [
-        "twitch",
-    ],
+    chatRooms: [],
 }
 
 class AddedRoomEvent extends Event {
