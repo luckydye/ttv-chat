@@ -20,7 +20,6 @@ Next goal: Beta Release
 ## To be included features (TODOs):
 - [ ] Auth flow
 - [ ] follower mode + mode dropdown
-- [ ] sub mode toggle
 - [ ] seperate out the message log part of the chat for seperate mention and whisper tab wihtout, chat-input, bio and room state stuff
 
 - Visibility panel
@@ -29,7 +28,6 @@ Next goal: Beta Release
     - [ ] Streamer features
         - Hide names
         - Hide badges
-    - [ ] mod tools
     - [ ] Spam grouping
         - find a way to get a value based on the difference between messages
         - group messages if msg.unique_words == msg.unique_words
@@ -40,6 +38,7 @@ Next goal: Beta Release
     - [ ] Timestamps take to much space
         - Colored dot indicating how long ago the message got posted?
 
+- [x] sub mode toggle
 - [x] All the emotes
 - [x] Stream Title
 - [x] Uptime/Live indicator
@@ -49,6 +48,7 @@ Next goal: Beta Release
 - [x] added rooms not appearing
 - [x] colse chats
 - [x] open user list
+- [x] mod tools
 - [ ] Username color picker
 - [ ] input history navigation
 - [ ] emote and badge tool tips
@@ -61,9 +61,9 @@ Next goal: Beta Release
 - [ ] Notifications
 - [ ] activity feed
 - [ ] Inline Notifications
-    - Subs
-    - Follows
-    - Stream Title
+    - Follows?
+    - Game change
+    - Stream Title change
 - [ ] "Threads" (Mentions)
     - Optin thread
     - Person gets added to thread on mention
