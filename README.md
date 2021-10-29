@@ -59,6 +59,7 @@ Next goal: Beta Release
     - Predictions
 - [ ] Channel Point Redemtions
 - [ ] Notifications
+- [ ] activity feed
 - [ ] Inline Notifications
     - Subs
     - Follows
