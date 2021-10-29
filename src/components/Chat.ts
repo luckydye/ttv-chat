@@ -234,7 +234,6 @@ export default class TwitchChat extends LitElement {
             }
             .lines {
                 margin-top: 54px;
-                padding-bottom: 10px;
                 box-sizing: border-box;
                 position: absolute;
                 top: 0;
@@ -265,6 +264,7 @@ export default class TwitchChat extends LitElement {
                 align-items: center;
                 white-space: nowrap;
                 font-size: 12px;
+                font-weight: 400;
                 color: #ababab;
                 border-bottom: 1px solid black;
             }
@@ -286,8 +286,9 @@ export default class TwitchChat extends LitElement {
                 background: rgb(25 25 28);
                 position: relative;
                 z-index: 1000;
-                display: flex;
-                justify-content: space-between;
+                display: grid;
+                grid-template-columns: 1fr auto 1fr;
+                align-items: center;
                 padding: 4px 8px;
                 box-sizing: border-box;
                 z-index: 1000;
@@ -344,7 +345,11 @@ export default class TwitchChat extends LitElement {
                 opacity: 1;
             }
 
+            @keyframes bio-slidein {
+                from { transform: translate(0, -0px); opacity: 0; }
+            }
             .bio {
+                animation: bio-slidein .2s ease;
                 display: grid;
                 grid-template-columns: auto 1fr;
                 padding: 30px 30px 40px 30px;
@@ -413,6 +418,7 @@ export default class TwitchChat extends LitElement {
             .chat-state-icons {
                 display: flex;
                 align-items: center;
+                justify-content: flex-end;
             }
             .room-state-icon {
                 display: none;
@@ -423,6 +429,7 @@ export default class TwitchChat extends LitElement {
                 justify-content: center;
                 align-items: center;
                 margin-left: 8px;
+                user-select: none;
             }
             .room-state-icon[active] {
                 display: flex;
@@ -444,6 +451,12 @@ export default class TwitchChat extends LitElement {
                 display: inline-block;
                 margin-left: 8px;
             }
+
+            .chat-channel-name {
+                opacity: 0.75;
+                font-size: 12px;
+                font-weight: 400;
+            }
         `;
     }
 
@@ -464,7 +477,7 @@ export default class TwitchChat extends LitElement {
                         </button>
                     </div>
                     <div class="chat-action">
-                        <button class="user-list-button" title="User list" @click="${() => {
+                        <button class="user-list-button" title="Userlist" @click="${() => {
                             this.openUserlist();
                         }}">
                             <img src="./people.svg" width="16px" height="16px" />
@@ -480,6 +493,9 @@ export default class TwitchChat extends LitElement {
                             <img src="./open.svg" width="16px" height="16px" />
                         </button>
                     </div>
+                </div>
+                <div class="chat-channel-name">
+                    ${this.roomName}
                 </div>
                 <div class="chat-state-icons">
                     <div class="chat-action">

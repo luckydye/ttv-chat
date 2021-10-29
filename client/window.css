@@ -3,6 +3,7 @@ body {
     color: #eee;
     font-family: 'Roboto', sans-serif;
     font-size: 14px;
+    font-weight: 300;
     height: 100vh;
     margin: 0;
     box-sizing: border-box;
@@ -58,6 +59,11 @@ notification {
     border-right: 1px solid rgb(48, 48, 48);
 }
 
+.sidebar chat-rooms {
+    max-height: calc(100vh - 80px);
+    overflow: visible;
+}
+
 .body {
     display: flex;
     flex-direction: column;
@@ -72,5 +78,5 @@ notification {
 }
 
 .chat-input {
-    background: #19191C;
+    /* background: #19191C; */
 }

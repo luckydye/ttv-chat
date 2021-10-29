@@ -11,7 +11,7 @@ export default class ChatInput extends LitElement {
                 width: 100%;
             }
             .wrapper {
-                padding: 10px;
+                padding: 8px;
             }
             .input-field {
                 position: relative;
@@ -31,8 +31,10 @@ export default class ChatInput extends LitElement {
                 outline: none;
                 padding: 13px 12px 15px 12px;
                 color: #eee;
-                font-family: 'Open Sans', sans-serif;
+                font-family: 'Roboto', sans-serif;
+                font-size: 14px;
                 box-sizing: border-box;
+                display: block;
             }
             .util {
                 position: absolute;
@@ -85,8 +87,10 @@ export default class ChatInput extends LitElement {
     submit(e: KeyboardEvent) {
         const ele = e.target;
         const value = ele.value;
-        ele.value = "";
-        IRCChatClient.sendMessage(Application.getSelectedRoom(), value);
+        if(value != "") {
+            ele.value = "";
+            IRCChatClient.sendMessage(Application.getSelectedRoom(), value);
+        }
     }
 
     handleKeyDown(e: KeyboardEvent) {

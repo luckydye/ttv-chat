@@ -34,23 +34,27 @@ export default class ChatUserList extends LitElement {
         const counts = this.shadowRoot.querySelector('.user-list-counts');
         counts.innerHTML = "";
         if(staffCount > 0) {
-            counts.innerHTML += `Staff: ${formatNumber(staffCount)}  `;
-        }
-        if(vipCount > 0) {
-            counts.innerHTML += `VIPs: ${formatNumber(vipCount)}  `;
+            counts.innerHTML += `<img height="16px" width="16px" src="./Staff.svg"/> ${formatNumber(staffCount)}  `;
         }
         if(modCount > 0) {
-            counts.innerHTML += `Mods: ${formatNumber(modCount)}  `;
+            counts.innerHTML += `<img height="16px" width="16px" src="./Mod.svg"/> ${formatNumber(modCount)}  `;
         }
-        counts.innerHTML += `Viewers: ${(viewerCount)}`;
+        if(vipCount > 0) {
+            counts.innerHTML += `<img height="16px" width="16px" src="./VIP.svg"/> ${formatNumber(vipCount)}  `;
+        }
+        counts.innerHTML += `<img height="16px" width="16px" src="./Viewer.svg"/> ${formatNumber(viewerCount)}`;
 
         this.update();
     }
 
     static get styles() {
         return css`
+            @keyframes userlist-slidein {
+                from { transform: translate(0, -10px); opacity: 0; }
+            }
             :host {
                 display: block;
+                animation: userlist-slidein .2s ease;
             }
             .list,
             .preview {
@@ -59,13 +63,16 @@ export default class ChatUserList extends LitElement {
                 background: #1f1f23f0;
                 backdrop-filter: blur(12px);
                 box-shadow: rgb(0 0 0 / 25%) 1px 2px 8px;
-                padding: 6px 10px;
+                padding: 10px 10px;
                 font-size: 12px;
                 color: #eee;
+                border: 1px solid #303030;
+                min-width: 200px;
+                max-width: 400px;
             }
             .preview {
                 white-space: nowrap;
-                margin-bottom: 2px;
+                margin-bottom: 5px;
             }
             .list {
                 max-height: 500px;
@@ -91,6 +98,17 @@ export default class ChatUserList extends LitElement {
             .user {
 
             }
+            .user-list-counts {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .user-list-counts img:not(:first-child) {
+                margin-left: 15px;
+            }
+            .user-list-counts img {
+                margin-right: 5px;
+            }
 
             /* // webkit scrollbars */
             ::-webkit-scrollbar {
@@ -104,11 +122,11 @@ export default class ChatUserList extends LitElement {
                 background: transparent;
             }
             ::-webkit-scrollbar-thumb {
-                background: var(--color-scrollbar-thumb, #1c1c1c);
+                background: var(--color-scrollbar-thumb, #464646);
                 border-radius: 5px;
             }
             ::-webkit-scrollbar-thumb:hover {
-                background: var(--color-scrollbar-thumb-hover, #333333);
+                background: var(--color-scrollbar-thumb-hover, #555555);
             }
             ::-webkit-scrollbar-corner {
                 background: transparent;
