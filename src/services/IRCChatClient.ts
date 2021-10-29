@@ -1,6 +1,6 @@
 import { invoke } from '@tauri-apps/api/tauri';
 import { emit, listen } from '@tauri-apps/api/event';
-import { rgbToHex } from '../utils';
+import { rgbToHex, limitColorContrast } from '../utils';
 
 interface ChatTransport {
     id: string,
@@ -96,27 +96,40 @@ export default class IRCChatClient {
             message,
         })
             .then(e => {
-                // loop message back to display in chat
-                for(let callback of listeners.get("chat.message")) {
-                    if(!this.usermap[channel]) {
-                        throw new Error('User not listed');
+                if(message[0] !== "/") {
+                    // loop message back to display in chat if its not a command
+                    for(let callback of listeners.get("chat.message")) {
+                        if(!this.usermap[channel]) {
+                            throw new Error('User not listed');
+                        }
+                        const user = this.usermap[channel];
+                        const message_data: ChatMessage = {
+                            id: "-1",
+                            username: user.username || "user not found",
+                            sender_id: user.id,
+                            channel: channel,
+                            is_action: false,
+                            badges: user.badges || [],
+                            message: message,
+                            color: user.color,
+                            timestamp: new Date()
+                        }
+                        callback(message_data);
                     }
-                    const user = this.usermap[channel];
-                    const message_data: ChatMessage = {
-                        id: "-1",
-                        username: user.username || "user not found",
-                        sender_id: user.id,
-                        channel: channel,
-                        is_action: false,
-                        badges: user.badges || [],
-                        message: message,
-                        color: user.color,
-                        timestamp: new Date()
-                    }
-                    callback(message_data);
                 }
 
                 console.log('message sent');
+            })
+            .catch((e) => console.error(e))
+    }
+
+    static async sendCommand(channel: string, message: string) {
+        return invoke('chat_send_message', {
+            channel,
+            message,
+        })
+            .then(e => {
+                console.log('command sent');
             })
             .catch((e) => console.error(e))
     }
@@ -148,7 +161,7 @@ export default class IRCChatClient {
                             is_action: payload.is_action,
                             badges: payload.badges,
                             message: payload.message,
-                            color: rgbToHex(...payload.name_color),
+                            color: rgbToHex(limitColorContrast(...payload.name_color)),
                             timestamp: new Date(payload.server_timestamp),
                             emotes: payload.emotes
                         }
@@ -163,7 +176,7 @@ export default class IRCChatClient {
                             channel: payload.channel,
                             username: payload.username,
                             badges: payload.badges,
-                            color: rgbToHex(...payload.name_color),
+                            color: rgbToHex(limitColorContrast(...payload.name_color)),
                         };
                         this.usermap[payload.channel] = message_data;
                         callback(message_data);
@@ -181,7 +194,7 @@ export default class IRCChatClient {
                             is_action: payload.is_action,
                             badges: payload.badges,
                             message: payload.message,
-                            color: rgbToHex(...payload.name_color),
+                            color: rgbToHex(limitColorContrast(...payload.name_color)),
                             timestamp: new Date(payload.server_timestamp),
                             emotes: payload.emotes
                         }

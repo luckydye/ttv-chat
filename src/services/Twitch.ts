@@ -1,15 +1,13 @@
 // import jwt from 'jsonwebtoken';
 import { parseSearch } from '../utils';
 import IRCChatClient from './IRCChatClient';
+import TwichCommands from './TwichCommands';
 
 const CLIENT_ID = "8gwe8mu523g9cstukr8rnnwspqjykf";
-const REDIRECT_URI = "https://luckydye.de/auth";
+const REDIRECT_URI = "https://best-twitch-chat.web.app/auth";
 
 let logged_in_username = "";
-
-window.addEventListener('load', e => {
-    checLogin();
-})
+let logged_in = false;
 
 function openChat(username: string, token: string) {
     try {
@@ -32,12 +30,14 @@ export async function handleAuthenticatedUser(token: string) {
     const userinfo = await fetchTwitchAuthApi("/oauth2/userinfo", token);
     const username = userinfo.preferred_username;
 
-    console.log(username);
+    console.log('Login', username);
     if (username == null) {
         localStorage.removeItem('user-token');
+        logged_in = false;
         return;
     } else {
         localStorage.setItem('user-token', token);
+        logged_in = true;
     }
 
     openChat(username, token);
@@ -92,7 +92,7 @@ export function fetchTwitchApi(path: string = "/users", query = "") {
 }
 
 export function checLogin() {
-    if (localStorage.getItem('user-token')) {
+    if (localStorage.getItem('user-token') && !logged_in) {
         const token = localStorage.getItem('user-token');
         handleAuthenticatedUser(token);
         return true;
@@ -168,12 +168,21 @@ export async function authClientUser() {
 
 export default class TwitchAPI {
 
+    static logout() {
+        localStorage.removeItem('user-token');
+        location.reload();
+    }
+
     static async getStreams(user_id: string) {
         return (await fetchTwitchApi("/streams", "user_id=" + user_id)).data;
     }
 
     static async getChannel(user_id: string) {
         return (await fetchTwitchApi("/channels", "broadcaster_id=" + user_id)).data;
+    }
+
+    static getAvailableCommands() {
+        return TwichCommands;
     }
 
 }

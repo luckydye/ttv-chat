@@ -1,6 +1,7 @@
-import { css, html, LitElement } from 'lit-element';
+import { css, html } from 'lit-element';
+import ContextMenu from "./ContextMenu";
 
-export default class EmotePicker extends LitElement {
+export default class EmotePicker extends ContextMenu {
 
     static get styles() {
         return css`

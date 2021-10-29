@@ -1,5 +1,6 @@
 import { css, html, LitElement } from 'lit-element';
-import { authClientUser, handleAuthenticatedUser, getUserInfo, checLogin, getLoggedInUser } from '../services/Twitch';
+import TwitchAPI, { getUserInfo, checLogin, getLoggedInUser } from '../services/Twitch';
+import ContextMenu from './ContextMenu';
 
 export default class TwitchAuthComp extends LitElement {
 
@@ -43,48 +44,46 @@ export default class TwitchAuthComp extends LitElement {
         `;
     }
 
+    user: { [key: string]: string } | null = null;
+
     constructor() {
         super();
 
-        this.user = null;
-
         if(checLogin()) {
             getLoggedInUser().then(info => {
-                this.user = info.preferred_username;
+                this.user = info;
                 this.update();
             })
         }
     }
 
-    pasteToken(e) {
-        navigator.clipboard.readText().then(clipText => {
-            handleAuthenticatedUser(clipText);
-        });
+    logout() {
+        TwitchAPI.logout();
     }
 
     render() {
-        if(!this.user) {
-            return html`
-                <div class="auth">
-                    <button @click="${e => authClientUser()}">L</button>
-                    <button @click="${e => this.pasteToken(e)}">P</button>
-                </div>
-            `;
-        } else {
-
+        if(this.user) {
             const img = new Image();
             img.width = 24;
-            img.alt = this.user;
+            img.alt = this.user.preferred_username;
             img.setAttribute('loading', '');
 
-            getUserInfo(this.user).then(info => {
+            getUserInfo(this.user.preferred_username).then(info => {
                 img.src = info.profile_image_url;
                 img.removeAttribute('loading');
             })
 
             return html`
                 <div class="auth">
-                    <div class="user-icon">
+                    <div class="user-icon" @click="${e => {
+                        const menu = ContextMenu.openOn(e.target);
+                        const btn = document.createElement('button');
+                        btn.innerHTML = "Logout";
+                        btn.onclick = () => {
+                            this.logout();
+                        }
+                        menu.append(btn);
+                    }}">
                         ${img}
                     </div>
                 </div>
@@ -93,4 +92,4 @@ export default class TwitchAuthComp extends LitElement {
     }
 }
 
-customElements.define('twitch-auth', TwitchAuthComp);
+customElements.define('twitch-profile', TwitchAuthComp);

@@ -2,7 +2,48 @@ chat-line {
     display: block;
     padding: 3px 12px;
     line-height: 150%;
+    position: relative;
 }
+chat-line:hover {
+    background: rgba(48, 50, 53, 0.15);
+}
+
+chat-line .tools {
+    display: grid;
+    grid-auto-flow: column;
+    grid-gap: 2px;
+    position: absolute;
+    right: 0;
+    top: 3px;
+    margin: 0 10px;
+}
+
+chat-line .chat-line-tool {
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 3px;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+chat-line .chat-line-tool:hover {
+    background: rgb(34 34 38 / 50%);
+}
+chat-line .chat-line-tool:active {
+    background: rgb(34 34 38 / 50%);
+    transform: scale(0.95);
+}
+
+chat-line:hover .tools .chat-line-tool {
+    display: flex;
+}
+chat-line:hover .tools .chat-line-tool.mod-tool {
+    display: none;
+}
+[modview] chat-line:hover .tools .chat-line-tool.mod-tool {
+    display: flex;
+}
+
 chat-line[deleted] {
     opacity: 0.33;
 }

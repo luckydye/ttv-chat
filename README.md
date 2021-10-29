@@ -3,29 +3,61 @@
 A new Desktop Twitch Client with all the things.
 
 
+## Install
 
-### To be included features (TODOs):
+n/a
+
+
+## Development
+
+n/a
+
+
+## Roadmap
+
+Next goal: Beta Release
+
+## To be included features (TODOs):
 - [ ] Auth flow
-- [x] chat not loading
-- [x] added rooms not appearing
-- [x] colse chats
-- [x] per chat user appearence
-
-- [x] lose chat
-- [x] open user list
 - [ ] follower mode + mode dropdown
 - [ ] sub mode toggle
-- [x] open in browser
+- [ ] seperate out the message log part of the chat for seperate mention and whisper tab wihtout, chat-input, bio and room state stuff
 
+- Visibility panel
+    - [ ] Show deltes messages
+    - [ ] Zoom chat
+    - [ ] Streamer features
+        - Hide names
+        - Hide badges
+    - [ ] mod tools
+    - [ ] Spam grouping
+        - find a way to get a value based on the difference between messages
+        - group messages if msg.unique_words == msg.unique_words
+        - make content IDs/hashes.
+        - find existing chat messages that match that id/hash
+        - move message down to latest and add to a counter on the message
+    - [ ] Hide messages from bots
+    - [ ] Timestamps take to much space
+        - Colored dot indicating how long ago the message got posted?
+
+- [x] All the emotes
+- [x] Stream Title
+- [x] Uptime/Live indicator
+- [x] Put the bio n stuff at the top of the chatroom
+- [x] open in browser
+- [x] per chat user appearence
+- [x] added rooms not appearing
+- [x] colse chats
+- [x] open user list
+- [ ] Username color picker
+- [ ] input history navigation
 - [ ] emote and badge tool tips
 - [ ] User panel
-- [ ] Zoom chat
 - [ ] Fix dragging rooms
 - [ ] UI for
     - Pols
     - Predictions
 - [ ] Channel Point Redemtions
-- [x] All the emotes
 - [ ] Notifications
 - [ ] Inline Notifications
     - Subs
@@ -34,24 +66,8 @@ A new Desktop Twitch Client with all the things.
 - [ ] "Threads" (Mentions)
     - Optin thread
     - Person gets added to thread on mention
-- [ ] Streamer features
-    - Hide names
-    - Hide badges
 - [ ] Chat commands
-- [x] Stream Title
-- [x] Uptime/Live indicator
-- [ ] mod tools
-- [ ] Spam grouping
-    - group messages if msg.unique_words == msg.unique_words
-    - make content IDs/hashes.
-     - find existing chat messages that match that id/hash
-     - move message down to latest and add to a counter on the message
-- [ ] Hide messages from bots
-- [ ] Problems to solve:
-    - Timestamps take to much space
-        - Colored dot indicating how long ago the message got posted?
 - [ ] Chat input UI like the discord one with emote, pol/Pred feature, etc
 - [ ] Input emote parsing
 - [ ] Youtube chats
-- [x] Put the bio n stuff at the top of the chatroom
 - [ ] Reccomend channels from follow list

@@ -1,10 +1,11 @@
 import { css, html, LitElement } from 'lit-element';
-import { ChatMessage } from '../services/IRCChatClient';
+import IRCChatClient, { ChatMessage } from '../services/IRCChatClient';
 import Badges from '../services/Badges';
 import { getLoggedInUsername } from '../services/Twitch';
 import Emotes from '../services/Emotes';
 import Webbrowser from '../services/Webbrowser';
 import TwitchEmotes from '../services/emotes/TwitchEmotes';
+import { Application } from '../App';
 
 export class ChatLine extends LitElement {
 
@@ -43,6 +44,16 @@ export class ChatLine extends LitElement {
 
     createRenderRoot() {
         return this;
+    }
+
+    jumpToChat() {
+        console.log('jump to', this.chat.roomName);
+        
+        Application.selectRoom(this.chat.roomName);
+    }
+
+    timeout(s: number = 10) {
+        IRCChatClient.sendCommand(this.message.channel, `/timeout ${this.message?.username} ${s}`);
     }
 
     render() {
@@ -97,6 +108,13 @@ export class ChatLine extends LitElement {
                 if (client_user != "" && str.toLocaleLowerCase().match(client_user)) {
                     wordMentionMap[str] = str;
                     this.setAttribute('highlighted', '');
+                    
+                    // is current user => send to mentions chat
+                    //   yeah not the ideal palce to do this... should process and parse messages elswhere
+                    if(this.chat.roomName !== "Mentions") {
+                        const mentionChat = Application.getChats("@");
+                        mentionChat.appendMessage(this.message);
+                    }
                 }
             });
 
@@ -123,19 +141,30 @@ export class ChatLine extends LitElement {
                 <div class="line" style="--color: ${this.message.color}" ?action="${this.message.is_action}">
                     <span class="bages">
                         ${this.message.badges.map(badge => {
-                let badge_url = "";
+                            let badge_url = "";
 
-                if (badge.name == "subscriber") {
-                    badge_url = this.chat.getSubBadge(badge.version) || Badges.getBadgeByName(badge.name, badge.version);
-                } else {
-                    badge_url = Badges.getBadgeByName(badge.name, badge.version);
-                }
+                            if (badge.name == "subscriber") {
+                                badge_url = this.chat.getSubBadge(badge.version) || Badges.getBadgeByName(badge.name, badge.version);
+                            } else {
+                                badge_url = Badges.getBadgeByName(badge.name, badge.version);
+                            }
 
-                return html`<img class="badge" alt="${badge.name}" src="${badge_url}" width="18" height="18">`;
-            })}
+                            return html`<img class="badge" alt="${badge.name}" src="${badge_url}" width="18" height="18">`;
+                        })}
                     </span>
                     <span class="username">${this.message.username}:</span>
                     <span class="message">${parsed_msg}</span>
+                    
+                    <div class="tools">
+                        ${this.chat.roomName === "Mentions" ? html`
+                            <div class="chat-line-tool" @click="${() => this.jumpToChat()}" title="Jump to chat">
+                                <img src="./images/navigate_before_white_24dp.svg" width="18px" height="18px" />
+                            </div>
+                        ` : ""}
+                        <div class="chat-line-tool mod-tool" @click="${() => this.timeout(10)}">
+                            <img src="./images/block_white_24dp.svg" width="18px" height="18px" />
+                        </div>
+                    </div>
                 </div>
             `;
         }

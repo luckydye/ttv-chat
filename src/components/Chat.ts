@@ -21,6 +21,8 @@ export default class TwitchChat extends LitElement {
     roomName: string = "";
     stream_title: string = "";
 
+    connect = false;
+
     info = null;
     channel_badges: {
         [key: string]: any;
@@ -112,6 +114,8 @@ export default class TwitchChat extends LitElement {
     setRoom(roomName: string) {
         this.roomName = roomName;
 
+        this.appenNote(`Connecting`);
+
         const updateStatus = async () => {
             const stream = await TwitchAPI.getStreams(this.info.id);
             if(stream[0]) {
@@ -165,6 +169,7 @@ export default class TwitchChat extends LitElement {
 
     connectedCallback() {
         super.connectedCallback();
+        
         setTimeout(() => {
             this.scrollToLatest();
             this.afterAppend();
@@ -195,6 +200,12 @@ export default class TwitchChat extends LitElement {
                 this.moderator = msg.badges.find(b => b.name == "moderator") !== undefined;
                 this.broadcaster = msg.badges.find(b => b.name == "broadcaster") !== undefined;
                 this.update();
+
+                if(this.moderator === true || this.broadcaster === true) {
+                    this.setAttribute('modview', '');
+                } else {
+                    this.removeAttribute('modview');
+                }
             }
         })
 
@@ -216,6 +227,11 @@ export default class TwitchChat extends LitElement {
                     this.slow_mode = msg.slow_mode.secs;
                 }
                 this.update();
+
+                if(!this.connect) {
+                    this.appenNote(`Connected to ${this.roomName}`);
+                    this.connect = true;
+                }
             }
         });
     }
@@ -267,14 +283,6 @@ export default class TwitchChat extends LitElement {
                 font-weight: 400;
                 color: #ababab;
                 border-bottom: 1px solid black;
-            }
-
-            .chat-title:hover {
-                cursor: pointer;
-                background: rgb(33, 33, 36);
-            }
-            .chat-title:active {
-                background: rgb(25, 25, 28);
             }
 
             .chat-title span {
@@ -419,7 +427,9 @@ export default class TwitchChat extends LitElement {
                 display: flex;
                 align-items: center;
                 justify-content: flex-end;
+                grid-column: 3;
             }
+            .user-state-icon,
             .room-state-icon {
                 display: none;
                 color: #eee;
@@ -431,10 +441,40 @@ export default class TwitchChat extends LitElement {
                 margin-left: 8px;
                 user-select: none;
             }
+            .user-state-icon[active],
             .room-state-icon[active] {
                 display: flex;
             }
+            :host([modview]) .room-state-icon {
+                opacity: 0.25;
+                display: flex;
+            }
+            :host([modview]) .room-state-icon[active] {
+                opacity: 1;
+            }
 
+            :host([modview]) .room-state-icon {
+                border: none;
+                padding: 0px;
+                margin: 0px;
+                background: transparent;
+                min-width: 24px;
+                height: 22px;
+                cursor: pointer;
+                border-radius: 3px;
+            }
+            :host([modview]) .room-state-icon:hover {
+                outline: #464646 solid 1px;
+            }
+            :host([modview]) .room-state-icon:active {
+                background: #333333;
+            }
+            :host([modview]) .room-state-icon:active img {
+                transform: scale(0.95);
+            }
+
+            .user-list-preview:focus-within,
+            .user-list-preview:hover,
             .user-list-preview:focus,
             .user-list-button:focus ~ .user-list-preview {
                 display: block;
@@ -457,12 +497,72 @@ export default class TwitchChat extends LitElement {
                 font-size: 12px;
                 font-weight: 400;
             }
+            .chat-channel-name:hover {
+                text-decoration: underline;
+                cursor: pointer;
+            }
+            .chat-channel-name:active {
+                opacity: 0.5;
+            }
+            :host([modview]) .chat-channel-name {
+                display: none;
+            }
         `;
     }
 
     async openUserlist() {
         const listEle = this.shadowRoot.querySelector('chat-user-list');
         listEle.updateList();
+    }
+
+    toggleSlowMode() {
+        if(this.moderator || this.broadcaster) {
+            if(this.slow_mode) {
+                IRCChatClient.sendMessage(this.roomName, "/slowoff");
+            } else {
+                IRCChatClient.sendMessage(this.roomName, "/slow 10");
+            }
+        }
+    }
+
+    toggleFollowerMode() {
+        if(this.moderator || this.broadcaster) {
+            if(this.follwers_only) {
+                IRCChatClient.sendMessage(this.roomName, "/followersoff");
+            } else {
+                IRCChatClient.sendMessage(this.roomName, "/followers 10");
+            }
+        }
+    }
+
+    toggleEmoteOnlyMode() {
+        if(this.moderator || this.broadcaster) {
+            if(this.emote_only) {
+                IRCChatClient.sendMessage(this.roomName, "/emoteonlyoff");
+            } else {
+                IRCChatClient.sendMessage(this.roomName, "/emoteonly");
+            }
+        }
+    }
+
+    toggleSubOnlyMode() {
+        if(this.moderator || this.broadcaster) {
+            if(this.subscribers_only) {
+                IRCChatClient.sendMessage(this.roomName, "/subscribersoff");
+            } else {
+                IRCChatClient.sendMessage(this.roomName, "/subscribers");
+            }
+        }
+    }
+
+    toggleR9kMode() {
+        if(this.moderator || this.broadcaster) {
+            if(this.r9k) {
+                IRCChatClient.sendMessage(this.roomName, "/r9kbetaoff");
+            } else {
+                IRCChatClient.sendMessage(this.roomName, "/r9kbeta");
+            }
+        }
     }
 
     render() {
@@ -473,14 +573,14 @@ export default class TwitchChat extends LitElement {
                         <button title="Close chat" @click="${(e) => {
                             Application.closeRoom(this.roomName);
                         }}">
-                            <img src="./close.svg" width="16px" height="16px" />
+                            <img src="./images/close.svg" width="16px" height="16px" />
                         </button>
                     </div>
                     <div class="chat-action">
                         <button class="user-list-button" title="Userlist" @click="${() => {
                             this.openUserlist();
                         }}">
-                            <img src="./people.svg" width="16px" height="16px" />
+                            <img src="./images/people.svg" width="16px" height="16px" />
                         </button>
                         <div class="user-list-preview" tabindex="0">
                             <chat-user-list channel="${this.roomName}"></chat-user-list>
@@ -490,52 +590,52 @@ export default class TwitchChat extends LitElement {
                         <button title="Open Stream" @click="${() => {
                             Webbrowser.openURL(`https://www.twitch.tv/${this.roomName}`);
                         }}">
-                            <img src="./open.svg" width="16px" height="16px" />
+                            <img src="./images/open.svg" width="16px" height="16px" />
                         </button>
                     </div>
                 </div>
-                <div class="chat-channel-name">
+                <div class="chat-channel-name" @click="${() => {
+                    Webbrowser.openURL(`https://www.twitch.tv/${this.roomName}`);
+                }}">
                     ${this.roomName}
                 </div>
                 <div class="chat-state-icons">
-                    <div class="chat-action">
+                    <div class="chat-action" @click="${this.toggleSlowMode}">
                         <div class="room-state-icon" title="Slow mode for ${this.slow_mode}s" ?active="${this.slow_mode !== 0}">
-                            <img src="./slowmode.svg" width="18px" height="18px"/>
+                            <img src="./images/slowmode.svg" width="18px" height="18px"/>
                         </div>
                     </div>
-                    <div class="chat-action">
+                    <div class="chat-action" @click="${this.toggleFollowerMode}">
                         <div class="room-state-icon" title="Follow mode for ${this.follwers_only}s" ?active="${this.follwers_only !== 0}">
-                            <img src="./follower.svg" width="18px" height="18px"/>
+                            <img src="./images/follower.svg" width="18px" height="18px"/>
                         </div>
                     </div>
-                    <div class="chat-action">
+                    <div class="chat-action" @click="${this.toggleEmoteOnlyMode}">
                         <div class="room-state-icon" title="Emote only mode" ?active="${this.emote_only}">
-                            <img src="./emote.svg" width="18px" height="18px"/>
+                            <img src="./images/emote.svg" width="18px" height="18px"/>
                         </div>
                     </div>
-                    <div class="chat-action">
+                    <div class="chat-action" @click="${this.toggleSubOnlyMode}">
                         <div class="room-state-icon" title="Sub only mode" ?active="${this.subscribers_only}">
-                            <img src="./subscriber.svg" width="18px" height="18px"/>
+                            <img src="./images/subscriber.svg" width="18px" height="18px"/>
                         </div>
                     </div>
-                    <div class="chat-action">
+                    <div class="chat-action" @click="${this.toggleR9kMode}">
                         <div class="room-state-icon" title="r9k mode" ?active="${this.r9k}">r9k</div>
                     </div>
                     <div class="chat-action">
-                        <div class="room-state-icon" title="Moderator" ?active="${this.moderator}">
+                        <div class="user-state-icon" title="Moderator" ?active="${this.moderator}">
                             <img src="https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/2" width="18px" height="18px"/>
                         </div>
                     </div>
                     <div class="chat-action">
-                        <div class="room-state-icon" title="Broadcaster" ?active="${this.broadcaster}">
+                        <div class="user-state-icon" title="Broadcaster" ?active="${this.broadcaster}">
                             <img src="https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/2" width="18px" height="18px"/>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="chat-title" @click="${() => {
-                Webbrowser.openURL(`https://www.twitch.tv/${this.roomName}`);
-            }}">
+            <div class="chat-title">
                 ${this.stream_title == "" ? "Offline" : this.stream_title}
             </div>
             <div class="scroll-to-bottom" @click="${() => this.lock()}">
@@ -552,7 +652,7 @@ export default class TwitchChat extends LitElement {
                                 <div class="profile-name">
                                     ${this.info.display_name}
                                     ${this.info.broadcaster_type == "partner" ? html`
-                                        <img src="./verified.svg" alt="verified"/>
+                                        <img src="./images/verified.svg" alt="verified"/>
                                     ` : ""}
                                 </div>
                                 <div class="game">
@@ -572,7 +672,6 @@ export default class TwitchChat extends LitElement {
                             `}
                         </div>
                     ` : ""}
-                    <div class="info">Connected to ${this.roomName}</div>
                 `: ""}
                 <slot></slot>
             </div>

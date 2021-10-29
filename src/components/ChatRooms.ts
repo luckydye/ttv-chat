@@ -101,6 +101,15 @@ export default class ChatRooms extends LitElement {
 
         return html`
             <div class="icon-list" @pointermove="${move}" @pointerup="${commitDrag}" @pointercancel="${commitDrag}">
+
+                <div channel="@" ?selected="${Application.getSelectedRoom() == "@"}" 
+                    class="room-icon mentions-icon" hint="Mentions" 
+                    @mousedown="${() => {
+                        Application.selectRoom("@");
+                    }}">
+                    <img src="./images/Mention.svg" width="18px" height="18px"/>
+                </div>
+
                 ${rooms.map(room => {
                     return html`
                         <profile-indicator channel="${room}" ?selected="${Application.getSelectedRoom() == room}" 
@@ -114,9 +123,7 @@ export default class ChatRooms extends LitElement {
                 })}
 
                 <div class="room-icon new-room" @click="${(e) => {
-                        const rect = e.target.getClientRects()[0];
-                        const ele = new AddChannelDialog(rect.x, rect.y);
-                        document.body.append(ele);
+                        AddChannelDialog.openOn(e.target);
                     }}" hint="Join Room" >
                     +
                 </div>

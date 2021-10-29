@@ -1,14 +1,15 @@
 //
-import './components/Authenticator';
+import './components/Login';
+import './components/Profile';
 import './components/ChatInput';
 import './components/ChatRooms';
 import './components/Chat';
 import './services/Twitch';
 import IRCChatClient from './services/IRCChatClient';
-import { ChatMessage, UserState, ChatClearMessage } from './services/IRCChatClient';
+import { ChatMessage } from './services/IRCChatClient';
 import { Application } from './App';
 
-const chatElements = {};
+const chatElements: { [key: string]: any } = {};
 
 function createChat(channel: string) {
     chatElements[channel] = document.createElement("twitch-chat");
@@ -28,6 +29,12 @@ function renderSelecetdChat() {
 async function main() {
 
     await Application.init();
+
+    // custom mentions channel
+    chatElements["@"] = document.createElement("twitch-chat");
+    chatElements["@"].setRoom("Mentions");
+
+    Application.setChats(chatElements);
 
     window.addEventListener('addedroom', e => {
         createChat(e.room_name);

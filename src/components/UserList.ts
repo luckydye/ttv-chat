@@ -14,6 +14,7 @@ export default class ChatUserList extends LitElement {
 
     channel: string;
     list: Array<any>;
+    filter: string = "";
 
     updateList() {
         this.request();
@@ -34,15 +35,15 @@ export default class ChatUserList extends LitElement {
         const counts = this.shadowRoot.querySelector('.user-list-counts');
         counts.innerHTML = "";
         if(staffCount > 0) {
-            counts.innerHTML += `<img height="16px" width="16px" src="./Staff.svg"/> ${formatNumber(staffCount)}  `;
+            counts.innerHTML += `<img height="16px" width="16px" src="./images/Staff.svg"/> ${formatNumber(staffCount)}  `;
         }
         if(modCount > 0) {
-            counts.innerHTML += `<img height="16px" width="16px" src="./Mod.svg"/> ${formatNumber(modCount)}  `;
+            counts.innerHTML += `<img height="16px" width="16px" src="./images/Mod.svg"/> ${formatNumber(modCount)}  `;
         }
         if(vipCount > 0) {
-            counts.innerHTML += `<img height="16px" width="16px" src="./VIP.svg"/> ${formatNumber(vipCount)}  `;
+            counts.innerHTML += `<img height="16px" width="16px" src="./images/VIP.svg"/> ${formatNumber(vipCount)}  `;
         }
-        counts.innerHTML += `<img height="16px" width="16px" src="./Viewer.svg"/> ${formatNumber(viewerCount)}`;
+        counts.innerHTML += `<img height="16px" width="16px" src="./images/Viewer.svg"/> ${formatNumber(viewerCount)}`;
 
         this.update();
     }
@@ -80,6 +81,7 @@ export default class ChatUserList extends LitElement {
                 font-size: 14px;
             }
             .user-search {
+                color: #eee;
                 margin-bottom: 5px;
                 width: 100%;
                 background: transparent;
@@ -134,9 +136,16 @@ export default class ChatUserList extends LitElement {
         `;
     }
 
+    setFilter(str: string) {
+        this.filter = str;
+        this.update();
+    }
+
     render() {
         const renderList = (arr) => {
-            return arr.map(username => {
+            return arr.filter(username => {
+                return username.match(this.filter);
+            }).map(username => {
                 return html`<div class="user">${username}</div>`;
             });
         }
@@ -147,7 +156,9 @@ export default class ChatUserList extends LitElement {
 
             ${this.list ? html`
                 <div class="list">
-                    <input class="user-search" placeholder="Search user"/>
+                    <input class="user-search" placeholder="Search user" @input="${(e) => {
+                        this.setFilter(e.target.value);
+                    }}"/>
                     <div class="full-list">
                         <div class="list-title">Braodcast</div>
                         ${renderList(this.list.broadcaster)}

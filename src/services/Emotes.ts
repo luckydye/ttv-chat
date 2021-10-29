@@ -43,3 +43,5 @@ export default class Emotes {
     }
 
 }
+
+Emotes.getGlobalEmotes();

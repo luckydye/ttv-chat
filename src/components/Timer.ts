@@ -36,7 +36,7 @@ export default class Tiemr extends LitElement {
             seconds: Math.floor((uptimems / 1000) % 60),
         }
         return html`
-            <span>${`${uptime.hours}h${uptime.minutes}m${uptime.seconds}s`}</span>
+            <span>${`${uptime.hours}h ${uptime.minutes}m ${uptime.seconds}s`}</span>
         `;
     }
 }

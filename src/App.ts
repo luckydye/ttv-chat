@@ -24,7 +24,20 @@ class CloseRoomEvent extends Event {
     }
 }
 
+let chatRooms = {};
+
 export class Application {
+
+    static setChats(chatMap: object) {
+        chatRooms = chatMap;
+    }
+
+    static getChats(key: string) {
+        if(key) {
+            return chatRooms[key];
+        }
+        return chatRooms;
+    }
 
     static saveState() {
         localStorage.setItem('save-state', JSON.stringify(applicationState));
