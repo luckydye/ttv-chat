@@ -40,9 +40,7 @@ export class ChatLine extends LitElement {
     }
 
     jumpToChat() {
-        console.log('jump to', this.chat.roomName);
-        
-        Application.selectRoom(this.chat.roomName);
+        Application.selectRoom(this.message.channel);
     }
 
     timeout(s: number = 10) {
@@ -51,6 +49,10 @@ export class ChatLine extends LitElement {
 
     openThread() {
         // gotta implement this and user cards
+    }
+
+    reply() {
+        // reply to this message
     }
 
     render() {
@@ -155,8 +157,8 @@ export class ChatLine extends LitElement {
                     </span>
                     <span class="username">${this.message.username}:</span>
                     ${this.isReply ? html`
-                        <button class="reply-icon" @click="${this.openThread}">
-                            <img src="./images/reply_white_24dp.svg" height="18px" width="18px" />
+                        <button class="reply-icon" title="Open Thread" @click="${this.openThread}">
+                            <img src="./images/question_answer_white_24dp.svg" height="18px" width="18px" />
                         </button>
                     ` : ""}
                     <span class="message">${parsed_msg}</span>
@@ -167,9 +169,14 @@ export class ChatLine extends LitElement {
                                 <img src="./images/navigate_before_white_24dp.svg" width="18px" height="18px" />
                             </div>
                         ` : ""}
-                        <div class="chat-line-tool mod-tool" @click="${() => this.timeout(10)}">
-                            <img src="./images/block_white_24dp.svg" width="18px" height="18px" />
-                        </div>
+                        ${this.message.username !== getLoggedInUsername() ? html`
+                            <div class="chat-line-tool mod-tool" title="Reply" @click="${() => this.reply()}">
+                                <img src="./images/reply_white_24dp.svg" height="18px" width="18px" />
+                            </div>
+                            <div class="chat-line-tool mod-tool" @click="${() => this.timeout(10)}">
+                                <img src="./images/block_white_24dp.svg" width="18px" height="18px" />
+                            </div>
+                        ` : ""}
                     </div>
                 </div>
             `;
