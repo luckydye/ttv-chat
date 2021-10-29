@@ -377,7 +377,7 @@ export default class TwitchChat extends LitElement {
             .profile-desc {
                 margin-top: 20px;
                 grid-column: 1 / span 2;
-                line-height: 1.33em;
+                line-height: 150%;
             }
             .viewcount {
                 opacity: 0.5;

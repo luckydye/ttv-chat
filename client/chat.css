@@ -1,7 +1,7 @@
 chat-line {
     display: block;
-    padding: 5px 12px;
-    line-height: 1.33em;
+    padding: 3px 12px;
+    line-height: 150%;
 }
 chat-line[deleted] {
     opacity: 0.33;
