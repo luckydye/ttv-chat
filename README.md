@@ -27,6 +27,7 @@ A new Desktop Twitch Client with all the things.
 - [ ] Channel Point Redemtions
 - [x] All the emotes
 - [ ] Notifications
+- [ ] activity feed
 - [ ] Inline Notifications
     - Subs
     - Follows
