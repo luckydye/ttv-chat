@@ -14,13 +14,15 @@ let currentAnimation: number = -1;
 
 export default class AnimatedScroll {
 
-    static scrollTo(ele: HTMLElement, root: HTMLElement) {
+    static scrollTo(target: number, root: HTMLElement) {
         cancelAnimationFrame(currentAnimation);
 
-        const y = ele.getClientRects()[0].y - scrollToYOffset;
-
-        const maxScrollHeight = root.scrollHeight - root.clientHeight;
-        const target = Math.min(y + root.scrollTop, maxScrollHeight);
+        if(target > 0) {
+            const maxScrollHeight = root.scrollHeight - root.clientHeight;
+            target = Math.min(target, maxScrollHeight);
+        } else {
+            target = 0;
+        }
 
         const start = root.scrollTop;
         const dist = target - start;
@@ -33,8 +35,9 @@ export default class AnimatedScroll {
         const loop = () => {
             const currentTick = performance.now();
             const deltaTime = (currentTick - lastTick) / (1000 / scrollToSpeed);
+
             elapsed += deltaTime;
-            current = start + (Ease.easeOutQuad(elapsed) * dist);
+            current = start + (Ease.easeOutCubic(elapsed) * dist);
 
             lastTick = currentTick;
 

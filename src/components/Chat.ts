@@ -14,6 +14,7 @@ export default class TwitchChat extends LitElement {
 
     scrollLock = true;
     roomName: string = "";
+    scrollTarget: number = 0;
 
     appendMessage(msg: ChatMessage, sourceChat: TwitchChat = this) {
         const line = new ChatLine(sourceChat, msg);
@@ -55,7 +56,9 @@ export default class TwitchChat extends LitElement {
         if(!scrollEle) return;
 
         if(scrollEle.scrollHeight > 0 && this.scrollLock) {
-            AnimatedScroll.scrollTo(this.children[this.children.length-1], scrollEle);
+            const latest = (scrollEle.scrollHeight - scrollEle.clientHeight);
+            this.scrollTarget = latest;
+            AnimatedScroll.scrollTo(latest, scrollEle);
         }
     }
 
@@ -63,17 +66,17 @@ export default class TwitchChat extends LitElement {
         const scrollEle = this.shadowRoot?.querySelector('.lines');
         if(!scrollEle) return;
 
+        this.scrollTarget = scrollEle.scrollTop;
+
         const latest = (scrollEle.scrollHeight - scrollEle.clientHeight);
 
-        if(scrollEle.scrollTop >= latest - 10) {
+        if(this.scrollTarget >= latest - 1) {
+            console.log('locking');
             this.lock();
         } 
-        if(scrollEle.scrollTop < latest - 1000) {
+        if(this.scrollTarget < latest - 1000) {
             this.unlock();
         }
-
-        // update scroll position
-        this.scrollToLatest();
 
         // clean out buffer
         if (this.children.length > this.MAX_BUFFER_SIZE) {
@@ -82,6 +85,9 @@ export default class TwitchChat extends LitElement {
                 this.children[i].remove();
             }
         }
+
+        // update scroll position
+        requestAnimationFrame(() => this.scrollToLatest());
     }
 
     setRoom(roomName: string) {
@@ -102,8 +108,14 @@ export default class TwitchChat extends LitElement {
         super();
 
         this.addEventListener('wheel', e => {
+            const scrollEle = this.shadowRoot?.querySelector('.lines');
+            this.scrollTarget = scrollEle.scrollTop;
             if (e.deltaY < 0) {
                 this.unlock();
+            }
+            const latest = (scrollEle.scrollHeight - scrollEle.clientHeight);
+            if (scrollEle.scrollTop + e.deltaY >= latest) {
+                this.lock();
             }
             this.afterAppend();
         })
