@@ -372,6 +372,10 @@ export default class TwitchChat extends Chat {
                 align-items: center;
                 margin-left: 8px;
                 user-select: none;
+                padding: 0px 3px;
+            }
+            .room-state-icon.action-expand {
+                padding: 0px;
             }
             .user-state-icon[active],
             .room-state-icon[active] {
@@ -387,10 +391,9 @@ export default class TwitchChat extends Chat {
 
             :host([modview]) .room-state-icon {
                 border: none;
-                padding: 0px;
                 margin: 0px;
                 background: transparent;
-                min-width: 24px;
+                min-width: 16px;
                 height: 22px;
                 cursor: pointer;
                 border-radius: 3px;
@@ -553,6 +556,13 @@ export default class TwitchChat extends Chat {
                             Webbrowser.openURL(`https://www.twitch.tv/${this.roomName}`);
                         }}">
                             <img src="./images/open.svg" width="16px" height="16px" />
+                        </button>
+                    </div>
+                    <div class="chat-action">
+                        <button title="Relaod Chat" @click="${() => {
+                            location.reload();
+                        }}">
+                            <img src="./images/refresh_white_24dp.svg" width="16px" height="16px" />
                         </button>
                     </div>
                 </div>
