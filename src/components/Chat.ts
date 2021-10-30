@@ -8,6 +8,8 @@ import Webbrowser from '../services/Webbrowser';
 import { ChatLine, ChatInfo, ChatNote } from './ChatLine';
 import { Application } from '../App';
 import { formatLang, formatNumber } from '../utils';
+import ContextMenu from './ContextMenu';
+import './FluidInput';
 // Components
 import './Timer';
 import './UserList';
@@ -36,6 +38,9 @@ export default class TwitchChat extends LitElement {
     follwers_only = 0;
     slow_mode = 0;
     chatter_count = 0;
+
+    slowmode_time = 10;
+    followermode_time = 10;
     
     moderator = false;
     broadcaster = false;
@@ -233,9 +238,15 @@ export default class TwitchChat extends LitElement {
                 }
                 if(msg.follwers_only !== null) {
                     this.follwers_only = msg.follwers_only !== "Disabled" ? msg.follwers_only.Enabled.secs : 0;
+                    if(this.followermode_time === 0) {
+                        this.followermode_time = this.follwers_only / 60;
+                    }
                 }
                 if(msg.slow_mode !== null) {
                     this.slow_mode = msg.slow_mode.secs;
+                    if(this.slowmode_time === 0) {
+                        this.slowmode_time = this.slow_mode;
+                    }
                 }
                 this.update();
 
@@ -533,7 +544,7 @@ export default class TwitchChat extends LitElement {
             if(this.slow_mode) {
                 IRCChatClient.sendMessage(this.roomName, "/slowoff");
             } else {
-                IRCChatClient.sendMessage(this.roomName, "/slow 10");
+                IRCChatClient.sendMessage(this.roomName, "/slow " + this.slowmode_time);
             }
         }
     }
@@ -543,7 +554,7 @@ export default class TwitchChat extends LitElement {
             if(this.follwers_only) {
                 IRCChatClient.sendMessage(this.roomName, "/followersoff");
             } else {
-                IRCChatClient.sendMessage(this.roomName, "/followers 10");
+                IRCChatClient.sendMessage(this.roomName, "/followers " + this.followermode_time);
             }
         }
     }
@@ -576,6 +587,36 @@ export default class TwitchChat extends LitElement {
                 IRCChatClient.sendMessage(this.roomName, "/r9kbeta");
             }
         }
+    }
+
+    openSlowModeSettins(e) {
+        const menu = ContextMenu.openOn(e.target, 'down');
+        const input = document.createElement('fluid-input');
+        input.value = this.slowmode_time;
+        input.steps = "1";
+        input.min = 1;
+        input.max = 600;
+        input.suffix = "sec";
+        input.style.width = "100px";
+        input.addEventListener('change', e => {
+            this.slowmode_time = input.value;
+        })
+        menu.append(input);
+    }
+
+    openFollowerModeSettings(e) {
+        const menu = ContextMenu.openOn(e.target, 'down');
+        const input = document.createElement('fluid-input');
+        input.value = this.followermode_time;
+        input.steps = "1";
+        input.min = 1;
+        input.max = 600;
+        input.suffix = "min";
+        input.style.width = "100px";
+        input.addEventListener('change', e => {
+            this.followermode_time = input.value;
+        })
+        menu.append(input);
     }
 
     render() {
@@ -613,28 +654,34 @@ export default class TwitchChat extends LitElement {
                     ${this.roomName}
                 </div>
                 <div class="chat-state-icons">
-                    <div class="chat-action" @click="${this.toggleSlowMode}">
-                        <div class="room-state-icon" title="Slow mode for ${this.slow_mode}s" ?active="${this.slow_mode !== 0}">
+                    <div class="chat-action">
+                        <div class="room-state-icon" title="Slow mode for ${this.slow_mode}s" ?active="${this.slow_mode !== 0}" @click="${this.toggleSlowMode}">
                             <img src="./images/slowmode.svg" width="18px" height="18px"/>
                         </div>
-                    </div>
-                    <div class="chat-action" @click="${this.toggleFollowerMode}">
-                        <div class="room-state-icon" title="Follow mode for ${this.follwers_only}s" ?active="${this.follwers_only !== 0}">
-                            <img src="./images/follower.svg" width="18px" height="18px"/>
+                        <div class="room-state-icon action-expand" title="Slowmode time" @click="${this.openSlowModeSettins}">
+                            <img src="./images/expand_more_black_24dp.svg" width="16px" height="16px"/>
                         </div>
                     </div>
-                    <div class="chat-action" @click="${this.toggleEmoteOnlyMode}">
-                        <div class="room-state-icon" title="Emote only mode" ?active="${this.emote_only}">
+                    <div class="chat-action">
+                        <div class="room-state-icon" title="Follow mode for ${this.follwers_only}s" ?active="${this.follwers_only !== 0}" @click="${this.toggleFollowerMode}">
+                            <img src="./images/follower.svg" width="18px" height="18px"/>
+                        </div>
+                        <div class="room-state-icon action-expand" title="Follower time" @click="${this.openFollowerModeSettings}">
+                            <img src="./images/expand_more_black_24dp.svg" width="16px" height="16px"/>
+                        </div>
+                    </div>
+                    <div class="chat-action">
+                        <div class="room-state-icon" title="Emote only mode" ?active="${this.emote_only}" @click="${this.toggleEmoteOnlyMode}">
                             <img src="./images/emote.svg" width="18px" height="18px"/>
                         </div>
                     </div>
-                    <div class="chat-action" @click="${this.toggleSubOnlyMode}">
-                        <div class="room-state-icon" title="Sub only mode" ?active="${this.subscribers_only}">
+                    <div class="chat-action">
+                        <div class="room-state-icon" title="Sub only mode" ?active="${this.subscribers_only}" @click="${this.toggleSubOnlyMode}">
                             <img src="./images/subscriber.svg" width="18px" height="18px"/>
                         </div>
                     </div>
-                    <div class="chat-action" @click="${this.toggleR9kMode}">
-                        <div class="room-state-icon" title="r9k mode" ?active="${this.r9k}">r9k</div>
+                    <div class="chat-action">
+                        <div class="room-state-icon" title="r9k mode" ?active="${this.r9k}" @click="${this.toggleR9kMode}">r9k</div>
                     </div>
                     <div class="chat-action">
                         <div class="user-state-icon" title="Moderator" ?active="${this.moderator}">

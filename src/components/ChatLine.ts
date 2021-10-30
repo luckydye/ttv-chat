@@ -170,7 +170,7 @@ export class ChatLine extends LitElement {
                             </div>
                         ` : ""}
                         ${this.message.username !== getLoggedInUsername() ? html`
-                            <div class="chat-line-tool mod-tool" title="Reply" @click="${() => this.reply()}">
+                            <div class="chat-line-tool" title="Reply" @click="${() => this.reply()}">
                                 <img src="./images/reply_white_24dp.svg" height="18px" width="18px" />
                             </div>
                             <div class="chat-line-tool mod-tool" @click="${() => this.timeout(10)}">

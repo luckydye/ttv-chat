@@ -4,19 +4,31 @@ export default class ContextMenu extends LitElement {
 
     static get styles() {
         return css`
-            @keyframes slide-in {
+            @keyframes slide-right {
                 from {
                     opacity: 0;
                     transform: translate(-10px, 0);
                 }
             }
+            @keyframes slide-down {
+                from {
+                    opacity: 0;
+                    transform: translate(0, -10px);
+                }
+            }
+            @keyframes slide-up {
+                from {
+                    opacity: 0;
+                    transform: translate(0, 10px);
+                }
+            }
             :host {
                 outline: none;
-                animation: slide-in .2s ease;
+                animation: var(--anim, slide-in) .15s ease;
                 display: block;
                 position: fixed;
-                top: calc(var(--y, 0) * 1px - 10px);
-                left: calc(var(--x, 0) * 1px + 40px);
+                top: calc(var(--y, 0) * 1px);
+                left: calc(var(--x, 0) * 1px);
                 z-index: 10000000;
                 padding: 5px;
                 border-radius: 6px;
@@ -28,9 +40,48 @@ export default class ContextMenu extends LitElement {
         `;
     }
 
-    static openOn(ele: HTMLElement) {
+    static openOn(ele: HTMLElement, direction: string) {
         const rect = ele.getClientRects()[0];
-        const newEle = new this(rect.x, rect.y);
+
+        let x = rect.x;
+        let y = rect.y;
+
+        switch(direction) {
+            case "down":
+                x -= 10;
+                y += 25;
+                break;
+            case "right":
+                x -= 10;
+                y += 25;
+                break;
+            case "up":
+                x -= 10;
+                y -= 50;
+                break;
+            default:
+                x += 30;
+                y -= 10;
+                break;
+        }
+
+        const newEle = new this(x, y);
+
+        switch(direction) {
+            case "down":
+                newEle.style.setProperty('--anim', 'slide-down');
+                break;
+            case "right":
+                newEle.style.setProperty('--anim', 'slide-right');
+                break;
+            case "up":
+                newEle.style.setProperty('--anim', 'slide-up');
+                break;
+            default:
+                newEle.style.setProperty('--anim', 'slide-right');
+                break;
+        }
+        
         document.body.append(newEle);
         return newEle;
     }

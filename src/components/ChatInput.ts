@@ -108,7 +108,7 @@ export default class ChatInput extends LitElement {
     }
 
     openEmotePicker(e) {
-        const menu = ContextMenu.openOn(e.target);
+        const menu = ContextMenu.openOn(e.target, 'up');
     }
 
     render() {
