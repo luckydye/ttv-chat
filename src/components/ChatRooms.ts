@@ -72,7 +72,6 @@ export default class ChatRooms extends LitElement {
                 if(!dragging && Math.abs(deltaY) > 10) {
                     dragging = true;
                     this.target.setAttribute("dragging", "");
-                    console.log(Math.sign(deltaY));
                     moveIcon(this.target, Math.sign(deltaY));
                 }
 

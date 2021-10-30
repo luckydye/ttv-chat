@@ -71,8 +71,6 @@
         }, {});
 
         const params = parseSearch(location.hash);
-        console.log(params);
-
         const btn = document.querySelector('#copyTokenBtn');
         btn.addEventListener('click', e => {
             navigator.clipboard.writeText(JSON.stringify(params)).then(() => {

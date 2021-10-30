@@ -16,7 +16,7 @@ const chatElements: { [key: string]: any } = {};
 function createChat(channel: string) {
     chatElements[channel] = document.createElement("twitch-chat");
     chatElements[channel].setRoom(channel);
-    IRCChatClient.joinChatRoom(channel);
+    IRCChatClient.joinChatRoom(channel.toLocaleLowerCase());
 }
 
 function renderSelecetdChat() {

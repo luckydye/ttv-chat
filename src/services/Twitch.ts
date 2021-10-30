@@ -160,24 +160,13 @@ export async function authClientUser() {
 
             const access_token = parsed.access_token;
             handleAuthenticatedUser(access_token);
-
-            console.log('token', access_token);
+            
             win.close();
         })
     } else {
         throw new Error('could not open authentication window');
     }
 }
-
-
-// function initEventSubSubscriptions() {
-//     const ws = new WebSocket('wss://eventsub.twitch.tv');
-//     console.log(ws);
-// }
-
-// setTimeout(() => {
-//     initEventSubSubscriptions()
-// }, 2000);
 
 
 export default class TwitchAPI {

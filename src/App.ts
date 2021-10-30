@@ -1,7 +1,9 @@
+import { getUserInfo } from './services/Twitch';
 
 let applicationState = {
     selectedRoom: localStorage.getItem('selected') || "@",
     chatRooms: [],
+    chatDetails: {}
 }
 
 class AddedRoomEvent extends Event {
@@ -39,6 +41,10 @@ export class Application {
         return chatRooms;
     }
 
+    static getChannelId(channel_login: string) {
+        return applicationState.chatDetails[channel_login];
+    }
+
     static saveState() {
         localStorage.setItem('save-state', JSON.stringify(applicationState));
     }
@@ -48,6 +54,15 @@ export class Application {
         if(state) {
             applicationState = JSON.parse(state);
         }
+
+        for(let channel_name of this.getRooms()) {
+            try {
+                applicationState.chatDetails[channel_name] = await getUserInfo(channel_name);
+            } catch(err) {
+                console.error(err);
+            }
+        }
+
         window.dispatchEvent(new Event('stateloaded'));
     }
 
@@ -78,7 +93,13 @@ export class Application {
         this.saveState();
     }
 
-    static addRoom(username: string) {
+    static async addRoom(username: string) {
+        try {
+            applicationState.chatDetails[username] = await getUserInfo(username);
+        } catch(err) {
+            console.error(err);
+        }
+
         applicationState.chatRooms.push(username);
         window.dispatchEvent(new AddedRoomEvent(username));
         this.saveState();
@@ -88,7 +109,7 @@ export class Application {
         const index = applicationState.chatRooms.indexOf(username);
         applicationState.chatRooms.splice(index, 1);
         window.dispatchEvent(new CloseRoomEvent(username));
-        this.selectRoom(this.getRooms()[Math.max(0, index)]);
+        this.selectRoom(this.getRooms()[Math.min(Math.max(0, index), applicationState.chatRooms.length - 1)]);
         this.saveState();
     }
 

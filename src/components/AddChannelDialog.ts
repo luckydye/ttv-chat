@@ -40,7 +40,7 @@ export default class AddChannelDialog extends ContextMenu {
     }
 
     submit(e) {
-        Application.addRoom(e.target.value);
+        Application.addRoom(e.target.value.toLocaleLowerCase());
         this.remove();
     }
 

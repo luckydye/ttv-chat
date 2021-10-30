@@ -1,6 +1,7 @@
 import { invoke } from '@tauri-apps/api/tauri';
 import { emit, listen } from '@tauri-apps/api/event';
 import { hexToRgb, rgbToHex, limitColorContrast } from './utils';
+import { Application } from './App';
 
 // message types
 import { EventMessage, UserMessage } from './MessageParser';
@@ -82,7 +83,6 @@ export default class IRCChatClient {
                             throw new Error('User not listed');
                         }
                         const user = this.usermap[channel];
-                        console.log(user);
                         const message_data: UserMessage = {
                             channel: channel,   // sneak this in here, its not in the type but rust gives me the channel as well
                             message_type: 'user',
@@ -96,9 +96,9 @@ export default class IRCChatClient {
                             timestamp: new Date(),
                             is_action: false,
                             bits: 0,
-                            tags: [
-                                "room-id": 0,   // TODO: get channel id from somewhere
-                            ],
+                            tags: {
+                                "room-id": Application.getChannelId(channel),
+                            },
                         }
                         callback(message_data);
                     }
