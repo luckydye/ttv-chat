@@ -9,6 +9,10 @@ const REDIRECT_URI = "https://best-twitch-chat.web.app/auth";
 let logged_in_username = "";
 let logged_in = false;
 
+
+// TODO: Contain all these loose functions into the TwitchAPI class
+
+
 function openChat(username: string, token: string) {
     try {
         console.log('connecting');

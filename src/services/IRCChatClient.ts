@@ -2,6 +2,8 @@ import { invoke } from '@tauri-apps/api/tauri';
 import { emit, listen } from '@tauri-apps/api/event';
 import { rgbToHex, limitColorContrast } from '../utils';
 
+// TODO: fix thoes stupidly chaotic duplicated interfaces
+
 interface ChatTransport {
     id: string,
     message: string,
@@ -124,7 +126,7 @@ export default class IRCChatClient {
                         }
                         const user = this.usermap[channel];
                         const message_data: ChatMessage = {
-                            id: "-1",
+                            id: Math.floor(Math.random() * 100000000000).toString(),
                             username: user.username || "user not found",
                             sender_id: user.id,
                             channel: channel,

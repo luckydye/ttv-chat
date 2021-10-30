@@ -3,8 +3,9 @@ import './components/Login';
 import './components/Profile';
 import './components/ChatInput';
 import './components/ChatRooms';
+import './components/TwitchChat';
 import './components/Chat';
-import './services/Twitch';
+import './components/Tooltip';
 import IRCChatClient from './services/IRCChatClient';
 import { ChatMessage, ChatInfoMessage } from './services/IRCChatClient';
 import { Application } from './App';
@@ -18,12 +19,18 @@ function createChat(channel: string) {
 }
 
 function renderSelecetdChat() {
+    const input = document.querySelector('chat-input');
     const room = Application.getSelectedRoom();
     const container = document.querySelector('.chat');
     for(let child of container?.children) {
         child.remove();
     }
     container?.append(chatElements[room]);
+    if(room === "@") {
+        input?.setAttribute('disabled', '');
+    } else {
+        input?.removeAttribute('disabled');
+    }
 }
 
 async function main() {
@@ -31,7 +38,7 @@ async function main() {
     await Application.init();
 
     // custom mentions channel
-    chatElements["@"] = document.createElement("twitch-chat");
+    chatElements["@"] = document.createElement("sample-chat");
     chatElements["@"].setRoom("Mentions");
 
     Application.setChats(chatElements);
@@ -48,6 +55,10 @@ async function main() {
         renderSelecetdChat();
     });
 
+    //
+    // IRC shit
+    // move this into the chat element
+    //   or maybe move all of this irc logic out of the chat *Element* and put it somwhere else?
     IRCChatClient.listen('chat.message', (msg: ChatMessage) => {
         const chat = chatElements[msg.channel];
         if(chat) {
@@ -117,6 +128,9 @@ async function main() {
             }
         }
     });
+    //
+    // IRC shit END
+    //
 
     for(let channel of Application.getRooms()) {
         createChat(channel);

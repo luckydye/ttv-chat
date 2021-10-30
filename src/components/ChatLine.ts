@@ -116,7 +116,9 @@ export class ChatLine extends LitElement {
                     //   yeah not the ideal palce to do this... should process and parse messages elswhere
                     if(this.chat.roomName !== "Mentions") {
                         const mentionChat = Application.getChats("@");
-                        mentionChat.appendMessage(this.message);
+                        if(!mentionChat.querySelector(`[messageid="${this.message.id}"]`)) {
+                            mentionChat.appendMessage(this.message, this.chat);
+                        }
                     }
                 }
             });
