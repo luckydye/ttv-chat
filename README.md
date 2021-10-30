@@ -62,7 +62,7 @@ Next goal: Beta Release
 - [ ] "Threads" (Mentions)
     - Optin thread
     - Person gets added to thread on mention
-- [ ] emote and badge tool tips
+- [x] emote and badge tool tips
 
 #### Text Inputs
 - [ ] Username color picker
