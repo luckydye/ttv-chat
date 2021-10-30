@@ -3,7 +3,7 @@ import BTTVEmotes from './emotes/BTTVEmotes';
 import FFZEmotes from './emotes/FFZEmotes';
 import SevenTVEmotes from './emotes/SevenTVEmotes';
 
-let globalEmotes = {};
+let globalEmotes: { [key: string]: any } = {};
 let emoteTemplate = "";
 
 const EMOTE_SERVICES = [
@@ -29,6 +29,10 @@ export default class Emotes {
 
     static get global_emotes() {
         return globalEmotes;
+    }
+
+    static getGlobalEmote(name: string) {
+        return globalEmotes[name];
     }
 
     static async getGlobalEmotes() {

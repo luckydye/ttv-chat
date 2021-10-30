@@ -9,7 +9,7 @@ const Ease = {
 }
 
 let scrollToYOffset = 0;
-let scrollToSpeed = 8;
+let scrollToSpeed = 8;  // keep text movement above 100ms/line for readability
 let currentAnimation: number = -1;
 
 export default class AnimatedScroll {

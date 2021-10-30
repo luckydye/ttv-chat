@@ -1,15 +1,15 @@
 //
-import './components/Login';
-import './components/Profile';
+import { Application } from './App';
+import './components/Chat';
 import './components/ChatInput';
 import './components/ChatRooms';
-import './components/TwitchChat';
-import './components/Chat';
+import './components/Login';
+import './components/Profile';
 import './components/Tooltip';
-import IRCChatClient from './services/IRCChatClient';
-import { ChatMessage, ChatInfoMessage } from './services/IRCChatClient';
-import { Application } from './App';
-import { formatSeconds } from './utils';
+import './components/TwitchChat';
+import IRCChatClient, { ChatMessage } from './IRCChatClient';
+import MessageParser, { EventMessage, UserMessage } from './MessageParser';
+import Foramt from './Format';
 
 const chatElements: { [key: string]: any } = {};
 
@@ -32,6 +32,9 @@ function renderSelecetdChat() {
     } else {
         input?.removeAttribute('disabled');
     }
+    requestAnimationFrame(() => {
+        chatElements[room].scrollToLatest();
+    })
 }
 
 async function main() {
@@ -60,20 +63,33 @@ async function main() {
     // IRC shit
     // move this into the chat element
     //   or maybe move all of this irc logic out of the chat *Element* and put it somwhere else?
-    IRCChatClient.listen('chat.message', (msg: ChatMessage) => {
+    IRCChatClient.listen('chat.message', async (msg: UserMessage) => {
         const chat = chatElements[msg.channel];
+        const chatMessages = MessageParser.parse(msg);
+        
         if(chat) {
-            chat.appendMessage(msg);
+            for(let msg of chatMessages) {
+                chat.appendMessage(msg);
+            }
         }
     });
 
-    IRCChatClient.listen('chat.info', (msg: ChatInfoMessage) => {
+    IRCChatClient.listen('chat.info', (msg: EventMessage) => {
         const chat = chatElements[msg.channel];
+        const chatMessages = MessageParser.parse(msg);
+
         if(chat) {
-            if(msg.message) {
-                chat.appendMessage(msg);
+            for(let msg of chatMessages) {
+                switch(msg.type) {
+                    case "info":
+                        chat.appendInfo(msg);
+                        break;
+                    case "message":
+                        msg.highlighted = true;
+                        chat.appendMessage(msg);
+                        break;
+                }
             }
-            chat.appenLine(msg.system_message);
         }
     });
 
@@ -82,7 +98,6 @@ async function main() {
         if(chat) {
             chat.appendNote(msg.message_text);
         }
-
         chat.update();
     });
 
@@ -125,7 +140,7 @@ async function main() {
             }
             if(msg.action.UserTimedOut) {
                 // got timed out for xs
-                chat.appendNote(`${action.user_login} got timed out for ${formatSeconds(action.timeout_length.secs)}.`);
+                chat.appendNote(`${action.user_login} got timed out for ${Foramt.seconds(action.timeout_length.secs)}.`);
             }
         }
     });
@@ -141,5 +156,5 @@ async function main() {
 }
 
 window.addEventListener('loggedin', e => {
-    main();
+    main().catch(err => console.error(err));
 })

@@ -29,14 +29,16 @@ export default class BTTVEmotes extends EmoteService {
         return fetch("https://api.betterttv.net/3/cached/users/twitch/" + id)
             .then(res => res.json())
             .then(data => {
-                const channelEmotes = {};
-                for (let emote of data.channelEmotes) {
-                    channelEmotes[emote.code] = this.parseEmoteUrl(emote);
+                if(data.channelEmotes) {
+                    const channelEmotes = {};
+                    for (let emote of data.channelEmotes) {
+                        channelEmotes[emote.code] = this.parseEmoteUrl(emote);
+                    }
+                    for (let emote of data.sharedEmotes) {
+                        channelEmotes[emote.code] = this.parseEmoteUrl(emote);
+                    }
+                    return channelEmotes;
                 }
-                for (let emote of data.sharedEmotes) {
-                    channelEmotes[emote.code] = this.parseEmoteUrl(emote);
-                }
-                return channelEmotes;
             });
     }
 

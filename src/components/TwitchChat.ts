@@ -1,15 +1,13 @@
 import { css, html } from 'lit-element';
 import { Application } from '../App';
-import Badges from '../services/Badges';
-import Emotes from '../services/Emotes';
-import IRCChatClient from '../services/IRCChatClient';
+import IRCChatClient from '../IRCChatClient';
 import TwitchAPI, { getUserInfo } from '../services/Twitch';
-import Webbrowser from '../services/Webbrowser';
-import { formatLang, formatNumber } from '../utils';
+import Webbrowser from '../Webbrowser';
 import Chat from './Chat';
 import ContextMenu from './ContextMenu';
-import './FluidInput';
+import Format from '../Format';
 // Components
+import './FluidInput';
 import './Timer';
 import './UserList';
 
@@ -20,11 +18,6 @@ export default class TwitchChat extends Chat {
     connect = false;
 
     info = null;
-    channel_badges: {
-        [key: string]: any;
-    } = {};
-    
-    channel_emotes = {};
 
     r9k = false;
     subscribers_only = false;
@@ -59,7 +52,7 @@ export default class TwitchChat extends Chat {
 
                 this.stream_title = html`
                     <div title="${title}">
-                        ${formatNumber(viewer_count)} - <stream-timer starttime="${started_at}"></stream-timer> - ${game_name} - ${title}
+                        ${Format.number(viewer_count)} - <stream-timer starttime="${started_at}"></stream-timer> - ${game_name} - ${title}
                     </div>
                 `;
 
@@ -79,22 +72,10 @@ export default class TwitchChat extends Chat {
             const channel = await TwitchAPI.getChannel(info.id);
             info.channel_info = channel[0];
 
-            const badges = await Badges.getChannelBadges(info.id);
-            this.channel_badges = badges;
-
-            const emotes = await Emotes.getChannelEmotes(info.id);
-            this.channel_emotes = emotes;
-
             this.update();
         })
 
         this.update();
-    }
-
-    getSubBadge(version: number) {
-        if(this.channel_badges["subscriber"]) {
-            return this.channel_badges["subscriber"].versions[version].image_url_2x;
-        }
     }
 
     async updateChatterCount() {
@@ -213,6 +194,11 @@ export default class TwitchChat extends Chat {
                 font-weight: 400;
                 color: #ababab;
                 border-bottom: 1px solid black;
+            }
+
+            .chat-title > div {
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
             .chat-title span {
@@ -613,7 +599,7 @@ export default class TwitchChat extends Chat {
             </div>
             <div class="chat-title">
                 ${this.stream_title == "" ? 
-                    (this.chatter_count > 0 ? `Offline - ${formatNumber(this.chatter_count)} chatters` : "Offline") 
+                    (this.chatter_count > 0 ? `Offline - ${Format.number(this.chatter_count)} chatters` : "Offline") 
                 : this.stream_title}
             </div>
             <div class="scroll-to-bottom" @click="${() => this.lock()}">
@@ -634,13 +620,13 @@ export default class TwitchChat extends Chat {
                                     ` : ""}
                                 </div>
                                 <div class="game">
-                                    ${this.info.channel_info.game_name}
+                                    ${this.info.channel_info ? this.info.channel_info.game_name : "-"}
                                 </div>
                                 <div class="language">
-                                    ${formatLang(this.info.channel_info.broadcaster_language)}
+                                    ${this.info.channel_info ? Format.lang(this.info.channel_info.broadcaster_language) : "-"}
                                 </div>
                                 <div class="viewcount">
-                                    ${formatNumber(this.info.view_count)} views
+                                    ${Format.number(this.info.view_count)} views
                                 </div>
                             </div>
                             ${this.info.description == "" ? "" : html`

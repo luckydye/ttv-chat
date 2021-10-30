@@ -1,6 +1,6 @@
 // import jwt from 'jsonwebtoken';
 import { parseSearch } from '../utils';
-import IRCChatClient from './IRCChatClient';
+import IRCChatClient from '../IRCChatClient';
 import TwichCommands from './TwichCommands';
 
 const CLIENT_ID = "8gwe8mu523g9cstukr8rnnwspqjykf";

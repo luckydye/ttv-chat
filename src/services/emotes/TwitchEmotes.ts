@@ -26,11 +26,13 @@ export default class TwitchEmotes extends EmoteService {
 
     static getChannelEmotes(id: string) {
         return fetchTwitchApi("/chat/emotes", "broadcaster_id=" + id).then(data => {
-            const channelEmotes = {};
-            for(let emote of data.data) {
-                channelEmotes[emote.name] = this.parseEmoteUrl(emote);
+            if(data.status == 200) {
+                const channelEmotes = {};
+                for(let emote of data.data) {
+                    channelEmotes[emote.name] = this.parseEmoteUrl(emote);
+                }
+                return channelEmotes;
             }
-            return channelEmotes;
         });
     }
     

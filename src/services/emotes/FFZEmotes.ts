@@ -21,13 +21,15 @@ export default class FFZEmotes extends EmoteService {
         return fetch("https://api.frankerfacez.com/v1/room/id/" + id)
             .then(res => res.json())
             .then(data => {
-                const channelEmotes = {};
-                for(let set in data.sets) {
-                    for (let emote of data.sets[set].emoticons) {
-                        channelEmotes[emote.name] = this.parseEmoteUrl(emote);
+                if(data.sets) {
+                    const channelEmotes = {};
+                    for(let set in data.sets) {
+                        for (let emote of data.sets[set].emoticons) {
+                            channelEmotes[emote.name] = this.parseEmoteUrl(emote);
+                        }
                     }
+                    return channelEmotes;
                 }
-                return channelEmotes;
             });
     }
 

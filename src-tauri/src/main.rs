@@ -3,7 +3,6 @@
   windows_subsystem = "windows"
 )]
 
-use reqwest::Error;
 use webbrowser;
 
 use tauri::command;
@@ -13,12 +12,17 @@ use twitch_irc::login::StaticLoginCredentials;
 use twitch_irc::message::Badge;
 use twitch_irc::message::Emote;
 use twitch_irc::message::IRCTags;
-use twitch_irc::message::UserNoticeEvent;
 use twitch_irc::message::ServerMessage;
+use twitch_irc::message::UserNoticeEvent;
 use twitch_irc::TwitchIRCClient;
 use twitch_irc::{ClientConfig, SecureTCPTransport};
 
-static mut app_chat_state: ChatState = ChatState {
+struct ChatState {
+  connected_channels: Vec<String>,
+  chat_client: Option<TwitchIRCClient<SecureTCPTransport, StaticLoginCredentials>>,
+}
+
+static mut APP_CHAT_STATE: ChatState = ChatState {
   connected_channels: vec![],
   chat_client: None,
 };
@@ -26,41 +30,10 @@ static mut app_chat_state: ChatState = ChatState {
 // the payload type must implement `Serialize`.
 // for global events, it also must implement `Clone`.
 #[derive(Clone, serde::Serialize)]
-struct ChatTransport {
-  id: String,
-  message: String,
-  sender: String,
-  sender_id: String,
-  channel: String,
-  is_action: bool,
-  badges: Vec<Badge>,
-  badge_info: Vec<Badge>,
-  bits: u64,
-  name_color: Vec<u8>,
-  emotes: Vec<Emote>,
-  tags: IRCTags,
-  server_timestamp: String,
-}
-
-// the payload type must implement `Serialize`.
-// for global events, it also must implement `Clone`.
-#[derive(Clone, serde::Serialize)]
-struct ChatTransportNotice {
-  id: String,
-  message: String,
-  user_message: Option<String>,
-  sender: String,
-  sender_id: String,
-  channel: String,
-  is_action: bool,
-  badges: Vec<Badge>,
-  badge_info: Vec<Badge>,
-  bits: u64,
-  name_color: Vec<u8>,
-  emotes: Vec<Emote>,
-  tags: IRCTags,
-  event: UserNoticeEvent,
-  server_timestamp: String,
+struct FullBadge {
+  name: String,
+  version: String,
+  description: String,
 }
 
 // the payload type must implement `Serialize`.
@@ -86,10 +59,43 @@ struct ChatUser {
   name_color: Vec<u8>,
 }
 
-struct ChatState {
-  connected_channels: Vec<String>,
-  chat_client: Option<TwitchIRCClient<SecureTCPTransport, StaticLoginCredentials>>,
+///////////////////
+/// new interfaces
+
+// the payload type must implement `Serialize`.
+// for global events, it also must implement `Clone`.
+#[derive(Clone, serde::Serialize)]
+struct UserMessage {
+  message_type: String,
+  channel: String,
+  id: String,             // message id
+  text: String,           // user message
+  user_name: String,      // username
+  user_id: String,        // user id
+  color: Vec<u8>,         // username color
+  emotes: Vec<Emote>,     // emotes
+  badges: Vec<FullBadge>, // badges + badge_info
+  timestamp: String,      // tmi server timestamp
+  is_action: bool,        // is /me message
+  bits: u64,              // amounts of bits attached to this message
+  tags: IRCTags,          // hgihlighted messages etc.
 }
+
+// the payload type must implement `Serialize`.
+// for global events, it also must implement `Clone`.
+#[derive(Clone, serde::Serialize)]
+struct EventMessage {
+  message_type: String,
+  channel: String,
+  id: String,                   // message id
+  text: String,                 // system text
+  message: Option<UserMessage>, // attatched user message
+  timestamp: String,            // tmi server timestamp
+  event: UserNoticeEvent,       // event causing this message
+}
+
+// end new
+//////////////
 
 impl ChatState {
   pub fn set_client(
@@ -153,28 +159,41 @@ async fn connect_to_chat(app_handle: tauri::AppHandle, username: String, token: 
       // println!("Received message: {:?}", message);
       match message {
         ServerMessage::Privmsg(msg) => {
-          let transport = ChatTransport {
+          let mut badge_info_it = msg.badge_info.iter();
+          let transport = UserMessage {
+            message_type: "user".to_owned(),
             id: msg.message_id.to_owned(),
-            message: msg.message_text.to_owned(),
-            sender: msg.sender.name.to_owned(),
-            sender_id: msg.sender.id.to_owned(),
-            channel: msg.channel_login.to_owned(),
+            text: msg.message_text.to_owned(),
+            user_name: msg.sender.name.to_owned(),
+            user_id: msg.sender.id.to_owned(),
+            color: match msg.name_color {
+              Some(nc) => vec![nc.r, nc.g, nc.b],
+              None => vec![240u8, 240u8, 240u8],
+            },
+            emotes: msg.emotes,
+            timestamp: msg.server_timestamp.to_rfc2822(),
             is_action: msg.is_action,
-            badges: msg.badges,
-            badge_info: msg.badge_info,
-            tags: msg.source.tags,
             bits: match msg.bits {
               Some(nc) => nc,
               None => 0,
             },
-            name_color: match msg.name_color {
-              Some(nc) => {
-                vec![nc.r, nc.g, nc.b]
-              }
-              None => vec![240u8, 240u8, 240u8],
-            },
-            emotes: msg.emotes,
-            server_timestamp: msg.server_timestamp.to_rfc2822(),
+            tags: msg.source.tags,
+            channel: msg.channel_login.to_owned(),
+            badges: msg
+              .badges
+              .iter()
+              .map(|badge| {
+                let info = badge_info_it.next();
+                FullBadge {
+                  name: badge.name.to_owned(),
+                  version: badge.version.to_owned(),
+                  description: match info {
+                    Some(info) => info.version.to_owned(),
+                    None => "".to_owned(),
+                  },
+                }
+              })
+              .collect(),
           };
           app_handle.emit_all("chat.message", transport).unwrap();
         }
@@ -222,22 +241,50 @@ async fn connect_to_chat(app_handle: tauri::AppHandle, username: String, token: 
         }
         ServerMessage::UserNotice(msg) => {
           // sub messages and stuff
-          let transport = ChatTransportNotice {
-            id: msg.message_id.to_owned(),
-            user_message: msg.message_text,
-            message: msg.system_message.to_owned(),
-            sender: msg.sender.name.to_owned(),
-            sender_id: msg.sender.id.to_owned(),
+
+          let optional_message: Option<UserMessage> = match msg.message_text {
+            Some(str) => {
+              let mut badge_info_it = msg.badge_info.iter();
+              Some(UserMessage {
+                message_type: "user".to_owned(),
+                id: msg.message_id.to_owned(),
+                text: str.to_owned(),
+                user_name: msg.sender.name.to_owned(),
+                user_id: msg.sender.id.to_owned(),
+                color: match msg.name_color {
+                  Some(nc) => vec![nc.r, nc.g, nc.b],
+                  None => vec![240u8, 240u8, 240u8],
+                },
+                emotes: msg.emotes,
+                timestamp: msg.server_timestamp.to_rfc2822(),
+                is_action: false,
+                bits: 0,
+                tags: msg.source.tags,
+                channel: msg.channel_login.to_owned(),
+                badges: msg.badges.iter().map(|badge| {
+                  let info = badge_info_it.next();
+                  FullBadge {
+                    name: badge.name.to_owned(),
+                    version: badge.version.to_owned(),
+                    description: match info {
+                      Some(info) => info.version.to_owned(),
+                      None => "".to_owned(),
+                    },
+                  }
+                }).collect()
+              })
+            },
+            None => None
+          };
+
+          let transport = EventMessage {
+            message_type: "event".to_owned(),
             channel: msg.channel_login.to_owned(),
-            is_action: false,
-            badges: msg.badges,
-            badge_info: msg.badge_info,
-            tags: msg.source.tags,
-            bits: 0,
+            id: msg.message_id.to_owned(),
+            text: msg.system_message.to_owned(),
+            message: optional_message,
+            timestamp: msg.server_timestamp.to_rfc2822(),
             event: msg.event,
-            name_color: vec![240u8, 240u8, 240u8],
-            emotes: msg.emotes,
-            server_timestamp: msg.server_timestamp.to_rfc2822(),
           };
           app_handle.emit_all("chat.info", transport).unwrap();
         }
@@ -252,11 +299,11 @@ async fn connect_to_chat(app_handle: tauri::AppHandle, username: String, token: 
   });
 
   unsafe {
-    for chan in &app_chat_state.connected_channels {
+    for chan in &APP_CHAT_STATE.connected_channels {
       client.join(chan.to_owned());
     }
 
-    app_chat_state.set_client(client);
+    APP_CHAT_STATE.set_client(client);
   }
   // keep the tokio executor alive.
   // If you return instead of waiting the background task will exit.
@@ -266,21 +313,21 @@ async fn connect_to_chat(app_handle: tauri::AppHandle, username: String, token: 
 #[command]
 async fn chat_join_room(channel: String) {
   unsafe {
-    app_chat_state.join_room(channel);
+    APP_CHAT_STATE.join_room(channel);
   }
 }
 
 #[command]
 async fn chat_leave_room(channel: String) {
   unsafe {
-    app_chat_state.leave_room(channel);
+    APP_CHAT_STATE.leave_room(channel);
   }
 }
 
 #[command]
 async fn chat_send_message(channel: String, message: String) {
   unsafe {
-    app_chat_state.send(channel, message).await;
+    APP_CHAT_STATE.send(channel, message).await;
   }
 }
 
@@ -301,7 +348,7 @@ async fn get_userlist(channel: String) -> Option<String> {
     Err(e) => {
       println!("Error fetching userlist: {}", e);
       Some("".to_owned())
-    },
+    }
     Ok(r) => r.text().await.ok(),
   }
 }

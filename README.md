@@ -44,6 +44,7 @@ Next goal: Beta Release
 - [ ] Notifications
 - [ ] Reccomend channels from follow list
 - [ ] (MessageParser) seperate out the message log part of the chat for seperate mention and whisper tab wihtout, chat-input, bio and room state stuff
+- [ ] Cache chatroom profile pictures for faster loading time and also will just look faster without actually beeing faster
 
 #### Visibility panel
 - [ ] Show delted messages

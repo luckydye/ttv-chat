@@ -92,4 +92,12 @@ export class Application {
         this.saveState();
     }
 
+    static reply(message_id: string) {
+        alert('reply to ' + message_id);
+    }
+
+    static timeout(user_name: string, secs: number) {
+        alert('timeout ' + user_name + ' for ' + secs + " seconds");
+    }
+
 }

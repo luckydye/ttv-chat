@@ -1,5 +1,5 @@
 import { css, html, LitElement } from 'lit-element';
-import IRCChatClient from '../services/IRCChatClient';
+import IRCChatClient from '../IRCChatClient';
 import { Application } from '../App';
 import ContextMenu from './ContextMenu';
 

@@ -29,6 +29,15 @@ export default class PageOverlay extends LitElement {
 
     x: number = 0;
     y: number = 0;
+    _clientWidth: number = 0;
+    _clientHeight: number = 0;
+
+    get width() {
+        return this._clientWidth;
+    }
+    get height() {
+        return this._clientHeight;
+    }
 
     constructor(x: number = 0, y: number = 0) {
         super();
@@ -38,7 +47,8 @@ export default class PageOverlay extends LitElement {
     }
 
     setPosition(x: number = this.x, y: number = this.y) {
-        this.x = x;
+        const overlap = Math.min(window.innerWidth - (x + this.width + 5), 0);
+        this.x = x + (overlap);
         this.y = y;
         this.style.setProperty('--x', this.x.toString());
         this.style.setProperty('--y', this.y.toString());
@@ -46,7 +56,11 @@ export default class PageOverlay extends LitElement {
 
     connectedCallback() {
         super.connectedCallback();
-        this.setPosition();
+
+        requestAnimationFrame(() => {
+            this._clientWidth = this.clientWidth;
+            this._clientHeight = this.clientHeight;
+        })
     }
 
     render() {

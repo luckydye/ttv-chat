@@ -3,6 +3,8 @@ import { Application } from '../App';
 import ProfileIndicator from './ProfileIndicator';
 import AddChannelDialog from './AddChannelDialog';
 
+// TODO: Fix drag sorting
+
 export default class ChatRooms extends LitElement {
 
     icons = [];

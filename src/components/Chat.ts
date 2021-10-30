@@ -1,14 +1,13 @@
 import { css, html, LitElement } from 'lit-element';
 import AnimatedScroll from '../AnimatedScroll';
-import { ChatMessage } from '../services/IRCChatClient';
-import { formatLang, formatNumber } from '../utils';
+import { ChatInfoMessage, ChatMessage } from '../MessageParser';
 import { ChatInfo, ChatLine, ChatNote } from './ChatLine';
-import './FluidInput';
 // Components
+import './FluidInput';
 import './Timer';
 import './UserList';
 
-export default class TwitchChat extends LitElement {
+export default class Chat extends LitElement {
 
     MAX_BUFFER_SIZE = 500;
 
@@ -16,7 +15,7 @@ export default class TwitchChat extends LitElement {
     roomName: string = "";
     scrollTarget: number = 0;
 
-    appendMessage(msg: ChatMessage, sourceChat: TwitchChat = this) {
+    appendMessage(msg: ChatMessage, sourceChat: Chat = this) {
         const line = new ChatLine(sourceChat, msg);
         this.appendChild(line);
         setTimeout(() => {
@@ -24,8 +23,8 @@ export default class TwitchChat extends LitElement {
         }, 1)
     }
 
-    appenLine(text: string) {
-        const line = new ChatInfo(text);
+    appendInfo(msg: ChatInfoMessage) {
+        const line = new ChatInfo(msg);
         this.appendChild(line);
         setTimeout(() => {
             this.afterAppend();
@@ -71,7 +70,6 @@ export default class TwitchChat extends LitElement {
         const latest = (scrollEle.scrollHeight - scrollEle.clientHeight);
 
         if(this.scrollTarget >= latest - 1) {
-            console.log('locking');
             this.lock();
         } 
         if(this.scrollTarget < latest - 1000) {
@@ -93,15 +91,6 @@ export default class TwitchChat extends LitElement {
     setRoom(roomName: string) {
         this.roomName = roomName;
         this.update();
-    }
-
-    connectedCallback() {
-        super.connectedCallback();
-        
-        setTimeout(() => {
-            this.scrollToLatest();
-            this.afterAppend();
-        }, 10);
     }
 
     constructor() {
@@ -249,41 +238,10 @@ export default class TwitchChat extends LitElement {
                 <span>Scroll to the bottom</span>
             </div>
             <div class="lines">
-                ${this.roomName ? html`
-                    ${this.info ? html`
-                        <div class="bio">
-                            <div class="profile-image">
-                                <img src="${this.info.profile_image_url}" width="125px" />
-                            </div>
-                            <div class="pin">
-                                <div class="profile-name">
-                                    ${this.info.display_name}
-                                    ${this.info.broadcaster_type == "partner" ? html`
-                                        <img src="./images/verified.svg" alt="verified"/>
-                                    ` : ""}
-                                </div>
-                                <div class="game">
-                                    ${this.info.channel_info.game_name}
-                                </div>
-                                <div class="language">
-                                    ${formatLang(this.info.channel_info.broadcaster_language)}
-                                </div>
-                                <div class="viewcount">
-                                    ${formatNumber(this.info.view_count)} views
-                                </div>
-                            </div>
-                            ${this.info.description == "" ? "" : html`
-                                <div class="profile-desc">
-                                    ${this.info.description}
-                                </div>
-                            `}
-                        </div>
-                    ` : ""}
-                `: ""}
                 <slot></slot>
             </div>
         `;
     }
 }
 
-customElements.define('sample-chat', TwitchChat);
+customElements.define('sample-chat', Chat);

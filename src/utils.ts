@@ -14,6 +14,15 @@ function componentToHex(c) {
     return hex.length == 1 ? "0" + hex : hex;
 }
 
+export function hexToRgb(hex: string) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return [
+        parseInt(result[1], 16),
+        parseInt(result[2], 16),
+        parseInt(result[3], 16)
+    ];
+}
+
 export function rgbToHex(rgb: number[]) {
     return "#" + componentToHex(rgb[0]) + componentToHex(rgb[1]) + componentToHex(rgb[2]);
 }
@@ -25,7 +34,7 @@ export function limitColorContrast(...rgb: number[]) {
 }
 
 // http://hsl2rgb.nichabi.com/javascript-function.php
-export function hsl2rgb (h: number, s: number, l: number) {
+export function hsl2rgb(h: number, s: number, l: number) {
     var r, g, b, m, c, x
 
     h *= 360;
@@ -86,12 +95,12 @@ export function rgb2hsl(r: number, g: number, b: number) {
     var max = Math.max(r, g, b), min = Math.min(r, g, b);
     var h, s, l = (max + min) / 2;
 
-    if(max == min){
+    if (max == min) {
         h = s = 0; // achromatic
-    }else{
+    } else {
         var d = max - min;
         s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-        switch(max){
+        switch (max) {
             case r: h = (g - b) / d + (g < b ? 6 : 0); break;
             case g: h = (b - r) / d + 2; break;
             case b: h = (r - g) / d + 4; break;
@@ -100,23 +109,6 @@ export function rgb2hsl(r: number, g: number, b: number) {
     }
 
     return [h, s, l * 100];
-}
-
-const NumberFormat = new Intl.NumberFormat('en-IN');
-const langFormat = new Intl.DisplayNames(['en'], { type: 'language' });
-
-export const formatLang = (langshort: string) => langFormat.of(langshort);
-export const formatNumber = (n: number) => NumberFormat.format(n);
-export const formatSeconds = (s: number, short: boolean = false) => {
-    if(s > 60 * 60) {
-        const h = s / 60 / 60;
-        return `${h.toFixed(1)} ${short ? "h" : (h > 1 ? "hours" : "hour")}`;
-    }
-    if(s > 60) {
-        const m = Math.floor(s / 60);
-        return `${m} ${short ? "min" : (m > 1 ? "minutes" : "minute")}`;
-    }
-    return `${s} ${short ? (s > 1 ? "secs" : "sec") : (s > 1 ? "seconds" : "second")}`;
 }
 
 // dragElement

@@ -1,27 +1,17 @@
 import { css, html, LitElement } from 'lit-element';
-import IRCChatClient, { ChatMessage } from '../services/IRCChatClient';
-import Badges from '../services/Badges';
-import { getLoggedInUsername } from '../services/Twitch';
-import Emotes from '../services/Emotes';
-import Webbrowser from '../services/Webbrowser';
-import TwitchEmotes from '../services/emotes/TwitchEmotes';
-import { Application } from '../App';
+import { ChatMessage, ChatInfoMessage } from '../MessageParser';
+import Chat from './Chat';
 
 export class ChatLine extends LitElement {
 
-    message: ChatMessage | null = null;
-    chat: TwitchChat | null = null;
-    isReply: boolean = false;
+    message: ChatMessage;
+    chat: Chat | null = null;
 
-    constructor(chat: TwitchChat, msg: ChatMessage) {
+    constructor(chat: Chat, msg: ChatMessage) {
         super();
 
         this.chat = chat;
         this.message = msg;
-
-        if(this.message.tags['reply-parent-msg-id']) {
-            this.isReply = true;
-        }
 
         setTimeout(() => {
             this.update();
@@ -32,157 +22,41 @@ export class ChatLine extends LitElement {
         super.connectedCallback();
 
         this.setAttribute('messageid', this.message.id);
-        this.setAttribute('userid', this.message.sender_id);
+        this.setAttribute('userid', this.message.user_id);
+
+        if(this.message.tagged) {
+            this.setAttribute('tagged', '');
+        }
+        if(this.message.highlighted) {
+            this.setAttribute('highlighted', '');
+        }
+        if(this.message.action) {
+            this.setAttribute('action', '');
+        }
     }
 
     createRenderRoot() {
         return this;
     }
 
-    jumpToChat() {
-        Application.selectRoom(this.message.channel);
-    }
+    // jumpToChat() {
+    //     Application.selectRoom(this.message.channel);
+    // }
 
-    timeout(s: number = 10) {
-        IRCChatClient.sendCommand(this.message.channel, `/timeout ${this.message?.username} ${s}`);
-    }
+    // timeout(s: number = 10) {
+    //     IRCChatClient.sendCommand(this.message.channel, `/timeout ${this.message.user_name} ${s}`);
+    // }
 
-    openThread() {
-        // gotta implement this and user cards
-    }
+    // openThread() {
+    //     // gotta implement this and user cards
+    // }
 
-    reply() {
-        // reply to this message
-    }
+    // reply() {
+    //     // reply to this message
+    // }
 
     render() {
-        if (this.message) {
-            const msg = this.message.message;
-
-            const wordEmoteMap = {};
-            const wordLinkMap = {};
-            const wordMentionMap = {};
-
-            if (this.message.emotes) {
-                for (let emote of this.message.emotes) {
-                    const start = emote.char_range.start;
-                    const end = emote.char_range.end;
-
-                    const wordToReplace = msg.slice(start, end);
-                    const emoteURL = TwitchEmotes.parseEmoteUrl(emote);
-
-                    wordEmoteMap[wordToReplace] = {
-                        name: wordToReplace,
-                        url: emoteURL,
-                    };
-                }
-            }
-
-            if(this.message.tags['msg-id'] == "highlighted-message") {
-                this.setAttribute('highlighted', '');
-            }
-
-            msg.split(" ").forEach(str => {
-                // channel emote repalcement
-                if (str in this.chat.channel_emotes) {
-                    wordEmoteMap[str] = {
-                        name: str,
-                        url: this.chat.channel_emotes[str],
-                    };
-                }
-                // global emotes repalcement
-                if (str in Emotes.global_emotes) {
-                    wordEmoteMap[str] = {
-                        name: str,
-                        url: Emotes.global_emotes[str],
-                    };
-                }
-                // url repalcement
-                const urlMatch = Webbrowser.matchURL(str);
-                if (urlMatch) {
-                    wordLinkMap[urlMatch[0]] = urlMatch[0];
-                }
-                // mention repalcement
-                if (str.match(/\@[a-zA-Z0-9]+/g)) {
-                    wordMentionMap[str] = str;
-                }
-                // highlight mentions
-                const client_user = getLoggedInUsername().toLocaleLowerCase();
-                if (client_user != "" && str.toLocaleLowerCase().match(client_user)) {
-                    wordMentionMap[str] = str;
-                    this.setAttribute('tagged', '');
-                    
-                    // is current user => send to mentions chat
-                    //   yeah not the ideal palce to do this... should process and parse messages elswhere
-                    if(this.chat.roomName !== "Mentions") {
-                        const mentionChat = Application.getChats("@");
-                        if(!mentionChat.querySelector(`[messageid="${this.message.id}"]`)) {
-                            mentionChat.appendMessage(this.message, this.chat);
-                        }
-                    }
-                }
-            });
-
-            const msg_split = msg.split(" ");
-            let parsed_msg = msg_split.map(word => {
-                // replace emotes
-                if (wordEmoteMap[word]) {
-                    return html`<img class="emote" name="${wordEmoteMap[word].name}" alt="${word}" src="${wordEmoteMap[word].url}" height="32"> `;
-                }
-                // replace links
-                if (wordLinkMap[word]) {
-                    return html`<a class="inline-link" href="javascript:()" @click="${() => {
-                        Webbrowser.openURL(wordLinkMap[word]);
-                    }}">${wordLinkMap[word]}</a> `;
-                }
-                // replace mentions
-                if (wordMentionMap[word]) {
-                    return html`<span class="mention">${word}</span> `;
-                }
-                return word + " ";
-            });
-
-            return html`
-                <div class="line" style="--color: ${this.message.color}" ?action="${this.message.is_action}">
-                    <span class="bages">
-                        ${this.message.badges.map(badge => {
-                            let badge_url = "";
-
-                            if (badge.name == "subscriber") {
-                                badge_url = this.chat.getSubBadge(badge.version) || Badges.getBadgeByName(badge.name, badge.version);
-                            } else {
-                                badge_url = Badges.getBadgeByName(badge.name, badge.version);
-                            }
-
-                            return html`<img class="badge" alt="${badge.name}" src="${badge_url}" width="18" height="18">`;
-                        })}
-                    </span>
-                    <span class="username">${this.message.username}:</span>
-                    ${this.isReply ? html`
-                        <button class="reply-icon" title="Open Thread" @click="${this.openThread}">
-                            <img src="./images/question_answer_white_24dp.svg" height="18px" width="18px" />
-                        </button>
-                    ` : ""}
-                    <span class="message">${parsed_msg}</span>
-                    
-                    <div class="tools">
-                        ${this.chat.roomName === "Mentions" ? html`
-                            <div class="chat-line-tool" @click="${() => this.jumpToChat()}" title="Jump to chat">
-                                <img src="./images/navigate_before_white_24dp.svg" width="18px" height="18px" />
-                            </div>
-                        ` : ""}
-                        ${this.message.username !== getLoggedInUsername() ? html`
-                            <div class="chat-line-tool" title="Reply" @click="${() => this.reply()}">
-                                <img src="./images/reply_white_24dp.svg" height="18px" width="18px" />
-                            </div>
-                            <div class="chat-line-tool mod-tool" @click="${() => this.timeout(10)}">
-                                <img src="./images/block_white_24dp.svg" width="18px" height="18px" />
-                            </div>
-                        ` : ""}
-                    </div>
-                </div>
-            `;
-        }
+        return this.message.content;
     }
 
 }
@@ -190,9 +64,9 @@ export class ChatLine extends LitElement {
 
 export class ChatInfo extends LitElement {
 
-    message: string = "";
+    message: ChatInfoMessage;
 
-    constructor(msg: string) {
+    constructor(msg: ChatInfoMessage) {
         super();
 
         this.message = msg;
@@ -214,13 +88,7 @@ export class ChatInfo extends LitElement {
     }
 
     render() {
-        if (this.message) {
-            return html`
-                <div class="line">
-                    <div class="message">${this.message}</div>
-                </div>
-            `;
-        }
+        return this.message.content;
     }
 
 }

@@ -10,7 +10,7 @@ chat-line {
     line-height: 150%;
     position: relative;
     box-sizing: border-box;
-    min-height: 32px;
+    min-height: 32px;f
 }
 chat-line:hover {
     background: rgba(48, 50, 53, 0.15);
@@ -101,6 +101,6 @@ chat-line .inline-link {
     color: #2c7fcc;
     word-break: break-all;
 }
-chat-line .line[action] .message {
+chat-line[action] .message {
     color: var(--color);
 }

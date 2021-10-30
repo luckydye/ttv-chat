@@ -1,10 +1,14 @@
-let global_badges = {};
+let global_badges: { [key: string]: any } = {};
 
 export default class Badges {
 
     static getBadgeByName(name: string, version: number) {
         const badge = global_badges[name];
-        return badge.versions[version].image_url_2x;
+        if(badge.versions[version]) {
+            return badge.versions[version].image_url_2x;
+        } else {
+            return badge.versions[Object.keys(badge.versions)[0]].image_url_2x;
+        }
     }
 
     static async getChannelBadges(channel_id: string) {
