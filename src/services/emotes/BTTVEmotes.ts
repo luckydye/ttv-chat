@@ -30,8 +30,6 @@ export default class BTTVEmotes extends EmoteService {
             .then(res => res.json())
             .then(data => {
                 const channelEmotes = {};
-                console.log(data, data.sharedEmotes);
-                
                 if(data.channelEmotes) {
                     for (let emote of data.channelEmotes) {
                         channelEmotes[emote.code] = this.parseEmoteUrl(emote);

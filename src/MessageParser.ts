@@ -118,8 +118,6 @@ let channel_badge_map: { [key: string]: any } = {};
 
 export default class MessageParser {
 
-    // TODO: optionally send mentions to the mentions chat etc.
-
     // in short. recieve the network message and form into a client side representation.
     // like if its highligted, tagged or a reply...
 
@@ -176,22 +174,10 @@ export default class MessageParser {
 
         // TODO: consider requesting those on chat connect and get them through the Badge interface
         // get cached channel badges
-        if (!channel_badge_map[message.channel]) {
-            channel_badge_map[message.channel] = {};
-            Badges.getChannelBadges(channel_id).then(badges => {
-                channel_badge_map[message.channel] = badges;
-            })
-        }
-        let channel_badges = channel_badge_map[message.channel];
+        let channel_badges = Badges.getChachedChannelBadges(channel_id);
 
         // get cached channel emotes
-        if (!channel_emote_map[message.channel]) {
-            channel_emote_map[message.channel] = {};
-            Emotes.getChannelEmotes(channel_id).then(emotes => {
-                channel_emote_map[message.channel] = emotes;
-            })
-        }
-        let channel_emotes = channel_emote_map[message.channel];
+        let channel_emotes = Emotes.getChachedChannelEmotes(channel_id);
 
         // collect emotes (url) for this message
         if (message.emotes) {
@@ -287,21 +273,21 @@ export default class MessageParser {
             <div class="line" style="--color: ${color}" ?action="${message.is_action}">
                 <span class="bages">
                     ${message.badges.map(badge => {
-            let badge_url = "";
+                        let badge_url = "";
 
-            // TODO: amount of gift sub in alt tag
+                        // TODO: amount of gift sub in alt tag
 
-            if (badge.name == "subscriber") {
-                badge_url = getSubBadge(badge.version) || Badges.getBadgeByName(badge.name, badge.version);
-            } else {
-                badge_url = Badges.getBadgeByName(badge.name, badge.version);
-            }
-            if (badge.description) {
-                return html`<img class="badge" alt="${badge.name} (${badge.description})" src="${badge_url}" width="18" height="18">`;
-            } else {
-                return html`<img class="badge" alt="${badge.name}" src="${badge_url}" width="18" height="18">`;
-            }
-        })}
+                        if (badge.name == "subscriber") {
+                            badge_url = getSubBadge(badge.version) || Badges.getBadgeByName(badge.name, badge.version);
+                        } else {
+                            badge_url = Badges.getBadgeByName(badge.name, badge.version);
+                        }
+                        if (badge.description) {
+                            return html`<img class="badge" alt="${badge.name} (${badge.description})" src="${badge_url}" width="18" height="18">`;
+                        } else {
+                            return html`<img class="badge" alt="${badge.name}" src="${badge_url}" width="18" height="18">`;
+                        }
+                    })}
                 </span>
                 <span class="username">${message.user_name}:</span>
                 ${isReply ? html`

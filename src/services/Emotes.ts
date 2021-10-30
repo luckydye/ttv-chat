@@ -3,7 +3,8 @@ import BTTVEmotes from './emotes/BTTVEmotes';
 import FFZEmotes from './emotes/FFZEmotes';
 import SevenTVEmotes from './emotes/SevenTVEmotes';
 
-let globalEmotes: { [key: string]: any } = {};
+let global_emotes: { [key: string]: any } = {};
+let channel_emotes: { [key: string]: {} } = {};
 let emoteTemplate = "";
 
 const EMOTE_SERVICES = [
@@ -28,17 +29,27 @@ export default class Emotes {
     }
 
     static get global_emotes() {
-        return globalEmotes;
+        return global_emotes;
     }
 
     static getGlobalEmote(name: string) {
-        return globalEmotes[name];
+        return global_emotes[name];
     }
 
     static async getGlobalEmotes() {
         const maps = await Promise.all([...EMOTE_SERVICES].map(Service => Service.getGlobalEmotes()));
-        globalEmotes = flattenMap(maps);
-        return globalEmotes;
+        global_emotes = flattenMap(maps);
+        return global_emotes;
+    }
+
+    static getChachedChannelEmotes(channel_id: string) {
+        if (!channel_emotes[channel_id]) {
+            channel_emotes[channel_id] = {};
+            Emotes.getChannelEmotes(channel_id).then(emotes => {
+                channel_emotes[channel_id] = emotes;
+            })
+        }
+        return channel_emotes[channel_id];
     }
 
     static async getChannelEmotes(id: string) {

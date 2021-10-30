@@ -1,4 +1,6 @@
 import { getUserInfo } from './services/Twitch';
+import Badges from './services/Badges';
+import Emotes from './services/Emotes';
 
 let applicationState = {
     selectedRoom: localStorage.getItem('selected') || "@",
@@ -57,7 +59,10 @@ export class Application {
 
         for(let channel_name of this.getRooms()) {
             try {
-                applicationState.chatDetails[channel_name] = await getUserInfo(channel_name);
+                const info = await getUserInfo(channel_name);
+                applicationState.chatDetails[channel_name] = info;
+                Badges.getChannelBadges(info.id);
+                Emotes.getChannelEmotes(info.id);
             } catch(err) {
                 console.error(err);
             }
@@ -95,7 +100,10 @@ export class Application {
 
     static async addRoom(username: string) {
         try {
-            applicationState.chatDetails[username] = await getUserInfo(username);
+            const info = await getUserInfo(username);
+            applicationState.chatDetails[username] = info;
+            Badges.getChannelBadges(info.id);
+            Emotes.getChannelEmotes(info.id);
         } catch(err) {
             console.error(err);
         }

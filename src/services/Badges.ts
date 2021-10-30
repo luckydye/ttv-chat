@@ -1,4 +1,5 @@
 let global_badges: { [key: string]: any } = {};
+let channel_badges: { [key: string]: {} } = {};
 
 export default class Badges {
 
@@ -9,6 +10,16 @@ export default class Badges {
         } else {
             return badge.versions[Object.keys(badge.versions)[0]].image_url_2x;
         }
+    }
+
+    static getChachedChannelBadges(channel_id: string) {
+        if (!channel_badges[channel_id]) {
+            channel_badges[channel_id] = {};
+            Badges.getChannelBadges(channel_id).then(badges => {
+                channel_badges[channel_id] = badges;
+            })
+        }
+        return channel_badges[channel_id];
     }
 
     static async getChannelBadges(channel_id: string) {

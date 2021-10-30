@@ -7,7 +7,7 @@ import './components/Login';
 import './components/Profile';
 import './components/Tooltip';
 import './components/TwitchChat';
-import IRCChatClient, { ChatMessage } from './IRCChatClient';
+import IRCChatClient from './IRCChatClient';
 import MessageParser, { EventMessage, UserMessage } from './MessageParser';
 import Foramt from './Format';
 
@@ -69,6 +69,11 @@ async function main() {
         
         if(chat) {
             for(let msg of chatMessages) {
+                if(msg.tagged) {
+                    const mentionChat = Application.getChats("@");
+                    mentionChat.appendMessage(msg);
+                }
+                
                 chat.appendMessage(msg);
             }
         }
@@ -86,6 +91,10 @@ async function main() {
                         break;
                     case "message":
                         msg.highlighted = true;
+                        if(msg.tagged) {
+                            const mentionChat = Application.getChats("@");
+                            mentionChat.appendMessage(msg);
+                        }
                         chat.appendMessage(msg);
                         break;
                 }
@@ -99,10 +108,6 @@ async function main() {
             chat.appendNote(msg.message_text);
         }
         chat.update();
-    });
-
-    IRCChatClient.listen('chat.user', (msg: ChatMessage) => {
-        // save to internal map. lol this is so bad
     });
 
     interface ClearChatAction {

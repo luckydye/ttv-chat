@@ -6,11 +6,6 @@ import { Application } from './App';
 // message types
 import { EventMessage, UserMessage } from './MessageParser';
 
-// TODO: fix thoes stupidly chaotic duplicated interfaces
-
-export interface ChatMessage {} // TODO: Remove references
-export interface ChatInfoMessage {} // TODO: Remove references
-
 export interface ChatClearMessage {
     id: string,
     message: string,
