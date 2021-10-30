@@ -1,8 +1,17 @@
+
+@keyframes chat-line-appear {
+    from { transform: translateY(8px); opacity: 0; }
+    to { transform: translateY(0px); opacity: 1; }
+}
+
 chat-line {
+    /* animation: chat-line-appear .2s ease both; */
     display: block;
     padding: 3px 12px;
     line-height: 150%;
     position: relative;
+    box-sizing: border-box;
+    min-height: 32px;
 }
 chat-line:hover {
     background: rgba(48, 50, 53, 0.15);

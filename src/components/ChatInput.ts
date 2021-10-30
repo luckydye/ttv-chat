@@ -84,7 +84,7 @@ export default class ChatInput extends LitElement {
         })
 
         window.addEventListener('keydown', e => {
-            if(document.activeElement == document.body) {
+            if(document.activeElement == document.body && !e.ctrlKey) {
                 const ele = this.shadowRoot?.querySelector('textarea');
                 ele?.focus();
             }

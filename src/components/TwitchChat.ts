@@ -1,15 +1,13 @@
-import { css, html, LitElement } from 'lit-element';
-import IRCChatClient, { ChatMessage } from '../services/IRCChatClient';
-import Badges from '../services/Badges';
-import { getUserInfo } from '../services/Twitch';
-import Emotes from '../services/Emotes';
-import TwitchAPI from '../services/Twitch';
-import Webbrowser from '../services/Webbrowser';
-import { ChatLine, ChatInfo, ChatNote } from './ChatLine';
+import { css, html } from 'lit-element';
 import { Application } from '../App';
+import Badges from '../services/Badges';
+import Emotes from '../services/Emotes';
+import IRCChatClient from '../services/IRCChatClient';
+import TwitchAPI, { getUserInfo } from '../services/Twitch';
+import Webbrowser from '../services/Webbrowser';
 import { formatLang, formatNumber } from '../utils';
-import ContextMenu from './ContextMenu';
 import Chat from './Chat';
+import ContextMenu from './ContextMenu';
 import './FluidInput';
 // Components
 import './Timer';
@@ -45,7 +43,7 @@ export default class TwitchChat extends Chat {
         super.setRoom(roomName);
 
         if(!this.connect) {
-            this.appenNote(`Connecting`);
+            this.appendNote(`Connecting`);
         }
 
         const updateStatus = async () => {
@@ -159,7 +157,7 @@ export default class TwitchChat extends Chat {
                 this.update();
 
                 if(!this.connect) {
-                    this.appenNote(`Connected to ${this.roomName}`);
+                    this.appendNote(`Connected to ${this.roomName}`);
                     this.updateChatterCount();
 
                     this.connect = true;

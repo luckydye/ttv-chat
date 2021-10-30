@@ -22,15 +22,6 @@ interface ChatTransport {
     server_timestamp: string,
 }
 
-export interface ChatClearMessage {
-    id: string,
-    message: string,
-    sender: string,
-    channel: string,
-    is_action: Boolean,
-    server_timestamp: string,
-}
-
 export interface ChatMessage {
     id: string,
     channel: string,
@@ -61,6 +52,15 @@ export interface ChatInfoMessage {
     emotes: Array<any>,
 }
 
+export interface ChatClearMessage {
+    id: string,
+    message: string,
+    sender: string,
+    channel: string,
+    is_action: Boolean,
+    server_timestamp: string,
+}
+
 export interface ChatUser {
     channel: string,
     username: string,
@@ -81,8 +81,7 @@ const listeners = new Map();
 // bindings to the rust api
 export default class IRCChatClient {
 
-    static user: UserState | null = null;
-    static usermap = {};
+    static usermap: { [key: string]: UserState } = {};
 
     static async connectoToChat(username: string, token: string) {
         return invoke('connect_to_chat', {
@@ -128,9 +127,10 @@ export default class IRCChatClient {
                         const message_data: ChatMessage = {
                             id: Math.floor(Math.random() * 100000000000).toString(),
                             username: user.username || "user not found",
-                            sender_id: user.id,
+                            sender_id: "chat-client",
                             channel: channel,
                             tags: [],
+                            emotes: [],
                             is_action: false,
                             badges: user.badges || [],
                             message: message,
@@ -169,6 +169,13 @@ export default class IRCChatClient {
                 case 'chat.state': {
                     if (event.payload) {
                         callback(event.payload);
+                    }
+                    break;
+                }
+                case 'chat.clear': {
+                    if (event.payload) {
+                        const payload: ChatClearMessage = event.payload as ChatClearMessage;
+                        callback(payload);
                     }
                     break;
                 }
@@ -226,13 +233,6 @@ export default class IRCChatClient {
                             emotes: payload.emotes
                         }
                         callback(message_data);
-                    }
-                    break;
-                }
-                case 'chat.clear': {
-                    if (event.payload) {
-                        const payload: ChatClearMessage = event.payload as ChatClearMessage;
-                        callback(payload);
                     }
                     break;
                 }

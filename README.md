@@ -1,6 +1,15 @@
 # Better Twitch Chat
 
-A new Desktop Twitch Client with all the things.
+A new Twitch Chat Client with some third party things.
+
+
+## Features
+
+Emotes
+- [x] Twitch
+- [x] BetterTTV
+- [x] FFZ
+- [x] 7TV
 
 
 ## Install

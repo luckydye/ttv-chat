@@ -98,6 +98,12 @@ window.addEventListener('pointermove', e => {
             lastOverlay = createOverlayForImageElement(e);
             lastTarget = target;
         }
+
+        if(target && (target as HTMLImageElement).classList.contains('inline-link')) {
+            // inline link preview
+            // lastOverlay = createOverlayForImageElement(e);
+            lastTarget = target;
+        }
     }
 
     

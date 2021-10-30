@@ -9,6 +9,7 @@ import './components/Tooltip';
 import IRCChatClient from './services/IRCChatClient';
 import { ChatMessage, ChatInfoMessage } from './services/IRCChatClient';
 import { Application } from './App';
+import { formatSeconds } from './utils';
 
 const chatElements: { [key: string]: any } = {};
 
@@ -79,7 +80,7 @@ async function main() {
     IRCChatClient.listen('chat.notice', (msg) => {
         const chat = chatElements[msg.channel_login];
         if(chat) {
-            chat.appenNote(msg.message_text);
+            chat.appendNote(msg.message_text);
         }
 
         chat.update();
@@ -120,11 +121,11 @@ async function main() {
 
             if(msg.action.UserBanned) {
                 // got banned
-                chat.appenNote(`${action.user_login} got banned.`);
+                chat.appendNote(`${action.user_login} got banned.`);
             }
             if(msg.action.UserTimedOut) {
                 // got timed out for xs
-                chat.appenNote(`${action.user_login} got timed out for ${action.timeout_length.secs} seconds.`);
+                chat.appendNote(`${action.user_login} got timed out for ${formatSeconds(action.timeout_length.secs)}.`);
             }
         }
     });

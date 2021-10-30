@@ -1,14 +1,8 @@
 import { css, html, LitElement } from 'lit-element';
-import IRCChatClient, { ChatMessage } from '../services/IRCChatClient';
-import Badges from '../services/Badges';
-import { getUserInfo } from '../services/Twitch';
-import Emotes from '../services/Emotes';
-import TwitchAPI from '../services/Twitch';
-import Webbrowser from '../services/Webbrowser';
-import { ChatLine, ChatInfo, ChatNote } from './ChatLine';
-import { Application } from '../App';
+import AnimatedScroll from '../AnimatedScroll';
+import { ChatMessage } from '../services/IRCChatClient';
 import { formatLang, formatNumber } from '../utils';
-import ContextMenu from './ContextMenu';
+import { ChatInfo, ChatLine, ChatNote } from './ChatLine';
 import './FluidInput';
 // Components
 import './Timer';
@@ -37,7 +31,7 @@ export default class TwitchChat extends LitElement {
         }, 1);
     }
 
-    appenNote(text: string) {
+    appendNote(text: string) {
         const line = new ChatNote(text);
         this.appendChild(line);
         setTimeout(() => {
@@ -60,11 +54,8 @@ export default class TwitchChat extends LitElement {
         const scrollEle = this.shadowRoot?.querySelector('.lines');
         if(!scrollEle) return;
 
-        if(scrollEle.scrollHeight > 0) {
-            const latest = (scrollEle.scrollHeight - scrollEle.clientHeight);
-            if (this.scrollLock) {
-                scrollEle.scrollTo(0, latest + 100);
-            }
+        if(scrollEle.scrollHeight > 0 && this.scrollLock) {
+            AnimatedScroll.scrollTo(this.children[this.children.length-1], scrollEle);
         }
     }
 
