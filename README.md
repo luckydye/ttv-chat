@@ -18,24 +18,6 @@ n/a
 Next goal: Beta Release
 
 ## To be included features (TODOs):
-- [ ] seperate out the message log part of the chat for seperate mention and whisper tab wihtout, chat-input, bio and room state stuff
-
-- Visibility panel
-    - [ ] Show deltes messages
-    - [ ] Zoom chat
-    - [ ] Streamer features
-        - Hide names
-        - Hide badges
-    - [ ] Spam grouping
-        - find a way to get a value based on the difference between messages
-        - group messages if msg.unique_words == msg.unique_words
-        - make content IDs/hashes.
-        - find existing chat messages that match that id/hash
-        - move message down to latest and add to a counter on the message
-    - [ ] Hide messages from bots
-    - [ ] Timestamps take to much space
-        - Colored dot indicating how long ago the message got posted?
-
 - [x] sub mode toggle
 - [x] All the emotes
 - [x] Stream Title
@@ -49,26 +31,46 @@ Next goal: Beta Release
 - [x] mod tools
 - [x] Auth flow
 - [x] follower mode + mode dropdown
-- [ ] Username color picker
-- [ ] input history navigation
-- [ ] emote and badge tool tips
-- [ ] User panel
 - [ ] Fix dragging rooms
-- [ ] UI for
-    - Pols
-    - Predictions
-- [ ] Channel Point Redemtions
 - [ ] Notifications
-- [ ] activity feed
+- [ ] Reccomend channels from follow list
+- [ ] (MessageParser) seperate out the message log part of the chat for seperate mention and whisper tab wihtout, chat-input, bio and room state stuff
+
+#### Visibility panel
+- [ ] Show deltes messages
+- [ ] Zoom chat
+- [ ] Streamer features
+    - Hide names
+    - Hide badges
+- [ ] Spam grouping
+    - find a way to get a value based on the difference between messages
+    - group messages if msg.unique_words == msg.unique_words
+    - make content IDs/hashes.
+    - find existing chat messages that match that id/hash
+    - move message down to latest and add to a counter on the message
+- [ ] Hide messages from bots
+- [ ] Timestamps take to much space
+    - Colored dot indicating how long ago the message got posted?
+
+#### Chat
+- [ ] Youtube chats
 - [ ] Inline Notifications
     - Follows?
     - Game change
     - Stream Title change
+- [ ] User panel
 - [ ] "Threads" (Mentions)
     - Optin thread
     - Person gets added to thread on mention
+- [ ] emote and badge tool tips
+
+#### Text Inputs
+- [ ] Username color picker
+- [ ] input history navigation
 - [ ] Chat commands
-- [ ] Chat input UI like the discord one with emote, pol/Pred feature, etc
 - [ ] Input emote parsing
-- [ ] Youtube chats
-- [ ] Reccomend channels from follow list
+- [ ] UI for
+    - Pols
+    - Predictions
+- [ ] Chat input UI like the discord one with emote, pol/Pred feature, etc
+- [ ] Channel Point Redemtions
