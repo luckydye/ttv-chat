@@ -37,8 +37,8 @@ Next goal: Beta Release
 - [ ] (MessageParser) seperate out the message log part of the chat for seperate mention and whisper tab wihtout, chat-input, bio and room state stuff
 
 #### Visibility panel
-- [ ] Show deltes messages
-- [ ] Zoom chat
+- [ ] Show delted messages
+- [ ] adjustable chat font size
 - [ ] Streamer features
     - Hide names
     - Hide badges
