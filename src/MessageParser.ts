@@ -199,6 +199,7 @@ export default class MessageParser {
         //  (3rd party emtoes | global emtoes | links | metions | msg tagged)
         msg_words.forEach(str => {
             // find channel emote repalcement
+            // TODO: PROBLEM: it renders sub emotes for people that dont have those emotes lol
             if (str in channel_emotes) {
                 wordEmoteMap[str] = {
                     name: str,
