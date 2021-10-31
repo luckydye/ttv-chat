@@ -15,9 +15,7 @@ export default class Badges {
     static getChachedChannelBadges(channel_id: string) {
         if (!channel_badges[channel_id]) {
             channel_badges[channel_id] = {};
-            Badges.getChannelBadges(channel_id).then(badges => {
-                channel_badges[channel_id] = badges;
-            })
+            Badges.getChannelBadges(channel_id);
         }
         return channel_badges[channel_id];
     }
@@ -26,6 +24,7 @@ export default class Badges {
         return fetch(`https://badges.twitch.tv/v1/badges/channels/${channel_id}/display`)
             .then(res => res.json())
             .then(json => {
+                channel_badges[channel_id] = json.badge_sets;
                 return json.badge_sets;
             })
             .catch(err => {

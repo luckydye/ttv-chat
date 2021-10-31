@@ -182,17 +182,15 @@ async fn connect_to_chat(app_handle: tauri::AppHandle, username: String, token: 
             badges: msg
               .badges
               .iter()
-              .map(|badge| {
-                let info = badge_info_it.next();
-                FullBadge {
-                  name: badge.name.to_owned(),
-                  version: badge.version.to_owned(),
-                  description: match info {
-                    // this aint working, just puts the badge info into the first badge what ever it is
+              .map(|badge| FullBadge {
+                name: badge.name.to_owned(),
+                version: badge.version.to_owned(),
+                description: if badge.name == "subscriber" {
+                  match badge_info_it.next() {
                     Some(info) => info.version.to_owned(),
                     None => "".to_owned(),
-                  },
-                }
+                  }
+                } else { "".to_owned() },
               })
               .collect(),
           };
@@ -262,20 +260,24 @@ async fn connect_to_chat(app_handle: tauri::AppHandle, username: String, token: 
                 bits: 0,
                 tags: msg.source.tags,
                 channel: msg.channel_login.to_owned(),
-                badges: msg.badges.iter().map(|badge| {
-                  let info = badge_info_it.next();
-                  FullBadge {
-                    name: badge.name.to_owned(),
-                    version: badge.version.to_owned(),
-                    description: match info {
-                      Some(info) => info.version.to_owned(),
-                      None => "".to_owned(),
-                    },
-                  }
-                }).collect()
+                badges: msg
+                  .badges
+                  .iter()
+                  .map(|badge| {
+                    let info = badge_info_it.next();
+                    FullBadge {
+                      name: badge.name.to_owned(),
+                      version: badge.version.to_owned(),
+                      description: match info {
+                        Some(info) => info.version.to_owned(),
+                        None => "".to_owned(),
+                      },
+                    }
+                  })
+                  .collect(),
               })
-            },
-            None => None
+            }
+            None => None,
           };
 
           let transport = EventMessage {

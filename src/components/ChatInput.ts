@@ -1,7 +1,7 @@
 import { css, html, LitElement } from 'lit-element';
 import IRCChatClient from '../IRCChatClient';
 import { Application } from '../App';
-import ContextMenu from './ContextMenu';
+import EmotePicker from './EmotePicker';
 
 export default class ChatInput extends LitElement {
 
@@ -108,7 +108,18 @@ export default class ChatInput extends LitElement {
     }
 
     openEmotePicker(e) {
-        const menu = ContextMenu.openOn(e.target, 'up');
+        EmotePicker.openOn(e.target, 'up');
+    }
+
+    insert(emote: string) {
+        // TODO: insert into cursor position not just the end
+        const ele = this.shadowRoot?.querySelector('textarea');
+        const lastChar = ele.value[ele.value.length-1];
+        if(lastChar == " ") {
+            ele.value += emote + " ";
+        } else {
+            ele.value += " " + emote + " ";
+        }
     }
 
     render() {

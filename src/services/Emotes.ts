@@ -3,6 +3,7 @@ import BTTVEmotes from './emotes/BTTVEmotes';
 import FFZEmotes from './emotes/FFZEmotes';
 import SevenTVEmotes from './emotes/SevenTVEmotes';
 
+// TODO: Sort cached emotes by service for emote picker sorting
 let global_emotes: { [key: string]: any } = {};
 let channel_emotes: { [key: string]: {} } = {};
 let emoteTemplate = "";
@@ -45,16 +46,15 @@ export default class Emotes {
     static getChachedChannelEmotes(channel_id: string) {
         if (!channel_emotes[channel_id]) {
             channel_emotes[channel_id] = {};
-            Emotes.getChannelEmotes(channel_id).then(emotes => {
-                channel_emotes[channel_id] = emotes;
-            })
+            Emotes.getChannelEmotes(channel_id);
         }
         return channel_emotes[channel_id];
     }
 
-    static async getChannelEmotes(id: string) {
-        const maps = await Promise.all([...EMOTE_SERVICES].map(Service => Service.getChannelEmotes(id)));
-        return flattenMap(maps);
+    static async getChannelEmotes(channel_id: string) {
+        const maps = await Promise.all([...EMOTE_SERVICES].map(Service => Service.getChannelEmotes(channel_id)));
+        channel_emotes[channel_id] = flattenMap(maps);
+        return channel_emotes[channel_id];
     }
 
 }

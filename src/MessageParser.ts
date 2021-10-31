@@ -172,10 +172,8 @@ export default class MessageParser {
         const wordLinkMap: { [key: string]: string } = {};
         const wordMentionMap: { [key: string]: string } = {};
 
-        // TODO: consider requesting those on chat connect and get them through the Badge interface
         // get cached channel badges
         let channel_badges = Badges.getChachedChannelBadges(channel_id);
-
         // get cached channel emotes
         let channel_emotes = Emotes.getChachedChannelEmotes(channel_id);
 
@@ -248,7 +246,7 @@ export default class MessageParser {
         };
 
         const renderMention = (name: string) => {
-            html`<span class="mention">${name}</span> `;
+            return html`<span class="mention">${name}</span> `;
         };
 
         // actually replace everything collected at once
@@ -263,7 +261,7 @@ export default class MessageParser {
             }
             // replace mentions
             if (wordMentionMap[word]) {
-                return renderMention(word);
+                return renderMention(wordMentionMap[word]);
             }
             return word + " ";
         });
@@ -279,14 +277,11 @@ export default class MessageParser {
 
                         if (badge.name == "subscriber") {
                             badge_url = getSubBadge(badge.version) || Badges.getBadgeByName(badge.name, badge.version);
-                        } else {
-                            badge_url = Badges.getBadgeByName(badge.name, badge.version);
-                        }
-                        if (badge.description) {
                             return html`<img class="badge" alt="${badge.name} (${badge.description})" src="${badge_url}" width="18" height="18">`;
-                        } else {
-                            return html`<img class="badge" alt="${badge.name}" src="${badge_url}" width="18" height="18">`;
                         }
+                        
+                        badge_url = Badges.getBadgeByName(badge.name, badge.version);
+                        return html`<img class="badge" alt="${badge.name}" src="${badge_url}" width="18" height="18">`;
                     })}
                 </span>
                 <span class="username">${message.user_name}:</span>

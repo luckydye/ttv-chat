@@ -78,11 +78,11 @@ let lastTarget: EventTarget | null = null;
 let lastOverlay: PageOverlay | null = null;
 
 function createOverlayForImageElement(e: PointerEvent) {
-    const target = e.target;
+    const target = e.target as HTMLImageElement;
     const overlay = new PageOverlay(e.x, e.y);
     overlay.innerHTML = `
         <img src="${target.src}" />
-        <div>${target.alt}</div>
+        <div style="margin-top: 5px;">${target.alt}</div>
     `;
     document.body.append(overlay);
     return overlay;

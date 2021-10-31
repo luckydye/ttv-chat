@@ -37,6 +37,27 @@ export default class ContextMenu extends LitElement {
                 background: rgba(31, 31, 35, 0.94);
                 backdrop-filter: blur(12px);
             }
+            /* // webkit scrollbars */
+            ::-webkit-scrollbar {
+                width: 8px;
+                margin: 5px 0;
+            }
+            ::-webkit-scrollbar-button {
+                display: none;
+            }
+            ::-webkit-scrollbar-track-piece  {
+                background: transparent;
+            }
+            ::-webkit-scrollbar-thumb {
+                background: var(--color-scrollbar-thumb, #464646);
+                border-radius: 5px;
+            }
+            ::-webkit-scrollbar-thumb:hover {
+                background: var(--color-scrollbar-thumb-hover, #555555);
+            }
+            ::-webkit-scrollbar-corner {
+                background: transparent;
+            }
         `;
     }
 
@@ -52,18 +73,21 @@ export default class ContextMenu extends LitElement {
                 y += 25;
                 break;
             case "right":
-                x -= 10;
+                x += 20;
                 y += 25;
                 break;
             case "up":
-                x -= 10;
-                y -= 50;
+                x -= rect.width + 300;
+                y -= 400;
                 break;
             default:
-                x += 30;
+                x += 40;
                 y -= 10;
                 break;
         }
+
+        const overlap = Math.min(window.innerWidth - (x + rect.width), 0);
+        x += overlap - 10;
 
         const newEle = new this(x, y);
 
@@ -109,13 +133,6 @@ export default class ContextMenu extends LitElement {
 
     connectedCallback() {
         super.connectedCallback();
-
-        const rect = this.getClientRects()[0];
-
-        if(this.x + 40 + this.clientWidth > window.innerWidth) {
-            this.y -= 100;
-            this.x -= 40;
-        }
 
         this.style.setProperty('--x', this.x.toString());
         this.style.setProperty('--y', this.y.toString());

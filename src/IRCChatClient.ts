@@ -73,28 +73,29 @@ export default class IRCChatClient {
             .then(e => {
                 if(message[0] !== "/") {
                     // loop message back to display in chat if its not a command
+                    if(!this.usermap[channel]) {
+                        throw new Error('User not listed');
+                    }
+                    const user = this.usermap[channel];
+                    const message_data: UserMessage = {
+                        channel: channel,
+                        message_type: 'user',
+                        id: Math.floor(Math.random() * 100000000000).toString(),
+                        text: message,
+                        user_name: user.username || "user not found",
+                        user_id: "chat-client",
+                        color: hexToRgb(user.color),
+                        emotes: [],
+                        badges: user.badges || [],
+                        timestamp: new Date(),
+                        is_action: false,
+                        bits: 0,
+                        tags: {
+                            "room-id": Application.getChannelId(channel),
+                        },
+                    }
+
                     for(let callback of listeners.get("chat.message")) {
-                        if(!this.usermap[channel]) {
-                            throw new Error('User not listed');
-                        }
-                        const user = this.usermap[channel];
-                        const message_data: UserMessage = {
-                            channel: channel,   // sneak this in here, its not in the type but rust gives me the channel as well
-                            message_type: 'user',
-                            id: Math.floor(Math.random() * 100000000000).toString(),
-                            text: message,
-                            user_name: user.username || "user not found",
-                            user_id: "chat-client",
-                            color: hexToRgb(user.color),
-                            emotes: [],
-                            badges: user.badges || [],
-                            timestamp: new Date(),
-                            is_action: false,
-                            bits: 0,
-                            tags: {
-                                "room-id": Application.getChannelId(channel),
-                            },
-                        }
                         callback(message_data);
                     }
                 }

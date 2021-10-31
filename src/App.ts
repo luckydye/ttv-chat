@@ -41,7 +41,7 @@ export class Application {
     }
 
     static getChannelId(channel_login: string) {
-        return applicationState.chatDetails[channel_login];
+        return applicationState.chatDetails[channel_login].id;
     }
 
     static saveState() {
