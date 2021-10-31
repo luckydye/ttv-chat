@@ -188,6 +188,7 @@ async fn connect_to_chat(app_handle: tauri::AppHandle, username: String, token: 
                   name: badge.name.to_owned(),
                   version: badge.version.to_owned(),
                   description: match info {
+                    // this aint working, just puts the badge info into the first badge what ever it is
                     Some(info) => info.version.to_owned(),
                     None => "".to_owned(),
                   },

@@ -17,14 +17,14 @@ import { getUserInfo } from './services/Twitch';
 const chatElements: { [key: string]: any } = {};
 
 async function createChat(channel: string) {
+    chatElements[channel] = document.createElement("twitch-chat");
+    chatElements[channel].setRoom(channel);
 
     const info = await getUserInfo(channel);
     Application.setChannelDetails(channel, info);
     Badges.getChannelBadges(info.id);
     Emotes.getChannelEmotes(info.id);
 
-    chatElements[channel] = document.createElement("twitch-chat");
-    chatElements[channel].setRoom(channel);
     IRCChatClient.joinChatRoom(channel.toLocaleLowerCase());
 
     if(Application.getSelectedRoom() == channel) {
