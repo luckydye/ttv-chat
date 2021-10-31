@@ -10,13 +10,26 @@ import './components/TwitchChat';
 import IRCChatClient from './IRCChatClient';
 import MessageParser, { EventMessage, UserMessage } from './MessageParser';
 import Foramt from './Format';
+import Badges from './services/Badges';
+import Emotes from './services/Emotes';
+import { getUserInfo } from './services/Twitch';
 
 const chatElements: { [key: string]: any } = {};
 
-function createChat(channel: string) {
+async function createChat(channel: string) {
+
+    const info = await getUserInfo(channel);
+    Application.setChannelDetails(channel, info);
+    Badges.getChannelBadges(info.id);
+    Emotes.getChannelEmotes(info.id);
+
     chatElements[channel] = document.createElement("twitch-chat");
     chatElements[channel].setRoom(channel);
     IRCChatClient.joinChatRoom(channel.toLocaleLowerCase());
+
+    if(Application.getSelectedRoom() == channel) {
+        renderSelecetdChat();
+    }
 }
 
 function renderSelecetdChat() {
@@ -156,8 +169,6 @@ async function main() {
     for(let channel of Application.getRooms()) {
         createChat(channel);
     }
-
-    renderSelecetdChat();
 }
 
 window.addEventListener('loggedin', e => {
