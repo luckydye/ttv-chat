@@ -40,14 +40,14 @@ Next goal: Beta Release
 - [x] mod tools
 - [x] Auth flow
 - [x] follower mode + mode dropdown
+- [x] (MessageParser) seperate out the message log part of the chat for seperate mention and whisper tab wihtout, chat-input, bio and room state stuff
 - [ ] Fix dragging rooms
 - [ ] Notifications
 - [ ] Reccomend channels from follow list
-- [ ] (MessageParser) seperate out the message log part of the chat for seperate mention and whisper tab wihtout, chat-input, bio and room state stuff
 - [ ] Cache chatroom profile pictures for faster loading time and also will just look faster without actually beeing faster
 
 #### Visibility panel
-- [ ] Show delted messages
+- [ ] Show/Hide delted messages
 - [ ] adjustable chat font size
 - [ ] Streamer features
     - Hide names
@@ -63,6 +63,7 @@ Next goal: Beta Release
     - Colored dot indicating how long ago the message got posted?
 
 #### Chat
+- [x] emote and badge tool tips
 - [ ] Youtube chats
 - [ ] Inline Notifications
     - Follows?
@@ -72,7 +73,6 @@ Next goal: Beta Release
 - [ ] "Threads" (Mentions)
     - Optin thread
     - Person gets added to thread on mention
-- [x] emote and badge tool tips
 
 #### Text Inputs
 - [ ] Username color picker
