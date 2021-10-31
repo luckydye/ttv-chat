@@ -50,12 +50,14 @@ export class Application {
 
     static setChannelDetails(channel_name: string, info: any) {
         applicationState.chatDetails[channel_name] = info;
+        this.saveState();
     }
     
     static async init() {
         const state = localStorage.getItem('save-state');
         if(state) {
-            applicationState = JSON.parse(state);
+            const json = JSON.parse(state);
+            applicationState = Object.assign(applicationState, json);
         }
 
         window.dispatchEvent(new Event('stateloaded'));
