@@ -293,7 +293,7 @@ export default class MessageParser {
                         return html`<img class="badge" alt="${badge.name}" src="${badge_url}" width="18" height="18">`;
                     })}
                 </span>
-                <span class="username">${message.user_name}:</span>
+                <span class="username" @click="${() => Application.openUserCard(message.channel, message.user_name)}">${message.user_name}:</span>
                 ${isReply ? html`
                     <button class="reply-icon" title="Open Thread" @click="${() => Application.openThread(message.channel, message.tags['reply-parent-msg-id'])}">
                         <img src="./images/question_answer_white_24dp.svg" height="18px" width="18px" />

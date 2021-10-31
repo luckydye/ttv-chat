@@ -106,8 +106,6 @@ export class Application {
     }
 
     static openThread(channel: string, message_id: string) {
-        console.log(message_id);
-
         const msg = document.querySelector(`[messageid="${message_id}"]`);
         if(msg) {
             const message = msg.message;
@@ -142,6 +140,11 @@ export class Application {
 
     static unban(channel: string, user_name: string) {
         IRCChatClient.sendMessage(channel, `/unban ${user_name}`);
+    }
+
+    static openUserCard(channel: string, user_name: string) {
+        const url = `https://www.twitch.tv/popout/${channel}/viewercard/${user_name}`;
+        open(url);
     }
 
 }

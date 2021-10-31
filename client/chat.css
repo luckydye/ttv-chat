@@ -90,6 +90,10 @@ chat-line .username {
     font-weight: 500;
     margin-right: 2px;
 }
+chat-line .username:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
 chat-line .message {
     display: inline;
 }
