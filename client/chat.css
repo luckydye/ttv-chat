@@ -91,7 +91,7 @@ chat-line .emote {
     display: inline-block;
     margin-bottom: -0.8em;
     margin-right: 3px;
-    max-width: 120px;
+    max-width: 100px;
     object-fit: contain;
 }
 chat-line .mention {

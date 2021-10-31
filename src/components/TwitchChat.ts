@@ -160,13 +160,12 @@ export default class TwitchChat extends Chat {
                 height: 100%;
             }
             .lines {
-                margin-top: 54px;
                 box-sizing: border-box;
                 position: absolute;
                 top: 0;
                 left: 0;
                 width: 100%;
-                height: calc(100% - 54px);
+                height: 100%;
                 overflow: auto;
                 overflow-y: scroll;
                 overflow-x: hidden;
@@ -179,11 +178,17 @@ export default class TwitchChat extends Chat {
                 padding: 10px 15px;
             }
 
-            .chat-title {
+            .header {
+                background: rgba(25, 25, 28, 0.75);
+                backdrop-filter: blur(24px);
+                background: rgba(25, 25, 28, 0.9);
+                backdrop-filter: blur(24px);
                 position: relative;
-                z-index: 100;
+                z-index: 1000;
+            }
+
+            .chat-title {
                 width: 100%;
-                background: rgb(25, 25, 28);
                 padding: 5px 10px;
                 box-sizing: border-box;
                 overflow: hidden;
@@ -207,15 +212,11 @@ export default class TwitchChat extends Chat {
 
             .chat-actions {
                 width: 100%;
-                background: rgb(25 25 28);
-                position: relative;
-                z-index: 1000;
                 display: grid;
                 grid-template-columns: 1fr auto 1fr;
                 align-items: center;
                 padding: 4px 8px;
                 box-sizing: border-box;
-                z-index: 1000;
             }
 
             .chat-action {
@@ -516,91 +517,93 @@ export default class TwitchChat extends Chat {
 
     render() {
         return html`
-            <div class="chat-actions">
-                <div>
-                    <div class="chat-action">
-                        <button title="Close chat" @click="${(e) => {
-                            Application.closeRoom(this.roomName);
-                        }}">
-                            <img src="./images/close.svg" width="16px" height="16px" />
-                        </button>
-                    </div>
-                    <div class="chat-action">
-                        <button class="user-list-button" title="Userlist" @click="${() => {
-                            this.openUserlist();
-                        }}">
-                            <img src="./images/people.svg" width="16px" height="16px" />
-                        </button>
-                        <div class="user-list-preview" tabindex="0">
-                            <chat-user-list channel="${this.roomName}"></chat-user-list>
+            <div class="header">
+                <div class="chat-actions">
+                    <div>
+                        <div class="chat-action">
+                            <button title="Close chat" @click="${(e) => {
+                                Application.closeRoom(this.roomName);
+                            }}">
+                                <img src="./images/close.svg" width="16px" height="16px" />
+                            </button>
+                        </div>
+                        <div class="chat-action">
+                            <button class="user-list-button" title="Userlist" @click="${() => {
+                                this.openUserlist();
+                            }}">
+                                <img src="./images/people.svg" width="16px" height="16px" />
+                            </button>
+                            <div class="user-list-preview" tabindex="0">
+                                <chat-user-list channel="${this.roomName}"></chat-user-list>
+                            </div>
+                        </div>
+                        <div class="chat-action">
+                            <button title="Open Stream" @click="${() => {
+                                Webbrowser.openURL(`https://www.twitch.tv/${this.roomName}`);
+                            }}">
+                                <img src="./images/open.svg" width="16px" height="16px" />
+                            </button>
+                        </div>
+                        <div class="chat-action">
+                            <button title="Relaod Chat" @click="${() => {
+                                location.reload();
+                            }}">
+                                <img src="./images/refresh_white_24dp.svg" width="16px" height="16px" />
+                            </button>
                         </div>
                     </div>
-                    <div class="chat-action">
-                        <button title="Open Stream" @click="${() => {
-                            Webbrowser.openURL(`https://www.twitch.tv/${this.roomName}`);
-                        }}">
-                            <img src="./images/open.svg" width="16px" height="16px" />
-                        </button>
+                    <div class="chat-channel-name" @click="${() => {
+                        Webbrowser.openURL(`https://www.twitch.tv/${this.roomName}`);
+                    }}">
+                        ${this.roomName}
                     </div>
-                    <div class="chat-action">
-                        <button title="Relaod Chat" @click="${() => {
-                            location.reload();
-                        }}">
-                            <img src="./images/refresh_white_24dp.svg" width="16px" height="16px" />
-                        </button>
+                    <div class="chat-state-icons">
+                        <div class="chat-action">
+                            <div class="room-state-icon" title="Slow mode for ${this.slow_mode}s" ?active="${this.slow_mode !== 0}" @click="${this.toggleSlowMode}">
+                                <img src="./images/slowmode.svg" width="18px" height="18px"/>
+                            </div>
+                            <div class="room-state-icon action-expand" title="Slowmode time" @click="${this.openSlowModeSettins}">
+                                <img src="./images/expand_more_black_24dp.svg" width="16px" height="16px"/>
+                            </div>
+                        </div>
+                        <div class="chat-action">
+                            <div class="room-state-icon" title="Follow mode for ${this.follwers_only}s" ?active="${this.follwers_only !== 0}" @click="${this.toggleFollowerMode}">
+                                <img src="./images/follower.svg" width="18px" height="18px"/>
+                            </div>
+                            <div class="room-state-icon action-expand" title="Follower time" @click="${this.openFollowerModeSettings}">
+                                <img src="./images/expand_more_black_24dp.svg" width="16px" height="16px"/>
+                            </div>
+                        </div>
+                        <div class="chat-action">
+                            <div class="room-state-icon" title="Emote only mode" ?active="${this.emote_only}" @click="${this.toggleEmoteOnlyMode}">
+                                <img src="./images/emote.svg" width="18px" height="18px"/>
+                            </div>
+                        </div>
+                        <div class="chat-action">
+                            <div class="room-state-icon" title="Sub only mode" ?active="${this.subscribers_only}" @click="${this.toggleSubOnlyMode}">
+                                <img src="./images/subscriber.svg" width="18px" height="18px"/>
+                            </div>
+                        </div>
+                        <div class="chat-action">
+                            <div class="room-state-icon" title="r9k mode" ?active="${this.r9k}" @click="${this.toggleR9kMode}">r9k</div>
+                        </div>
+                        <div class="chat-action">
+                            <div class="user-state-icon" title="Moderator" ?active="${this.moderator}">
+                                <img src="https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/2" width="18px" height="18px"/>
+                            </div>
+                        </div>
+                        <div class="chat-action">
+                            <div class="user-state-icon" title="Broadcaster" ?active="${this.broadcaster}">
+                                <img src="https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/2" width="18px" height="18px"/>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="chat-channel-name" @click="${() => {
-                    Webbrowser.openURL(`https://www.twitch.tv/${this.roomName}`);
-                }}">
-                    ${this.roomName}
+                <div class="chat-title">
+                    ${this.stream_title == "" ? 
+                        (this.chatter_count > 0 ? `Offline - ${Format.number(this.chatter_count)} chatters` : "Offline") 
+                    : this.stream_title}
                 </div>
-                <div class="chat-state-icons">
-                    <div class="chat-action">
-                        <div class="room-state-icon" title="Slow mode for ${this.slow_mode}s" ?active="${this.slow_mode !== 0}" @click="${this.toggleSlowMode}">
-                            <img src="./images/slowmode.svg" width="18px" height="18px"/>
-                        </div>
-                        <div class="room-state-icon action-expand" title="Slowmode time" @click="${this.openSlowModeSettins}">
-                            <img src="./images/expand_more_black_24dp.svg" width="16px" height="16px"/>
-                        </div>
-                    </div>
-                    <div class="chat-action">
-                        <div class="room-state-icon" title="Follow mode for ${this.follwers_only}s" ?active="${this.follwers_only !== 0}" @click="${this.toggleFollowerMode}">
-                            <img src="./images/follower.svg" width="18px" height="18px"/>
-                        </div>
-                        <div class="room-state-icon action-expand" title="Follower time" @click="${this.openFollowerModeSettings}">
-                            <img src="./images/expand_more_black_24dp.svg" width="16px" height="16px"/>
-                        </div>
-                    </div>
-                    <div class="chat-action">
-                        <div class="room-state-icon" title="Emote only mode" ?active="${this.emote_only}" @click="${this.toggleEmoteOnlyMode}">
-                            <img src="./images/emote.svg" width="18px" height="18px"/>
-                        </div>
-                    </div>
-                    <div class="chat-action">
-                        <div class="room-state-icon" title="Sub only mode" ?active="${this.subscribers_only}" @click="${this.toggleSubOnlyMode}">
-                            <img src="./images/subscriber.svg" width="18px" height="18px"/>
-                        </div>
-                    </div>
-                    <div class="chat-action">
-                        <div class="room-state-icon" title="r9k mode" ?active="${this.r9k}" @click="${this.toggleR9kMode}">r9k</div>
-                    </div>
-                    <div class="chat-action">
-                        <div class="user-state-icon" title="Moderator" ?active="${this.moderator}">
-                            <img src="https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/2" width="18px" height="18px"/>
-                        </div>
-                    </div>
-                    <div class="chat-action">
-                        <div class="user-state-icon" title="Broadcaster" ?active="${this.broadcaster}">
-                            <img src="https://static-cdn.jtvnw.net/badges/v1/5527c58c-fb7d-422d-b71b-f309dcb85cc1/2" width="18px" height="18px"/>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="chat-title">
-                ${this.stream_title == "" ? 
-                    (this.chatter_count > 0 ? `Offline - ${Format.number(this.chatter_count)} chatters` : "Offline") 
-                : this.stream_title}
             </div>
             <div class="scroll-to-bottom" @click="${() => this.lock()}">
                 <span>Scroll to the bottom</span>

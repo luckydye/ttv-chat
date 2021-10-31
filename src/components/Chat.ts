@@ -123,13 +123,12 @@ export default class Chat extends LitElement {
                 height: 100%;
             }
             .lines {
-                margin-top: 30px;
                 box-sizing: border-box;
                 position: absolute;
                 top: 0;
                 left: 0;
                 width: 100%;
-                height: calc(100% - 30px);
+                height: 100%;
                 overflow: auto;
                 overflow-y: scroll;
                 overflow-x: hidden;
