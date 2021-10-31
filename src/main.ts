@@ -12,7 +12,7 @@ import MessageParser, { EventMessage, UserMessage } from './MessageParser';
 import Foramt from './Format';
 import Badges from './services/Badges';
 import Emotes from './services/Emotes';
-import { getUserInfo } from './services/Twitch';
+import TwitchAPI from './services/Twitch';
 
 const chatElements: { [key: string]: any } = {};
 
@@ -20,7 +20,7 @@ async function createChat(channel: string) {
     chatElements[channel] = document.createElement("twitch-chat");
     chatElements[channel].setRoom(channel);
 
-    const info = await getUserInfo(channel);
+    const info = await TwitchAPI.getUserInfo(channel);
     Application.setChannelDetails(channel, info);
     Badges.getChannelBadges(info.id);
     Emotes.getChannelEmotes(info.id);
@@ -30,6 +30,8 @@ async function createChat(channel: string) {
     if(Application.getSelectedRoom() == channel) {
         renderSelecetdChat();
     }
+
+    // TwitchAPI.connectToPubSub(TwitchAPI.getCurrentUser().id, info.id);
 }
 
 function renderSelecetdChat() {

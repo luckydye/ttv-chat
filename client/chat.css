@@ -54,10 +54,22 @@ chat-line .chat-line-tool:active {
 chat-line:hover .tools .chat-line-tool {
     display: flex;
 }
+chat-line:hover .tools .chat-line-tool.mention-tool {
+    display: none;
+}
+[name="Mentions"] chat-line:hover .tools .chat-line-tool.mention-tool {
+    display: flex;
+}
 chat-line:hover .tools .chat-line-tool.mod-tool {
     display: none;
 }
+chat-line:hover .tools .chat-line-tool.mod-tool-banned {
+    display: none;
+}
 [modview] chat-line:hover .tools .chat-line-tool.mod-tool {
+    display: flex;
+}
+[modview] chat-line[deleted]:hover .tools .chat-line-tool.mod-tool-banned {
     display: flex;
 }
 

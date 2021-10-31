@@ -2,32 +2,28 @@
 import { parseSearch } from '../utils';
 import IRCChatClient from '../IRCChatClient';
 import TwichCommands from './TwichCommands';
+import TwitchPubsub from './twitch/Pubsub';
 
 const CLIENT_ID = "8gwe8mu523g9cstukr8rnnwspqjykf";
 const REDIRECT_URI = "https://best-twitch-chat.web.app/auth";
 
 let logged_in_username = "";
+let logged_in_user = {};
 let logged_in = false;
 
 
 // TODO: Contain all these loose functions into the TwitchAPI class
 
-
-function openChat(username: string, token: string) {
+function connectToChatServer(username: string, token: string) {
     try {
         console.log('connecting');
-        
+
         IRCChatClient.connectoToChat(username, token).then(() => {
             window.dispatchEvent(new Event("loggedin"));
         })
     } catch (err) {
         console.error('Error opening chat', err);
     }
-}
-
-export function joinChannel(channel: string) {
-    console.log('Joining channel');
-    IRCChatClient.joinChatRoom(channel);
 }
 
 export async function handleAuthenticatedUser(token: string) {
@@ -44,13 +40,15 @@ export async function handleAuthenticatedUser(token: string) {
         logged_in = true;
     }
 
-    openChat(username, token);
+    connectToChatServer(username, token);
 }
 
 export async function getLoggedInUser() {
     const token = localStorage.getItem('user-token');
     const userinfo = await fetchTwitchAuthApi("/oauth2/userinfo", token);
     logged_in_username = userinfo.preferred_username;
+    const user_data = await TwitchAPI.getUserInfo(logged_in_username);
+    logged_in_user = user_data;
     return userinfo;
 }
 
@@ -128,7 +126,6 @@ export async function authClientUser() {
         "user:read:blocked_users",
 
         "bits:read",
-        "channel:read:redemptions",
         "channel:moderate",
         "chat:read",
         "chat:edit",
@@ -160,7 +157,7 @@ export async function authClientUser() {
 
             const access_token = parsed.access_token;
             handleAuthenticatedUser(access_token);
-            
+
             win.close();
         })
     } else {
@@ -168,8 +165,52 @@ export async function authClientUser() {
     }
 }
 
-
 export default class TwitchAPI {
+
+    static getCurrentUser() {
+        return logged_in_user;
+    }
+
+    static async getUserInfo(user_login: string) {
+        const userinfo = await fetchTwitchApi("/users", `login=${user_login}`);
+        return userinfo.data[0];
+    }
+
+    static async getCustomReward(user_id: string) {
+        const userinfo = await fetchTwitchApi("/channel_points/custom_rewards", `broadcaster_id=${user_id}`);
+        return userinfo;
+    }
+
+    static async requestMessageHistory() {
+        
+    }
+
+    static connectToPubSub(user_id: string, channel_id: string) {
+        const token = localStorage.getItem('user-token');
+        if (token) {
+            const pubsub = new TwitchPubsub(token);
+
+            pubsub.connect()
+                .then(() => {
+                    pubsub.listen([
+                        `channel-points-channel-v1.${channel_id}`
+                    ]);
+                })
+                .catch(err => {
+                    console.error('Pubsub connection error', err);
+                })
+
+            // `channel-points-channel-v1.${channel_id}`,
+            // // seperate connections for mod stuff. Have a single connection with the max 50 topics for all chats.
+            // `automod-queue.${user_id}.${channel_id}`,
+            // `chat_moderator_actions.${user_id}.${channel_id}`,
+            // `user-moderation-notifications.${user_id}.${channel_id}`,
+
+
+        } else {
+            throw new Error('not logged in, can not connect to pubsub.');
+        }
+    }
 
     static logout() {
         localStorage.removeItem('user-token');

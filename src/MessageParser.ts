@@ -7,6 +7,7 @@ import { getLoggedInUsername } from './services/Twitch';
 import Webbrowser from './Webbrowser';
 import { limitColorContrast, rgbToHex } from './utils';
 import { Application } from './App';
+import TwitchAPI from './services/Twitch';
 
 const Default_EventMessage_Color = "rgb(12, 12, 12)";
 const ColorEventTypeMap = {
@@ -160,6 +161,13 @@ export default class MessageParser {
     static parseChatTextMessage(message: UserMessage): ChatMessage {
 
         const channel_id = message.tags['room-id'];
+        const reward_id = message.tags['custom-reward-id'];
+
+        // console.log(reward_id);
+        // TwitchAPI.getCustomReward(channel_id).then(d => {
+        //     console.log('d', d);
+        // })
+        
 
         let color = rgbToHex(limitColorContrast(...message.color));
         let highlighted = message.tags['msg-id'] == "highlighted-message";
@@ -287,7 +295,7 @@ export default class MessageParser {
                 </span>
                 <span class="username">${message.user_name}:</span>
                 ${isReply ? html`
-                    <button class="reply-icon" title="Open Thread" @click="${() => { alert('open thread') }}">
+                    <button class="reply-icon" title="Open Thread" @click="${() => Application.openThread(message.channel, message.tags['reply-parent-msg-id'])}">
                         <img src="./images/question_answer_white_24dp.svg" height="18px" width="18px" />
                     </button>
                 ` : ""}
@@ -295,17 +303,20 @@ export default class MessageParser {
                 
                 <div class="tools">
                     <!-- //////// use PageOverlay for this? //////////-->
-                    ${message.channel === "Mentions" ? html`
-                        <div class="chat-line-tool" @click="${() => Application.selectRoom(message.channel)}" title="Jump to chat">
-                            <img src="./images/navigate_before_white_24dp.svg" width="18px" height="18px" />
-                        </div>
-                    ` : ""}
+                    
+                    <div class="chat-line-tool mention-tool" @click="${() => Application.selectRoom(message.channel)}" title="Jump to chat">
+                        <img src="./images/navigate_before_white_24dp.svg" width="18px" height="18px" />
+                    </div>
+                    
                     ${message.user_name !== getLoggedInUsername() ? html`
-                        <div class="chat-line-tool" title="Reply" @click="${() => Application.reply(message.id)}">
+                        <div class="chat-line-tool" title="Reply" @click="${() => Application.reply(message.channel, message)}">
                             <img src="./images/reply_white_24dp.svg" height="18px" width="18px" />
                         </div>
-                        <div class="chat-line-tool mod-tool" @click="${() => Application.timeout(message.user_name, 10)}">
+                        <div class="chat-line-tool mod-tool" title="Timeout 10s" @click="${() => Application.timeout(message.channel, message.user_name, 10)}">
                             <img src="./images/block_white_24dp.svg" width="18px" height="18px" />
+                        </div>
+                        <div class="chat-line-tool mod-tool-banned" title="Unban" @click="${() => Application.unban(message.channel, message.user_name)}">
+                            <img src="./images/done_white_24dp.svg" width="18px" height="18px" />
                         </div>
                     ` : ""}
                 </div>

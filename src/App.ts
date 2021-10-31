@@ -1,3 +1,4 @@
+import IRCChatClient from './IRCChatClient';
 
 let applicationState = {
     selectedRoom: localStorage.getItem('selected') || "@",
@@ -104,12 +105,43 @@ export class Application {
         this.saveState();
     }
 
-    static reply(message_id: string) {
-        alert('reply to ' + message_id);
+    static openThread(channel: string, message_id: string) {
+        console.log(message_id);
+
+        const msg = document.querySelector(`[messageid="${message_id}"]`);
+        if(msg) {
+            const message = msg.message;
+
+            const chat2 = document.createElement('sample-chat');
+            chat2.appendMessage(message);
+
+            chat2.style.position = "fixed";
+            chat2.style.top = "auto";
+            chat2.style.bottom = "100px";
+            chat2.style.left = "40px";
+            chat2.style.width = "100%";
+            chat2.style.height = "100px";
+            chat2.style.background = "#333";
+            
+            document.body.append(chat2);
+        }
     }
 
-    static timeout(user_name: string, secs: number) {
-        alert('timeout ' + user_name + ' for ' + secs + " seconds");
+    static reply(channel: string, message: ChatMessage) {
+        Application.selectRoom(channel);
+        const input = document.querySelector('chat-input');
+        input.insert(message.user_name + ', ');
+        input.focus();
+        // message.id
+        // also place the message id as parent message into the sumbited message
+    }
+
+    static timeout(channel: string, user_name: string, secs: number) {
+        IRCChatClient.sendMessage(channel, `/timeout ${user_name} ${secs}`);
+    }
+
+    static unban(channel: string, user_name: string) {
+        IRCChatClient.sendMessage(channel, `/unban ${user_name}`);
     }
 
 }

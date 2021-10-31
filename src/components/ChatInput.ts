@@ -122,6 +122,11 @@ export default class ChatInput extends LitElement {
         }
     }
 
+    focus() {
+        const ele = this.shadowRoot?.querySelector('textarea');
+        ele?.focus();
+    }
+
     render() {
         return html`
             <div class="wrapper">
@@ -130,8 +135,8 @@ export default class ChatInput extends LitElement {
                         <textarea @keydown="${this.handleKeyDown}" placeholder="Send a message" rows="1"></textarea>
                     </div>
                     <div class="util">
-                        <button name="create poll">Y</button>
-                        <button name="create prediction">X</button>
+                        <!-- <button name="create poll">Y</button>
+                        <button name="create prediction">X</button> -->
                         <button name="Emotes" @click="${this.openEmotePicker}">
                             <img src="./images/sentiment_satisfied_alt_white_24dp.svg" width="18px" height="18px"/>
                         </button>

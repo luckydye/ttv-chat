@@ -20,7 +20,8 @@ export default class Chat extends LitElement {
         this.appendChild(line);
         setTimeout(() => {
             this.afterAppend();
-        }, 1)
+        }, 1);
+        return line;
     }
 
     appendInfo(msg: ChatInfoMessage) {
@@ -91,6 +92,7 @@ export default class Chat extends LitElement {
     setRoom(roomName: string) {
         this.roomName = roomName;
         this.update();
+        this.setAttribute('name', this.roomName);
     }
 
     constructor() {
@@ -132,6 +134,7 @@ export default class Chat extends LitElement {
                 overflow: auto;
                 overflow-y: scroll;
                 overflow-x: hidden;
+                padding-top: 30px;
             }
 
             .chat-actions {

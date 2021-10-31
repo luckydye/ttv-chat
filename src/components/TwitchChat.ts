@@ -32,6 +32,14 @@ export default class TwitchChat extends Chat {
     moderator = false;
     broadcaster = false;
 
+    appendMessage(...args) {
+        const line = super.appendMessage(...args);
+
+        if(!this.connect) {
+            line.style.opacity = "0.5";
+        }
+    }
+
     setRoom(roomName: string) {
         super.setRoom(roomName);
 
@@ -160,6 +168,7 @@ export default class TwitchChat extends Chat {
                 height: 100%;
             }
             .lines {
+                padding-top: 60px;
                 box-sizing: border-box;
                 position: absolute;
                 top: 0;
