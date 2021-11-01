@@ -125,6 +125,12 @@ export class Application {
         }
     }
 
+    static getMessageById(channel:string, message_id: string) {
+        const chat = this.getChats(channel);
+        const msg = chat.querySelector(`[messageid="${message_id}"]`);
+        return msg ? msg.message : undefined;
+    }
+
     static reply(channel: string, message: ChatMessage) {
         Application.selectRoom(channel);
         const input = document.querySelector('chat-input');

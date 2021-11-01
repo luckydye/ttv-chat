@@ -21,7 +21,7 @@ chat-line:hover {
 
 chat-line .line-title {
     opacity: 0.5;
-    line-height: 100%;
+    line-height: 140%;
     padding: 4px 0 8px 0;
     margin-left: -1px;
 }

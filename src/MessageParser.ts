@@ -100,6 +100,7 @@ export interface ChatMessage {
     action: boolean,            // is a /me message
     reply: boolean,             // is a reply
     timestamp: Date,
+    text: string,
     content: TemplateResult,    // parsed message
 }
 
@@ -278,7 +279,14 @@ export default class MessageParser {
             return word + " ";
         });
 
-        const line_title = reward_id ? `Redeemed ${redemtion_title}.` : null;
+        let line_title = reward_id ? `Redeemed ${redemtion_title}.` : null;
+
+        if(isReply) {
+            const parent_message = Application.getMessageById(message.channel, message.tags['reply-parent-msg-id']);
+            if(parent_message) {
+                line_title = `${parent_message.user_name}: ${parent_message.text}`;
+            }
+        }
 
         // render full message template
         const template = html`
@@ -300,7 +308,7 @@ export default class MessageParser {
                     })}
                 </span>
                 <span class="username" @click="${() => Application.openUserCard(message.channel, message.user_name)}">${message.user_name}:</span>
-                ${isReply ? html`
+                ${isReply && false ? html`
                     <button class="reply-icon" title="Open Thread" @click="${() => Application.openThread(message.channel, message.tags['reply-parent-msg-id'])}">
                         <img src="./images/question_answer_white_24dp.svg" height="18px" width="18px" />
                     </button>
@@ -339,6 +347,7 @@ export default class MessageParser {
             action: action,
             reply: isReply,
             timestamp: timestamp,
+            text: message.text,
             content: template,
         };
     }

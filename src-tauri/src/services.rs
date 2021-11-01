@@ -8,7 +8,7 @@ struct MessageHistory {
 pub async fn get_message_history(channel: String) -> Result<Vec<IRCMessage>, reqwest::Error> {
   println!("Getting message history");
   let request_url = format!(
-    "https://recent-messages.robotty.de/api/v2/recent-messages/{c}?clearchat_to_notice=true&limit=20",
+    "https://recent-messages.robotty.de/api/v2/recent-messages/{c}?clearchat_to_notice=true&limit=100",
     c = channel
   );
   let res = reqwest::get(request_url).await?;
