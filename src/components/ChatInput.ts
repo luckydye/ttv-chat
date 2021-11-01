@@ -13,6 +13,10 @@ export default class ChatInput extends LitElement {
                 display: block;
                 width: 100%;
             }
+            :host([disabled]) {
+                pointer-events: none;
+                opacity: 0;
+            }
             .wrapper {
                 padding: 8px;
             }

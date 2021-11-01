@@ -114,6 +114,15 @@ export default class Chat extends LitElement {
         })
     }
 
+    connectedCallback() {
+        super.connectedCallback();
+        
+        const scrollEle = this.shadowRoot?.querySelector('.lines');
+        if(scrollEle) {
+            scrollEle.scrollTo(0, this.scrollTarget);
+        }
+    }
+
     placeBookmarkLine() {
         if(this.bookmark) {
             this.removeBookmarkLine();
