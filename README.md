@@ -26,13 +26,15 @@ n/a
 
 Next goal: Beta Release
 
-- [ ] Fix room drag n drop
 - [x] fix the scrolling when switching channels
+- [x] bookmark line
+- [x] show point redemtions in chat !important
+- [ ] Fix room drag n drop
 - [ ] finish Emote Picker
 - [ ] Chat commands and names sugestions
 - [ ] update title and game via websocket, not interval
-- [x] show point redemtions in chat !important
-- [x] bookmark line
+- [ ] make the profile ring red on a mention
+- [ ] implement dialog for one-click timeout, to prevent missclicks
 
 ## To be included features (TODOs):
 - [x] sub mode toggle

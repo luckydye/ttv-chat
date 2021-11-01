@@ -2,7 +2,7 @@
 
 import { css, html, LitElement } from 'lit-element';
 import IRCChatClient from '../IRCChatClient';
-import Foramt from '../Format';
+import Format from '../Format';
 
 export default class ChatUserList extends LitElement {
 
@@ -35,15 +35,15 @@ export default class ChatUserList extends LitElement {
         const counts = this.shadowRoot.querySelector('.user-list-counts');
         counts.innerHTML = "";
         if(staffCount > 0) {
-            counts.innerHTML += `<img height="16px" width="16px" src="./images/Staff.svg"/> ${Foramt.number(staffCount)}  `;
+            counts.innerHTML += `<img height="16px" width="16px" src="./images/Staff.svg"/> ${Format.number(staffCount)}  `;
         }
         if(modCount > 0) {
-            counts.innerHTML += `<img height="16px" width="16px" src="./images/Mod.svg"/> ${Foramt.number(modCount)}  `;
+            counts.innerHTML += `<img height="16px" width="16px" src="./images/Mod.svg"/> ${Format.number(modCount)}  `;
         }
         if(vipCount > 0) {
-            counts.innerHTML += `<img height="16px" width="16px" src="./images/VIP.svg"/> ${Foramt.number(vipCount)}  `;
+            counts.innerHTML += `<img height="16px" width="16px" src="./images/VIP.svg"/> ${Format.number(vipCount)}  `;
         }
-        counts.innerHTML += `<img height="16px" width="16px" src="./images/Viewer.svg"/> ${Foramt.number(viewerCount)}`;
+        counts.innerHTML += `<img height="16px" width="16px" src="./images/Viewer.svg"/> ${Format.number(viewerCount)}`;
 
         this.update();
     }

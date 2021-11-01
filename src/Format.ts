@@ -3,7 +3,7 @@
 const NumberFormat = new Intl.NumberFormat('en-IN');
 const langFormat = new Intl.DisplayNames(['en'], { type: 'language' });
 
-export default class Foramt {
+export default class Format {
 
     static lang = (langshort: string) => langFormat.of(langshort);
     static number = (n: number) => NumberFormat.format(n);

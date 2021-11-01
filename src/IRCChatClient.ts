@@ -35,6 +35,7 @@ const listeners = new Map();
 // bindings to the rust api
 export default class IRCChatClient {
 
+    // appearence of the local user in different chat rooms
     static usermap: { [key: string]: UserState } = {};
 
     static async connectoToChat(username: string, token: string) {

@@ -15,7 +15,7 @@ let currentAnimation: number = -1;
 export default class AnimatedScroll {
 
     static scrollTo(target: number, root: HTMLElement) {
-        cancelAnimationFrame(currentAnimation);
+        clearTimeout(currentAnimation);
 
         if(target > 0) {
             const maxScrollHeight = root.scrollHeight - root.clientHeight;
@@ -30,10 +30,10 @@ export default class AnimatedScroll {
         let current = root.scrollTop;
 
         let elapsed = 0;
-        let lastTick = performance.now();
+        let lastTick = Date.now();
 
         const loop = () => {
-            const currentTick = performance.now();
+            const currentTick = Date.now();
             const deltaTime = (currentTick - lastTick) / (1000 / scrollToSpeed);
 
             elapsed += deltaTime;
@@ -44,7 +44,7 @@ export default class AnimatedScroll {
             root.scrollTo(0, current);
 
             if(Math.abs(target - current) > 2) {
-                currentAnimation = requestAnimationFrame(loop);
+                currentAnimation = setTimeout(loop, 1000 / 60);
             }
         }
         loop();

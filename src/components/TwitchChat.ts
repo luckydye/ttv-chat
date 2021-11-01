@@ -548,7 +548,7 @@ export default class TwitchChat extends Chat {
                         </div>
                         <div class="chat-action">
                             <button title="Open Stream" @click="${() => {
-                                Webbrowser.openURL(`https://www.twitch.tv/${this.roomName}`);
+                                Webbrowser.openInBrowwser(`https://www.twitch.tv/${this.roomName}`);
                             }}">
                                 <img src="./images/open.svg" width="16px" height="16px" />
                             </button>
@@ -562,7 +562,7 @@ export default class TwitchChat extends Chat {
                         </div>
                     </div>
                     <div class="chat-channel-name" @click="${() => {
-                        Webbrowser.openURL(`https://www.twitch.tv/${this.roomName}`);
+                        Webbrowser.openInBrowwser(`https://www.twitch.tv/${this.roomName}`);
                     }}">
                         ${this.roomName}
                     </div>

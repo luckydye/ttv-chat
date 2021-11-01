@@ -22,6 +22,9 @@
 
 // document.addEventListener(visibilityChange, handleVisibilityChange, false);
 
+/////
+// interface for listening to changes in window focus.
+
 export default class Focus {
 
     static onFocus(callback: Function) {

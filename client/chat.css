@@ -1,3 +1,7 @@
+[hidden] {
+    display: none !important;
+}
+
 @keyframes chat-line-appear {
     from {
         transform: translateY(20px);

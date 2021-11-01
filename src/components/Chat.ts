@@ -57,26 +57,30 @@ export default class Chat extends LitElement {
         const scrollEle = this.shadowRoot?.querySelector('.lines');
         if(!scrollEle) return;
 
-        if(scrollEle.scrollHeight > 0 && this.scrollLock) {
-            const latest = (scrollEle.scrollHeight - scrollEle.clientHeight);
-            this.scrollTarget = latest;
-            AnimatedScroll.scrollTo(latest, scrollEle);
-        }
+        this.scrollTarget = scrollEle.scrollHeight;
+        AnimatedScroll.scrollTo(this.scrollTarget, scrollEle);
     }
 
-    afterAppend() {
+    updateLock() {
         const scrollEle = this.shadowRoot?.querySelector('.lines');
         if(!scrollEle) return;
 
-        this.scrollTarget = scrollEle.scrollTop;
-
-        const latest = (scrollEle.scrollHeight - scrollEle.clientHeight);
+        const latest = scrollEle.scrollHeight - scrollEle.clientHeight;
 
         if(this.scrollTarget >= latest - 1) {
             this.lock();
         } 
-        if(this.scrollTarget < latest - 1000) {
+        if(this.scrollTarget <= latest - 10) {
             this.unlock();
+        }
+    }
+
+    afterAppend() {
+        // update scroll position
+        if(this.scrollLock) {
+            setTimeout(() => {
+                this.scrollToLatest();
+            }, 10);
         }
 
         // clean out buffer
@@ -86,9 +90,6 @@ export default class Chat extends LitElement {
                 this.children[i].remove();
             }
         }
-
-        // update scroll position
-        requestAnimationFrame(() => this.scrollToLatest());
     }
 
     setRoom(roomName: string) {
@@ -102,15 +103,14 @@ export default class Chat extends LitElement {
 
         this.addEventListener('wheel', e => {
             const scrollEle = this.shadowRoot?.querySelector('.lines');
-            this.scrollTarget = scrollEle.scrollTop;
-            if (e.deltaY < 0) {
-                this.unlock();
+            if(scrollEle) {
+                this.scrollTarget = scrollEle.scrollTop;
+                this.updateLock();
+
+                if (e.deltaY < 0) {
+                    this.unlock();
+                }
             }
-            const latest = (scrollEle.scrollHeight - scrollEle.clientHeight);
-            if (scrollEle.scrollTop + e.deltaY >= latest) {
-                this.lock();
-            }
-            this.afterAppend();
         })
     }
 
@@ -120,6 +120,27 @@ export default class Chat extends LitElement {
         const scrollEle = this.shadowRoot?.querySelector('.lines');
         if(scrollEle) {
             scrollEle.scrollTo(0, this.scrollTarget);
+
+            let mouseDown = false;
+
+            scrollEle.addEventListener('mousedown', e => {
+                mouseDown = true;
+            });
+
+            window.addEventListener('mouseup', e => {
+                mouseDown = false;
+            });
+
+            window.addEventListener('mousecancel', e => {
+                mouseDown = false;
+            });
+
+            scrollEle.addEventListener('scroll', e => {
+                if(mouseDown) {
+                    this.scrollTarget = scrollEle.scrollTop;
+                    this.updateLock();
+                }
+            });
         }
     }
 

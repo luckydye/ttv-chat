@@ -2,12 +2,23 @@ import { generateNonce } from '../../utils';
 
 const reward_listeners: Set<Function> = new Set();
 
+interface Reward {
+    reward_id: string,
+    channel_id: string,
+    cost: number,
+    timestamp: number,
+    user_id: string,
+    user_name: string,
+    title: string,
+    image_url: string
+}
+
 export default class TwitchPubsub {
 
     pubsub_url: string = 'wss://pubsub-edge.twitch.tv';
     access_token: string;
 
-    redemtions: Array<any> = [];
+    rewards: { [key: string]: Reward } = {};
 
     socket: WebSocket;
 
@@ -23,14 +34,12 @@ export default class TwitchPubsub {
     loadRedemtionHistory() {
         const redemtion_history = localStorage.getItem('redemtion-hisotry');
         if(redemtion_history) {
-            for(let redemtion of JSON.parse(redemtion_history)) {
-                this.handleRedemtionMessage(redemtion);
-            }
+            this.rewards = JSON.parse(redemtion_history);
         }
     }
 
     saveRedemtionHistory() {
-        localStorage.setItem('redemtion-hisotry', JSON.stringify(this.redemtions));
+        localStorage.setItem('redemtion-hisotry', JSON.stringify(this.rewards));
     }
 
     queuePing() {
@@ -41,7 +50,7 @@ export default class TwitchPubsub {
     }
 
     reconnect() {
-        // reconnect
+        // TODO: reconnect
     }
 
     async connect() {
@@ -120,7 +129,7 @@ export default class TwitchPubsub {
                 const title = reward.title;
                 const image_url = reward.image?.url_2x || reward.default_image.url_2x;
 
-                const redemtion_data = {
+                const reward_data: Reward = {
                     reward_id,
                     channel_id,
                     cost,
@@ -131,7 +140,7 @@ export default class TwitchPubsub {
                     image_url
                 };
 
-                this.handleRedemtionMessage(redemtion_data);
+                this.handleRedemtionMessage(reward_data);
                 this.saveRedemtionHistory();
                 break;
             default:
@@ -140,11 +149,11 @@ export default class TwitchPubsub {
         }
     }
 
-    handleRedemtionMessage(redemtion_data: any) {
+    handleRedemtionMessage(reward_data: any) {
         for (let listener of reward_listeners) {
-            listener(redemtion_data);
+            listener(reward_data);
         }
-        this.redemtions.push(redemtion_data);
+        this.rewards[reward_data.reward_id] = reward_data;
     }
 
 }

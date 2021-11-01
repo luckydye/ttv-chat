@@ -5,11 +5,11 @@ import './components/ChatInput';
 import './components/ChatRooms';
 import './components/Login';
 import './components/Profile';
-import './components/Tooltip';
 import './components/TwitchChat';
+import './Tooltip';
 import IRCChatClient from './IRCChatClient';
 import MessageParser, { EventMessage, UserMessage } from './MessageParser';
-import Foramt from './Format';
+import Format from './Format';
 import Badges from './services/Badges';
 import Emotes from './services/Emotes';
 import TwitchAPI from './services/Twitch';
@@ -32,7 +32,7 @@ async function createChat(channel: string) {
 
     IRCChatClient.joinChatRoom(channel.toLocaleLowerCase());
 
-    if(Application.getSelectedRoom() == channel) {
+    if (Application.getSelectedRoom() == channel) {
         renderSelecetdChat();
     }
 
@@ -43,7 +43,7 @@ async function createChat(channel: string) {
         // `predictions-channel-v1.${info.id}`
         // `polls.${info.id}`
         // `hype-train-events-v1.${info.id}`
-        
+
         // `predictions-user-v1.${info.id}`
         // `raid.${info.id}`
     ]);
@@ -55,7 +55,7 @@ async function createChat(channel: string) {
     // ]);
 
     pubsub.onRedemtion(data => {
-        if(data.channel_id == info.id) {
+        if (data.channel_id == info.id) {
             // sort this by timestamp into the existing messages
             chatElements[channel].appendNote(html`${data.user_name} redeemed ${data.title} for ${data.cost} <img src="${data.image_url}" height="18px" width="18px"/>`);
         }
@@ -66,18 +66,24 @@ function renderSelecetdChat() {
     const input = document.querySelector('chat-input');
     const room = Application.getSelectedRoom();
     const container = document.querySelector('.chat');
-    for(let child of container?.children) {
-        child.remove();
+    if (container) {
+        for (let child of container?.children) {
+            child.setAttribute('hidden', '');
+        }
+        chatElements[room].removeAttribute('hidden');
+        if (!chatElements[room].parentNode) {
+            container.append(chatElements[room]);
+        }
+        if (room === "@") {
+            input?.setAttribute('disabled', '');
+        } else {
+            input?.removeAttribute('disabled');
+        }
+
+        requestAnimationFrame(() => {
+            chatElements[room].lock();
+        })
     }
-    container?.append(chatElements[room]);
-    if(room === "@") {
-        input?.setAttribute('disabled', '');
-    } else {
-        input?.removeAttribute('disabled');
-    }
-    requestAnimationFrame(() => {
-        chatElements[room].scrollToLatest();
-    })
 }
 
 async function main() {
@@ -109,14 +115,14 @@ async function main() {
     IRCChatClient.listen('chat.message', async (msg: UserMessage) => {
         const chat = chatElements[msg.channel];
         const chatMessages = MessageParser.parse(msg);
-        
-        if(chat) {
-            for(let msg of chatMessages) {
-                if(msg.tagged) {
+
+        if (chat) {
+            for (let msg of chatMessages) {
+                if (msg.tagged) {
                     const mentionChat = Application.getChats("@");
                     mentionChat.appendMessage(msg);
                 }
-                
+
                 chat.appendMessage(msg);
             }
         }
@@ -126,15 +132,15 @@ async function main() {
         const chat = chatElements[msg.channel];
         const chatMessages = MessageParser.parse(msg);
 
-        if(chat) {
-            for(let msg of chatMessages) {
-                switch(msg.type) {
+        if (chat) {
+            for (let msg of chatMessages) {
+                switch (msg.type) {
                     case "info":
                         chat.appendInfo(msg);
                         break;
                     case "message":
                         msg.highlighted = true;
-                        if(msg.tagged) {
+                        if (msg.tagged) {
                             const mentionChat = Application.getChats("@");
                             mentionChat.appendMessage(msg);
                         }
@@ -147,7 +153,7 @@ async function main() {
 
     IRCChatClient.listen('chat.notice', (msg) => {
         const chat = chatElements[msg.channel_login];
-        if(chat) {
+        if (chat) {
             chat.appendNote(msg.message_text);
         }
         chat.update();
@@ -175,20 +181,20 @@ async function main() {
     IRCChatClient.listen('chat.clear', (msg: ClearChatMessage) => {
         const chat = chatElements[msg.channel_login];
 
-        if(chat) {
+        if (chat) {
             const action = msg.action.UserBanned || msg.action.UserTimedOut;
             const lines = chat.querySelectorAll(`[userid="${action.user_id}"]`);
-            for(let line of [...lines]) {
+            for (let line of [...lines]) {
                 line.setAttribute("deleted", "");
             }
 
-            if(msg.action.UserBanned) {
+            if (msg.action.UserBanned) {
                 // got banned
                 chat.appendNote(`${action.user_login} got banned.`);
             }
-            if(msg.action.UserTimedOut) {
+            if (msg.action.UserTimedOut) {
                 // got timed out for xs
-                chat.appendNote(`${action.user_login} got timed out for ${Foramt.seconds(action.timeout_length.secs)}.`);
+                chat.appendNote(`${action.user_login} got timed out for ${Format.seconds(action.timeout_length.secs)}.`);
             }
         }
     });
@@ -198,7 +204,7 @@ async function main() {
 
     pubsub = await TwitchAPI.connectToPubSub();
 
-    for(let channel of Application.getRooms()) {
+    for (let channel of Application.getRooms()) {
         createChat(channel);
     }
 

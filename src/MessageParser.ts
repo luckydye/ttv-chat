@@ -167,7 +167,7 @@ export default class MessageParser {
         let redemtion_title = "custom reward";
 
         if(reward_id) {
-            const redemtion = TwitchAPI.findRedemption(reward_id);
+            const redemtion = TwitchAPI.findReward(reward_id);
             if(redemtion) {
                 redemtion_title = redemtion.title;
             }
@@ -254,7 +254,7 @@ export default class MessageParser {
 
         const renderLink = (linkInfo: string) => {
             return html`<a class="inline-link" href="javascript:()" @click="${() => {
-                Webbrowser.openURL(linkInfo);
+                Webbrowser.openInBrowwser(linkInfo);
             }}">${linkInfo}</a> `;
         };
 

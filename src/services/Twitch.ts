@@ -191,9 +191,9 @@ export default class TwitchAPI {
         
     }
 
-    static findRedemption(id: string) {
+    static findReward(id: string) {
         if(twitch_pubsub) {
-            return twitch_pubsub.redemtions.find(r => r.reward_id === id);
+            return twitch_pubsub.rewards[id];
         }
     }
 
