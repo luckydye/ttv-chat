@@ -73,10 +73,16 @@ export class Application {
     }
 
     static selectRoom(room_name: string) {
+        const prev_chat = Application.getChats(Application.getSelectedRoom());
+        prev_chat.placeBookmarkLine();
+
         applicationState.selectedRoom = room_name;
         window.dispatchEvent(new Event('selectroom'));
         localStorage.setItem('selected', room_name);
         this.saveState();
+
+        const active_chat = Application.getChats(room_name);
+        active_chat.removeBookmarkLine();
     }
 
     static moveRoom(room: string, newIndex: number) {

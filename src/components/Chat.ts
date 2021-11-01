@@ -15,6 +15,8 @@ export default class Chat extends LitElement {
     roomName: string = "";
     scrollTarget: number = 0;
 
+    bookmark: HTMLElement;
+
     appendMessage(msg: ChatMessage, sourceChat: Chat = this) {
         const line = new ChatLine(sourceChat, msg);
         this.appendChild(line);
@@ -110,6 +112,19 @@ export default class Chat extends LitElement {
             }
             this.afterAppend();
         })
+    }
+
+    placeBookmarkLine() {
+        const line = document.createElement('div');
+        line.className = "bookmark";
+        this.appendChild(line);
+        this.bookmark = line;
+    }
+
+    removeBookmarkLine() {
+        if(this.bookmark) {
+            this.bookmark.remove();
+        }
     }
 
     static get styles() {

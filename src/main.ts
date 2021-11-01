@@ -15,6 +15,7 @@ import Emotes from './services/Emotes';
 import TwitchAPI from './services/Twitch';
 import TwitchPubsub from './services/twitch/Pubsub';
 import { html } from 'lit-element';
+import Focus from './Focus';
 
 const chatElements: { [key: string]: any } = {};
 
@@ -190,6 +191,16 @@ async function main() {
     setTimeout(() => {
         pubsub.loadRedemtionHistory()
     }, 500);
+
+    // bookmark placements
+    Focus.onBlur(() => {
+        const active_chat = Application.getChats(Application.getSelectedRoom());
+        active_chat.placeBookmarkLine();
+    });
+    Focus.onFocus(() => {
+        const active_chat = Application.getChats(Application.getSelectedRoom());
+        active_chat.removeBookmarkLine();
+    });
 }
 
 window.addEventListener('loggedin', e => {
