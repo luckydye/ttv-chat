@@ -3,6 +3,8 @@ import IRCChatClient from '../IRCChatClient';
 import { Application } from '../App';
 import EmotePicker from './EmotePicker';
 
+const MAX_HSITORY_LENGTH = 20;
+
 export default class ChatInput extends LitElement {
 
     static get styles() {
@@ -69,6 +71,19 @@ export default class ChatInput extends LitElement {
         `;
     }
 
+    history: Array<string> = [];
+    historyPointer: number = -1;
+
+    set value(v: string) {
+        const ele = this.shadowRoot?.querySelector('textarea');
+        ele.value = v;
+    }
+
+    get value() {
+        const ele = this.shadowRoot?.querySelector('textarea');
+        return ele.value;
+    }
+
     constructor() {
         super();
 
@@ -92,17 +107,63 @@ export default class ChatInput extends LitElement {
     }
 
     submit(e: KeyboardEvent) {
-        const ele = e.target;
-        const value = ele.value;
-        if(value != "") {
-            ele.value = "";
-            IRCChatClient.sendMessage(Application.getSelectedRoom(), value);
+        if(this.value != "") {
+            this.addToHistory(this.value);
+            IRCChatClient.sendMessage(Application.getSelectedRoom(), this.value);
+            this.value = "";
         }
+    }
+
+    loadHistory() {
+        const history = localStorage.getItem('input-history');
+        if(history && history instanceof Array) {
+            this.history = JSON.parse(history);
+        }
+    }
+
+    saveHistory() {
+        localStorage.setItem('input-history', JSON.stringify(this.history));
+    }
+
+    addToHistory(value: string) {
+        this.history.unshift(value);
+        if(this.history.length > MAX_HSITORY_LENGTH) {
+            this.history.pop();
+        }
+    }
+
+    prevHistoryValue() {
+        this.historyPointer = Math.max(this.historyPointer - 1, 0);
+        const historyValue = this.history[this.historyPointer];
+        if(historyValue) {
+            this.value = historyValue;
+        }
+    }
+
+    nextHistoryValue() {
+        this.historyPointer = Math.min(this.historyPointer + 1, this.history.length - 1);
+        const historyValue = this.history[this.historyPointer];
+        if(historyValue) {
+            this.value = historyValue;
+        }
+    }
+
+    resetHistoryValue() {
+        this.historyPointer = -1;
     }
 
     handleKeyDown(e: KeyboardEvent) {
         if(e.key == "Enter") {
             this.submit(e);
+            this.resetHistoryValue();
+            e.preventDefault();
+        }
+        if(e.key == "ArrowUp") {
+            this.nextHistoryValue();
+            e.preventDefault();
+        }
+        if(e.key == "ArrowDown") {
+            this.prevHistoryValue();
             e.preventDefault();
         }
     }
@@ -112,13 +173,13 @@ export default class ChatInput extends LitElement {
     }
 
     insert(emote: string) {
-        // TODO: insert into cursor position not just the end
         const ele = this.shadowRoot?.querySelector('textarea');
-        const lastChar = ele.value[ele.value.length-1];
-        if(lastChar == " ") {
-            ele.value += emote + " ";
-        } else {
-            ele.value += " " + emote + " ";
+        if(ele) {
+            const part1 = ele.value.slice(0, ele.selectionStart);
+            const part2 = ele.value.slice(ele.selectionStart);
+    
+            const newValue = [part1, emote, part2].join(" ");
+            ele.value = newValue;
         }
     }
 
