@@ -32,6 +32,8 @@ export default class TwitchChat extends Chat {
     moderator = false;
     broadcaster = false;
 
+    canvas = document.createElement('canvas');
+
     appendMessage(...args) {
         const line = super.appendMessage(...args);
 
@@ -95,6 +97,25 @@ export default class TwitchChat extends Chat {
 
     constructor() {
         super();
+
+
+        const context = this.canvas.getContext("2d");
+        let scrollY = 0;
+        
+        const draw = (ms = 0) => {
+            if(context) {
+                context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+
+                for(let i = 0; i < context.canvas.height; i += 20) {
+                    const txt = Math.floor(Math.random() * 100000000000000000000000000).toFixed();
+                    context.fillStyle = "#eee";
+                    context.fillText(txt, 0, i * 20);
+                }
+            }
+            requestAnimationFrame(draw);
+        }
+
+        draw();
 
         // update room info at interval
         const update_info = () => getUserInfo(this.roomName).then(info => {
@@ -175,9 +196,14 @@ export default class TwitchChat extends Chat {
                 left: 0;
                 width: 100%;
                 height: 100%;
-                overflow: auto;
-                overflow-y: scroll;
-                overflow-x: hidden;
+                overflow: hidden;
+            }
+            canvas {
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                top: 0;
+                left: 0;
             }
             .line {
 
@@ -618,38 +644,7 @@ export default class TwitchChat extends Chat {
                 <span>Scroll to the bottom</span>
             </div>
             <div class="lines">
-                ${this.roomName ? html`
-                    ${this.info ? html`
-                        <div class="bio">
-                            <div class="profile-image">
-                                <img src="${this.info.profile_image_url}" width="125px" />
-                            </div>
-                            <div class="pin">
-                                <div class="profile-name">
-                                    ${this.info.display_name}
-                                    ${this.info.broadcaster_type == "partner" ? html`
-                                        <img src="./images/verified.svg" alt="verified"/>
-                                    ` : ""}
-                                </div>
-                                <div class="game">
-                                    ${this.info.channel_info ? this.info.channel_info.game_name : "-"}
-                                </div>
-                                <div class="language">
-                                    ${this.info.channel_info ? Format.lang(this.info.channel_info.broadcaster_language) : "-"}
-                                </div>
-                                <div class="viewcount">
-                                    ${Format.number(this.info.view_count)} views
-                                </div>
-                            </div>
-                            ${this.info.description == "" ? "" : html`
-                                <div class="profile-desc">
-                                    ${this.info.description}
-                                </div>
-                            `}
-                        </div>
-                    ` : ""}
-                `: ""}
-                <slot></slot>
+                ${this.canvas}
             </div>
         `;
     }
