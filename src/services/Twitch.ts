@@ -1,7 +1,7 @@
 // import jwt from 'jsonwebtoken';
 import { parseSearch } from '../utils';
 import IRCChatClient from '../IRCChatClient';
-import TwichCommands from './TwichCommands';
+import TwichCommands from './twitch/TwichCommands';
 import TwitchPubsub from './twitch/Pubsub';
 
 const CLIENT_ID = "8gwe8mu523g9cstukr8rnnwspqjykf";
@@ -165,7 +165,13 @@ export async function authClientUser() {
     }
 }
 
+let twitch_pubsub: TwitchPubsub;
+
 export default class TwitchAPI {
+
+    static get pubsub() {
+        return twitch_pubsub;
+    }
 
     static getCurrentUser() {
         return logged_in_user;
@@ -185,31 +191,36 @@ export default class TwitchAPI {
         
     }
 
-    static connectToPubSub(user_id: string, channel_id: string) {
-        const token = localStorage.getItem('user-token');
-        if (token) {
-            const pubsub = new TwitchPubsub(token);
-
-            pubsub.connect()
-                .then(() => {
-                    pubsub.listen([
-                        `channel-points-channel-v1.${channel_id}`
-                    ]);
-                })
-                .catch(err => {
-                    console.error('Pubsub connection error', err);
-                })
-
-            // `channel-points-channel-v1.${channel_id}`,
-            // // seperate connections for mod stuff. Have a single connection with the max 50 topics for all chats.
-            // `automod-queue.${user_id}.${channel_id}`,
-            // `chat_moderator_actions.${user_id}.${channel_id}`,
-            // `user-moderation-notifications.${user_id}.${channel_id}`,
-
-
-        } else {
-            throw new Error('not logged in, can not connect to pubsub.');
+    static findRedemption(id: string) {
+        if(twitch_pubsub) {
+            return twitch_pubsub.redemtions.find(r => r.reward_id === id);
         }
+    }
+
+    static async connectToPubSub(): Promise<TwitchPubsub> {
+        return new Promise((resolve, reject) => {
+            const token = localStorage.getItem('user-token');
+            if (token) {
+                const pubsub = new TwitchPubsub(token);
+                twitch_pubsub = pubsub;
+
+                pubsub.connect()
+                    .then(() => {
+                        resolve(pubsub);
+                    })
+                    .catch(err => {
+                        reject(err);
+                    })
+
+                // `channel-points-channel-v1.${channel_id}`,
+                // // seperate connections for mod stuff. Have a single connection with the max 50 topics for all chats.
+                // `automod-queue.${user_id}.${channel_id}`,
+                // `chat_moderator_actions.${user_id}.${channel_id}`,
+                // `user-moderation-notifications.${user_id}.${channel_id}`,
+            } else {
+                throw new Error('not logged in, can not connect to pubsub.');
+            }
+        })
     }
 
     static logout() {

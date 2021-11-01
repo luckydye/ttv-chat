@@ -163,11 +163,14 @@ export default class MessageParser {
         const channel_id = message.tags['room-id'];
         const reward_id = message.tags['custom-reward-id'];
 
-        // console.log(reward_id);
-        // TwitchAPI.getCustomReward(channel_id).then(d => {
-        //     console.log('d', d);
-        // })
-        
+        let redemtion_title = "custom reward";
+
+        if(reward_id) {
+            const redemtion = TwitchAPI.findRedemption(reward_id);
+            if(redemtion) {
+                redemtion_title = redemtion.title;
+            }
+        }
 
         let color = rgbToHex(limitColorContrast(...message.color));
         let highlighted = message.tags['msg-id'] == "highlighted-message";
@@ -275,14 +278,17 @@ export default class MessageParser {
             return word + " ";
         });
 
+        const line_title = reward_id ? `Redeemed ${redemtion_title}.` : null;
+
         // render full message template
         const template = html`
+            ${line_title ? html`
+                <div class="line-title">${line_title}</div>
+            ` : ''}
             <div class="line" style="--color: ${color}" ?action="${message.is_action}">
                 <span class="bages">
                     ${message.badges.map(badge => {
                         let badge_url = "";
-
-                        // TODO: amount of gift sub in alt tag
 
                         if (badge.name == "subscriber") {
                             badge_url = getSubBadge(badge.version) || Badges.getBadgeByName(badge.name, badge.version);

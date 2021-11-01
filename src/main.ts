@@ -13,8 +13,12 @@ import Foramt from './Format';
 import Badges from './services/Badges';
 import Emotes from './services/Emotes';
 import TwitchAPI from './services/Twitch';
+import TwitchPubsub from './services/twitch/Pubsub';
+import { html } from 'lit-element';
 
 const chatElements: { [key: string]: any } = {};
+
+let pubsub: TwitchPubsub;
 
 async function createChat(channel: string) {
     chatElements[channel] = document.createElement("twitch-chat");
@@ -31,7 +35,16 @@ async function createChat(channel: string) {
         renderSelecetdChat();
     }
 
-    // TwitchAPI.connectToPubSub(TwitchAPI.getCurrentUser().id, info.id);
+    pubsub.listen([
+        `community-points-channel-v1.${info.id}`
+    ]);
+
+    pubsub.onRedemtion(data => {
+        if(data.channel_id == info.id) {
+            // sort this by timestamp into the existing messages
+            chatElements[channel].appendNote(html`${data.user_name} redeemed ${data.title} for ${data.cost} <img src="${data.image_url}" height="18px" width="18px"/>`);
+        }
+    })
 }
 
 function renderSelecetdChat() {
@@ -168,9 +181,15 @@ async function main() {
     // IRC shit END
     //
 
+    pubsub = await TwitchAPI.connectToPubSub();
+
     for(let channel of Application.getRooms()) {
         createChat(channel);
     }
+
+    setTimeout(() => {
+        pubsub.loadRedemtionHistory()
+    }, 500);
 }
 
 window.addEventListener('loggedin', e => {

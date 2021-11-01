@@ -48,56 +48,56 @@ export default class ChatRooms extends LitElement {
         let startY = 0;
 
         const cancelDrag = (e) => {
-            if(dragging) {
-                dragging = false;
-                if(this.target) {
-                    this.target.removeAttribute("dragging");
-                    console.log('cancel');
-                    this.target = null;
-                }
-            }
+            // if(dragging) {
+            //     dragging = false;
+            //     if(this.target) {
+            //         this.target.removeAttribute("dragging");
+            //         console.log('cancel');
+            //         this.target = null;
+            //     }
+            // }
         }
         const commitDrag = (e) => {
-            dragging = false;
-            if(this.target) {
-                this.target.removeAttribute("dragging");
-                console.log('commit');
-                this.target = null;
-            }
+            // dragging = false;
+            // if(this.target) {
+            //     this.target.removeAttribute("dragging");
+            //     console.log('commit');
+            //     this.target = null;
+            // }
         }
         const move = (e) => {
-            if(this.target) {
-                const deltaY = e.y - startY;
+            // if(this.target) {
+            //     const deltaY = e.y - startY;
 
-                if(!dragging && Math.abs(deltaY) > 10) {
-                    dragging = true;
-                    this.target.setAttribute("dragging", "");
-                    moveIcon(this.target, Math.sign(deltaY));
-                }
+            //     if(!dragging && Math.abs(deltaY) > 10) {
+            //         dragging = true;
+            //         this.target.setAttribute("dragging", "");
+            //         moveIcon(this.target, Math.sign(deltaY));
+            //     }
 
-                if(dragging) {
-                    console.log('darg', deltaY);
-                }
-            }
+            //     if(dragging) {
+            //         console.log('darg', deltaY);
+            //     }
+            // }
         }
         const startDrag = (e) => {
-            this.target = e.target;
-            startY = e.clientY;
-            console.log('start', this.target);
+            // this.target = e.target;
+            // startY = e.clientY;
+            // console.log('start', this.target);
         }
 
         // move node into direction -1/+1
         const moveIcon = (target: ProfileIndicator, dir: number) => {
-            const parent = target.parentNode as HTMLElement;
-            const iconIndex = [...parent.children].indexOf(target);
-            const d = Math.sign(dir) * (Math.abs(dir) + 1);
-            const newNextNode = parent.children[iconIndex + d];
-            if(newNextNode) {
-                parent.removeChild(target);
-                parent.insertBefore(target, newNextNode);
+            // const parent = target.parentNode as HTMLElement;
+            // const iconIndex = [...parent.children].indexOf(target);
+            // const d = Math.sign(dir) * (Math.abs(dir) + 1);
+            // const newNextNode = parent.children[iconIndex + d];
+            // if(newNextNode) {
+            //     parent.removeChild(target);
+            //     parent.insertBefore(target, newNextNode);
 
-                Application.moveRoom(target.channel, iconIndex + dir);
-            }
+            //     Application.moveRoom(target.channel, iconIndex + dir);
+            // }
         }
 
         return html`

@@ -23,6 +23,7 @@ export class ChatLine extends LitElement {
 
         this.setAttribute('messageid', this.message.id);
         this.setAttribute('userid', this.message.user_id);
+        this.setAttribute('timestamp', this.message.timestamp.valueOf());
 
         if(this.message.tagged) {
             this.setAttribute('tagged', '');
@@ -114,7 +115,10 @@ export class ChatNote extends LitElement {
                 line-height: 1.33em;
             }
             .message {
-                display: inline;
+                display: inline-flex;
+            }
+            img {
+                margin: 0 4px;
             }
         `;
     }

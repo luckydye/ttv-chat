@@ -1,6 +1,8 @@
-
 @keyframes chat-line-appear {
-    from { transform: translateY(20px); opacity: 0; }
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
 }
 
 chat-line {
@@ -10,10 +12,18 @@ chat-line {
     line-height: 150%;
     position: relative;
     box-sizing: border-box;
-    min-height: 32px;f
+    min-height: 32px;
 }
+
 chat-line:hover {
     background: rgba(48, 50, 53, 0.15);
+}
+
+chat-line .line-title {
+    opacity: 0.5;
+    line-height: 100%;
+    padding: 4px 0 8px 0;
+    margin-left: -1px;
 }
 
 chat-line .tools {
@@ -43,9 +53,11 @@ chat-line .chat-line-tool {
     justify-content: center;
     align-items: center;
 }
+
 chat-line .chat-line-tool:hover {
     background: rgb(34 34 38 / 50%);
 }
+
 chat-line .chat-line-tool:active {
     background: rgb(34 34 38 / 50%);
     transform: scale(0.95);
@@ -54,21 +66,27 @@ chat-line .chat-line-tool:active {
 chat-line:hover .tools .chat-line-tool {
     display: flex;
 }
+
 chat-line:hover .tools .chat-line-tool.mention-tool {
     display: none;
 }
+
 [name="Mentions"] chat-line:hover .tools .chat-line-tool.mention-tool {
     display: flex;
 }
+
 chat-line:hover .tools .chat-line-tool.mod-tool {
     display: none;
 }
+
 chat-line:hover .tools .chat-line-tool.mod-tool-banned {
     display: none;
 }
+
 [modview] chat-line:hover .tools .chat-line-tool.mod-tool {
     display: flex;
 }
+
 [modview] chat-line[deleted]:hover .tools .chat-line-tool.mod-tool-banned {
     display: flex;
 }
@@ -76,33 +94,40 @@ chat-line:hover .tools .chat-line-tool.mod-tool-banned {
 chat-line[deleted] {
     opacity: 0.33;
 }
+
 chat-line[tagged] {
     background: hsl(0deg 90% 70% / 22%);
 }
+
 chat-line[highlighted] {
     background: rgb(148 74 255 / 25%);
     padding-top: 8px;
     padding-bottom: 8px;
 }
+
 chat-line .username {
     color: var(--color);
     display: inline;
     font-weight: 500;
     margin-right: 2px;
 }
+
 chat-line .username:hover {
     text-decoration: underline;
     cursor: pointer;
 }
+
 chat-line .message {
     display: inline;
 }
+
 chat-line .badge {
     display: inline-block;
     margin-bottom: -0.3em;
     margin-right: 3px;
     user-select: none;
 }
+
 chat-line .emote {
     display: inline-block;
     margin-bottom: -0.8em;
@@ -110,13 +135,16 @@ chat-line .emote {
     max-width: 100px;
     object-fit: contain;
 }
+
 chat-line .mention {
     font-weight: bold;
 }
+
 chat-line .inline-link {
     color: #2c7fcc;
     word-break: break-all;
 }
+
 chat-line[action] .message {
     color: var(--color);
 }
