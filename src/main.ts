@@ -69,6 +69,7 @@ function renderSelecetdChat() {
     if (container) {
         for (let child of container?.children) {
             child.setAttribute('hidden', '');
+            // child.remove();
         }
         chatElements[room].removeAttribute('hidden');
         if (!chatElements[room].parentNode) {
