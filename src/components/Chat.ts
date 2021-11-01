@@ -115,6 +115,9 @@ export default class Chat extends LitElement {
     }
 
     placeBookmarkLine() {
+        if(this.bookmark) {
+            this.removeBookmarkLine();
+        }
         const line = document.createElement('div');
         line.className = "bookmark";
         this.appendChild(line);

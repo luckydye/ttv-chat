@@ -81,8 +81,8 @@ export class Application {
         localStorage.setItem('selected', room_name);
         this.saveState();
 
-        const active_chat = Application.getChats(room_name);
-        active_chat.removeBookmarkLine();
+        // const active_chat = Application.getChats(room_name);
+        // active_chat.removeBookmarkLine();
     }
 
     static moveRoom(room: string, newIndex: number) {
