@@ -90,14 +90,14 @@ Next goal: Beta Release
     - Follows?
     - Game change
     - Stream Title change
-- [ ] User panel
+- [x] User panel (used the twitch userpanel as popout)
 - [ ] "Threads" (Mentions)
     - Optin thread
     - Person gets added to thread on mention
 
 #### Text Inputs
 - [ ] Username color picker
-- [ ] input history navigation
+- [x] input history navigation
 - [ ] Chat commands
 - [ ] Input emote parsing
 - [ ] UI for
