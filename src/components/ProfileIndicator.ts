@@ -40,7 +40,8 @@ export default class ProfileIndicator extends LitElement {
     
             // check if there are new unread messages
             IRCChatClient.listen('chat.message', (msg: ChatMessage) => {
-                if(msg.channel === this.channel && Application.getSelectedRoom() !== this.channel) {
+                if(msg.channel === this.channel && Application.getSelectedRoom() !== this.channel && 
+                    Application.getChats(this.channel).connect) {
                     this.new_message = true;
                     this.update();
                 }
