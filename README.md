@@ -14,13 +14,24 @@ Emotes
 
 ## Install
 
-n/a
+Look at [Latest Releases](https://github.com/luckydye/better-twitch-chat/releases).
 
 
 ## Development
 
-n/a
+Install [NodeJS](https://nodejs.org/en/) and [Rust](https://www.rust-lang.org/).
 
+Run ```npm install```
+
+Run ```npm run build:cw``` to start the watch build process for the client.
+
+Start a local dev server using the LiveServer extension in VSCode.  
+Or temporarily change 
+```"devPath": "http://localhost:5500/client",``` 
+in src-tauri/tauri.conf.json to 
+```"devPath": "../client",```.
+
+Run ```npm run tauri dev``` or hit F5 in VSCode to compile the app.
 
 ## Roadmap
 
