@@ -36,9 +36,23 @@ async function createChat(channel: string) {
         renderSelecetdChat();
     }
 
+    // public chat events
+    // have to activly manage connections for the most recent selected chats or live chats actually
     pubsub.listen([
         `community-points-channel-v1.${info.id}`
+        // `predictions-channel-v1.${info.id}`
+        // `polls.${info.id}`
+        // `hype-train-events-v1.${info.id}`
+        
+        // `predictions-user-v1.${info.id}`
+        // `raid.${info.id}`
     ]);
+
+    // mod events
+    // pubsub.listen([
+    //     `chat_moderator_actions.${user_id}.${info.id}`,
+    //     `automod-queue.${user_id}.${info.id}`
+    // ]);
 
     pubsub.onRedemtion(data => {
         if(data.channel_id == info.id) {
