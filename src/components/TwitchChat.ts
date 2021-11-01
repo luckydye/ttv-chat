@@ -6,6 +6,7 @@ import Webbrowser from '../Webbrowser';
 import Chat from './Chat';
 import ContextMenu from './ContextMenu';
 import Format from '../Format';
+import { generateNonce } from '../utils';
 // Components
 import './FluidInput';
 import './Timer';
@@ -104,13 +105,17 @@ export default class TwitchChat extends Chat {
         
         const draw = (ms = 0) => {
             if(context) {
-                context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+                context.canvas.width = context.canvas.clientWidth;
+                context.canvas.height = context.canvas.clientHeight;
 
-                for(let i = 0; i < context.canvas.height; i += 20) {
-                    const txt = Math.floor(Math.random() * 100000000000000000000000000).toFixed();
-                    context.fillStyle = "#eee";
-                    context.fillText(txt, 0, i * 20);
+                if(context.canvas.width > 0) {
+                    for(let i = 0; i < context.canvas.height; i += 20) {
+                        const txt = generateNonce(100);
+                        context.fillStyle = "#eee";
+                        context.fillText(txt, 10, i);
+                    }
                 }
+
             }
             requestAnimationFrame(draw);
         }
