@@ -27,7 +27,7 @@ n/a
 Next goal: Beta Release
 
 - [ ] Fix room drag n drop
-- [ ] fix the scrolling when switching channels
+- [x] fix the scrolling when switching channels
 - [ ] finish Emote Picker
 - [ ] Chat commands and names sugestions
 - [ ] update title and game via websocket, not interval
