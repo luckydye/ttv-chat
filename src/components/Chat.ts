@@ -96,7 +96,7 @@ export default class Chat extends LitElement {
         }
 
         // clean out buffer
-        if (this.children.length > this.MAX_BUFFER_SIZE) {
+        if (this.children.length > this.MAX_BUFFER_SIZE + 20) {
             const rest = (this.children.length - this.MAX_BUFFER_SIZE);
             for (let i = 0; i < rest; i++) {
                 this.children[i].remove();
