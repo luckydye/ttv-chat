@@ -26,13 +26,13 @@ export default class Chat extends LitElement {
         line.setAttribute('timestamp', msg.timestamp.valueOf());
 
         if (msg.tagged) {
-            this.setAttribute('tagged', '');
+            line.setAttribute('tagged', '');
         }
         if (msg.highlighted) {
-            this.setAttribute('highlighted', '');
+            line.setAttribute('highlighted', '');
         }
         if (msg.action) {
-            this.setAttribute('action', '');
+            line.setAttribute('action', '');
         }
 
         render(msg.content, line);

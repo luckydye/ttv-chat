@@ -39,11 +39,11 @@ chat-rooms .room-icon[selected]::before {
 chat-rooms .room-icon[hint]:hover::after {
     content: attr(hint);
     position: absolute;
-    left: calc(100% + 5px);
+    left: calc(100% + 8px);
     top: 50%;
     transform: translate(0, -50%);
-    padding: 4px 8px;
-    border-radius: 3px;
+    padding: 8px 10px;
+    border-radius: 6px;
     z-index: 10000;
     background: rgb(0 0 0 / 50%);
     backdrop-filter: blur(4px);

@@ -6,11 +6,7 @@ export default class Loader extends LitElement {
         return css`
             :host {
                 display: block;
-                position: absolute;
-                top: 50%;
-                left: 50%;
                 z-index: 10000000000;
-                transform: translate(-50%, -50%);
             }
             .loader {
                 display: flex;

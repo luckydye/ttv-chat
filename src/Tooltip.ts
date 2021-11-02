@@ -20,9 +20,9 @@ function createOverlayForLink(e: PointerEvent) {
     const target = e.target as HTMLLinkElement;
     const overlay = new PageOverlay(e.x, e.y);
     overlay.innerHTML = `<net-loader></net-loader>`;
-    LinkPreview.generate(target.href).then(data => {
-        overlay.innerHTML = data;
-    })
+    // LinkPreview.generate(target.href).then(data => {
+    //     overlay.innerHTML = data;
+    // })
     document.body.append(overlay);
     return overlay;
 }
