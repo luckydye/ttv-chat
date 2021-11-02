@@ -270,8 +270,9 @@ export default class TwitchChat extends Chat {
                 box-sizing: border-box;
                 z-index: 100000;
                 cursor: pointer;
-                margin: 2px 10px;
+                margin: 4px 40px;
                 border-radius: 6px;
+                border: 1px solid #19191b;
             }
 
             :host(:not([locked])) .scroll-to-bottom {

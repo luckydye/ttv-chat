@@ -27,7 +27,7 @@ export default class AnimatedScroll {
         const start = root.scrollTop;
         const dist = target - start;
 
-        let current = root.scrollTop;
+        let current = start;
 
         let elapsed = 0;
         let lastTick = Date.now();
