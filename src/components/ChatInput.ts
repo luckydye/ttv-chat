@@ -42,11 +42,16 @@ export default class ChatInput extends LitElement {
                 font-size: 14px;
                 box-sizing: border-box;
                 display: block;
+                transition: outline .2s ease;
+                outline: 2px solid transparent;
+            }
+            .text-input textarea:focus {
+                outline-color: #1f1f23;
             }
             .util {
                 position: absolute;
                 right: 0;
-                top: 10px;
+                top: 7px;
                 padding: 0 10px;
                 display: grid;
                 grid-auto-flow: column;
@@ -58,16 +63,16 @@ export default class ChatInput extends LitElement {
                 padding: 4px;
                 min-width: 25px;
                 min-height: 25px;
-                background: hsl(240deg, 2%, 41%);
+                background: transparent;
                 margin: 0;
                 cursor: pointer;
                 color: #fff;
             }
             button:hover {
-                background: hsl(240deg, 2%, 44%);
+                background: #34343a;
             }
             button:active {
-                background: hsl(240deg, 2%, 30%);
+                transform: scale(0.95);
             }
             button img {
                 display: block;
@@ -203,7 +208,7 @@ export default class ChatInput extends LitElement {
                         <!-- <button name="create poll">Y</button>
                         <button name="create prediction">X</button> -->
                         <button name="Emotes" @click="${this.openEmotePicker}">
-                            <img src="./images/sentiment_satisfied_alt_white_24dp.svg" width="18px" height="18px"/>
+                            <img src="./images/sentiment_satisfied_alt_white_24dp.svg" width="22px" height="22px"/>
                         </button>
                     </div>
                 </div>

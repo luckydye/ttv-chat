@@ -254,29 +254,39 @@ export default class TwitchChat extends Chat {
                 transform: scale(0.95);
             }
 
-            :host(:not([locked])) .scroll-to-bottom {
-                display: block;
-            }
-
             .scroll-to-bottom {
-                display: none;
+                transition: opacity .125s ease, transform .125s ease;
+                transform: translate(0, 10px); 
+                opacity: 0;
+                pointer-events: none;
                 position: absolute;
                 bottom: 0;
                 left: 0;
-                width: 100%;
-                background: #080808;
+                right: 0;
+                background: rgb(8 8 8 / 75%);
+                backdrop-filter: blur(12px);
                 padding: 8px 15px;
                 text-align: center;
                 box-sizing: border-box;
                 z-index: 100000;
-                opacity: 0.9;
                 cursor: pointer;
+                margin: 2px 10px;
+                border-radius: 6px;
             }
-            .scroll-to-bottom:hover {
-                opacity: 0.95;
-            }
-            .scroll-to-bottom:active {
+
+            :host(:not([locked])) .scroll-to-bottom {
+                transform: translate(0, 0);
                 opacity: 1;
+                pointer-events: all;
+                transition: opacity .25s ease, transform .25s ease;
+            }
+
+            :host(:not([locked])) .scroll-to-bottom:hover {
+                transform: scale(1.005);
+                transition: none;
+            }
+            :host(:not([locked])) .scroll-to-bottom:active {
+                transform: scale(0.995);
             }
 
             @keyframes bio-slidein {

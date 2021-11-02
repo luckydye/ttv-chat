@@ -2,6 +2,7 @@ import { css, html, LitElement } from 'lit-element';
 import AnimatedScroll from '../AnimatedScroll';
 import { ChatInfoMessage, ChatMessage } from '../MessageParser';
 import { ChatInfo, ChatLine, ChatNote } from './ChatLine';
+import { render } from 'lit-html';
 // Components
 import './FluidInput';
 import './Timer';
@@ -17,29 +18,40 @@ export default class Chat extends LitElement {
 
     bookmark: HTMLElement;
 
-    appendMessage(msg: ChatMessage, sourceChat: Chat = this) {
-        const line = new ChatLine(sourceChat, msg);
+    appendMessage(msg: ChatMessage) {
+        const line = document.createElement('chat-line');
+
+        line.setAttribute('messageid', msg.id);
+        line.setAttribute('userid', msg.user_id);
+        line.setAttribute('timestamp', msg.timestamp.valueOf());
+
+        if (msg.tagged) {
+            this.setAttribute('tagged', '');
+        }
+        if (msg.highlighted) {
+            this.setAttribute('highlighted', '');
+        }
+        if (msg.action) {
+            this.setAttribute('action', '');
+        }
+
+        render(msg.content, line);
+
         this.appendChild(line);
-        setTimeout(() => {
-            this.afterAppend();
-        }, 1);
+        this.afterAppend();
         return line;
     }
 
     appendInfo(msg: ChatInfoMessage) {
         const line = new ChatInfo(msg);
         this.appendChild(line);
-        setTimeout(() => {
-            this.afterAppend();
-        }, 1);
+        this.afterAppend();
     }
 
     appendNote(text: string) {
         const line = new ChatNote(text);
         this.appendChild(line);
-        setTimeout(() => {
-            this.afterAppend();
-        }, 1);
+        this.afterAppend();
     }
 
     lock() {
@@ -55,7 +67,7 @@ export default class Chat extends LitElement {
 
     scrollToLatest() {
         const scrollEle = this.shadowRoot?.querySelector('.lines');
-        if(!scrollEle) return;
+        if (!scrollEle) return;
 
         this.scrollTarget = scrollEle.scrollHeight;
         AnimatedScroll.scrollTo(this.scrollTarget, scrollEle);
@@ -63,21 +75,21 @@ export default class Chat extends LitElement {
 
     updateLock() {
         const scrollEle = this.shadowRoot?.querySelector('.lines');
-        if(!scrollEle) return;
+        if (!scrollEle) return;
 
         const latest = scrollEle.scrollHeight - scrollEle.clientHeight;
 
-        if(this.scrollTarget >= latest - 1) {
+        if (this.scrollTarget >= latest - 1) {
             this.lock();
-        } 
-        if(this.scrollTarget <= latest - 10) {
+        }
+        if (this.scrollTarget <= latest - 10) {
             this.unlock();
         }
     }
 
     afterAppend() {
         // update scroll position
-        if(this.scrollLock) {
+        if (this.scrollLock) {
             setTimeout(() => {
                 this.scrollToLatest();
             }, 10);
@@ -103,7 +115,7 @@ export default class Chat extends LitElement {
 
         this.addEventListener('wheel', e => {
             const scrollEle = this.shadowRoot?.querySelector('.lines');
-            if(scrollEle) {
+            if (scrollEle) {
                 this.scrollTarget = scrollEle.scrollTop;
                 this.updateLock();
 
@@ -116,36 +128,19 @@ export default class Chat extends LitElement {
 
     connectedCallback() {
         super.connectedCallback();
-        
+
         const scrollEle = this.shadowRoot?.querySelector('.lines');
-        if(scrollEle) {
+        if (scrollEle) {
             scrollEle.scrollTo(0, this.scrollTarget);
 
-            let mouseDown = false;
-
-            scrollEle.addEventListener('mousedown', e => {
-                mouseDown = true;
-            });
-
-            window.addEventListener('mouseup', e => {
-                mouseDown = false;
-            });
-
-            window.addEventListener('mousecancel', e => {
-                mouseDown = false;
-            });
-
             scrollEle.addEventListener('scroll', e => {
-                if(mouseDown) {
-                    this.scrollTarget = scrollEle.scrollTop;
-                    this.updateLock();
-                }
+                this.updateLock();
             });
         }
     }
 
     placeBookmarkLine() {
-        if(this.bookmark) {
+        if (this.bookmark) {
             this.removeBookmarkLine();
         }
         const line = document.createElement('div');
@@ -155,7 +150,7 @@ export default class Chat extends LitElement {
     }
 
     removeBookmarkLine() {
-        if(this.bookmark) {
+        if (this.bookmark) {
             this.bookmark.remove();
         }
     }
@@ -225,18 +220,21 @@ export default class Chat extends LitElement {
             }
 
             .scroll-to-bottom {
+                border: 1px solid #19191b;
                 display: none;
                 position: absolute;
                 bottom: 0;
                 left: 0;
-                width: 100%;
-                background: #080808;
+                right: 0;
+                background: rgb(8 8 8 / 75%);
+                backdrop-filter: blur(12px);
                 padding: 8px 15px;
                 text-align: center;
                 box-sizing: border-box;
                 z-index: 100000;
-                opacity: 0.9;
                 cursor: pointer;
+                margin: 2px 10px;
+                border-radius: 6px;
             }
             .scroll-to-bottom:hover {
                 opacity: 0.95;

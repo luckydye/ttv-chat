@@ -215,7 +215,9 @@ async function main() {
     // bookmark placements
     Focus.onBlur(() => {
         const active_chat = Application.getChats(Application.getSelectedRoom());
-        active_chat.placeBookmarkLine();
+        if(active_chat) {
+            active_chat.placeBookmarkLine();
+        }
     });
     Focus.onFocus(() => {
         const active_chat = Application.getChats(Application.getSelectedRoom());

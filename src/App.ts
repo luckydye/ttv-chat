@@ -74,7 +74,9 @@ export class Application {
 
     static selectRoom(room_name: string) {
         const prev_chat = Application.getChats(Application.getSelectedRoom());
-        prev_chat.placeBookmarkLine();
+        if(prev_chat) {
+            prev_chat.placeBookmarkLine();
+        }
 
         applicationState.selectedRoom = room_name;
         window.dispatchEvent(new Event('selectroom'));

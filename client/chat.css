@@ -2,21 +2,51 @@
     display: none !important;
 }
 
-@keyframes chat-line-appear {
-    from {
-        transform: translateY(20px);
-        opacity: 0;
-    }
-}
-
 chat-line {
-    /* animation: chat-line-appear .2s ease; */
     display: block;
-    padding: 3px 12px;
+    padding: 0 12px;
     line-height: 150%;
     position: relative;
     box-sizing: border-box;
-    min-height: 32px;
+}
+
+chat-line .line {
+    padding: 4px 0;
+}
+
+chat-line .username {
+    color: var(--color);
+    font-weight: 500;
+    margin-right: 2px;
+}
+
+chat-line .username:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+chat-line .message {}
+
+chat-line .bages {}
+
+chat-line .badge {
+    margin-right: 4px;
+    user-select: none;
+    margin-bottom: -4px;
+}
+
+chat-line .emote {
+    display: inline;
+    margin-right: 3px;
+    line-height: 32px;
+}
+
+chat-line .emote img {
+    /* transform: translate(0, -5px); */
+    max-width: 100px;
+    object-fit: contain;
+    margin-bottom: -16px;
+    transform: translate(0, -6px);
 }
 
 chat-line:hover {
@@ -109,37 +139,6 @@ chat-line[highlighted] {
     padding-bottom: 8px;
 }
 
-chat-line .username {
-    color: var(--color);
-    display: inline;
-    font-weight: 500;
-    margin-right: 2px;
-}
-
-chat-line .username:hover {
-    text-decoration: underline;
-    cursor: pointer;
-}
-
-chat-line .message {
-    display: inline;
-}
-
-chat-line .badge {
-    display: inline-block;
-    margin-bottom: -0.3em;
-    margin-right: 3px;
-    user-select: none;
-}
-
-chat-line .emote {
-    display: inline-block;
-    margin-bottom: -0.8em;
-    margin-right: 3px;
-    max-width: 100px;
-    object-fit: contain;
-}
-
 chat-line .mention {
     font-weight: bold;
 }
@@ -158,6 +157,7 @@ chat-line[action] .message {
     height: 0px;
     position: relative;
 }
+
 .bookmark::after {
     content: "";
     position: absolute;

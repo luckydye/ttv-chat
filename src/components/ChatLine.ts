@@ -1,67 +1,5 @@
 import { css, html, LitElement } from 'lit-element';
-import { ChatMessage, ChatInfoMessage } from '../MessageParser';
-import Chat from './Chat';
-
-export class ChatLine extends LitElement {
-
-    message: ChatMessage;
-    chat: Chat | null = null;
-
-    constructor(chat: Chat, msg: ChatMessage) {
-        super();
-
-        this.chat = chat;
-        this.message = msg;
-
-        setTimeout(() => {
-            this.update();
-        }, 100);
-    }
-
-    connectedCallback() {
-        super.connectedCallback();
-
-        this.setAttribute('messageid', this.message.id);
-        this.setAttribute('userid', this.message.user_id);
-        this.setAttribute('timestamp', this.message.timestamp.valueOf());
-
-        if(this.message.tagged) {
-            this.setAttribute('tagged', '');
-        }
-        if(this.message.highlighted) {
-            this.setAttribute('highlighted', '');
-        }
-        if(this.message.action) {
-            this.setAttribute('action', '');
-        }
-    }
-
-    createRenderRoot() {
-        return this;
-    }
-
-    // jumpToChat() {
-    //     Application.selectRoom(this.message.channel);
-    // }
-
-    // timeout(s: number = 10) {
-    //     IRCChatClient.sendCommand(this.message.channel, `/timeout ${this.message.user_name} ${s}`);
-    // }
-
-    // openThread() {
-    //     // gotta implement this and user cards
-    // }
-
-    // reply() {
-    //     // reply to this message
-    // }
-
-    render() {
-        return this.message.content;
-    }
-
-}
-
+import { ChatInfoMessage } from '../MessageParser';
 
 export class ChatInfo extends LitElement {
 
@@ -136,6 +74,5 @@ export class ChatNote extends LitElement {
 }
 
 
-customElements.define('chat-line', ChatLine);
 customElements.define('chat-info', ChatInfo);
 customElements.define('chat-note', ChatNote);

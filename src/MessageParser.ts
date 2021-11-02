@@ -249,7 +249,9 @@ export default class MessageParser {
         };
 
         const renderEmote = (emoteInfo: any) => {
-            return html`<img class="emote" name="${emoteInfo.name}" alt="${emoteInfo.name}" src="${emoteInfo.url}" height="32"> `;
+            return html`
+                <span class="emote"><img emote name="${emoteInfo.name}" alt="${emoteInfo.name}" src="${emoteInfo.url}" height="32"></span>
+            `;
         };
 
         const renderLink = (linkInfo: string) => {

@@ -42,12 +42,12 @@ window.addEventListener('pointermove', e => {
             lastOverlay = null;
         }
 
-        if(target && (target as HTMLImageElement).classList.contains('badge')) {
+        if(target && (target as HTMLImageElement).hasAttribute('emote')) {
             lastOverlay = createOverlayForImageElement(e);
             lastTarget = target;
         }
 
-        if(target && (target as HTMLImageElement).classList.contains('emote')) {
+        if(target && (target as HTMLImageElement).classList.contains('badge')) {
             lastOverlay = createOverlayForImageElement(e);
             lastTarget = target;
         }
