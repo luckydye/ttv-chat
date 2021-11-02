@@ -1,57 +1,53 @@
 import EmoteService from './EmoteService';
+import { Emote, EmoteMap } from './Emote';
 
-let globalEmotes = {};
-let emoteTemplate = "https://cdn.betterttv.net/emote/{{id}}/{{scale}}";
+let globalEmotes: EmoteMap = {};
+
+class BTTVEmote extends Emote {
+    static get url_template() {
+        return "https://cdn.betterttv.net/emote/{{id}}/{{scale}}";
+    }
+}
 
 export default class BTTVEmotes extends EmoteService {
 
-    static get template() {
-        return emoteTemplate;
+    static get service_name(): string {
+        return "bttv";
     }
 
     static get global_emotes() {
         return globalEmotes;
     }
 
-    static getGlobalEmotes() {
+    static async getGlobalEmotes(): Promise<EmoteMap | undefined> {
         return fetch("https://api.betterttv.net/3/cached/emotes/global")
             .then(res => res.json())
             .then(data => {
                 for (let emote of data) {
-                    globalEmotes[emote.code] = this.parseEmoteUrl(emote);
+                    globalEmotes[emote.code] = new BTTVEmote(emote);
                 }
 
                 return globalEmotes;
             });
     }
 
-    static getChannelEmotes(id: string) {
+    static async getChannelEmotes(id: string): Promise<EmoteMap | undefined> {
         return fetch("https://api.betterttv.net/3/cached/users/twitch/" + id)
             .then(res => res.json())
             .then(data => {
-                const channelEmotes = {};
+                const channelEmotes: EmoteMap = {};
                 if(data.channelEmotes) {
                     for (let emote of data.channelEmotes) {
-                        channelEmotes[emote.code] = this.parseEmoteUrl(emote);
+                        channelEmotes[emote.code] = new BTTVEmote(emote);
                     }
                 }
                 if(data.sharedEmotes) {
                     for (let emote of data.sharedEmotes) {
-                        channelEmotes[emote.code] = this.parseEmoteUrl(emote);
+                        channelEmotes[emote.code] = new BTTVEmote(emote);
                     }
                 }
                 return channelEmotes;
             });
     }
 
-    static parseEmoteUrl(emote) {
-        // https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_a89c40939a4c4ce49ea2cbee83db26ca/static/light/2.0
-        // https://static-cdn.jtvnw.net/emoticons/v2/{{id}}/{{format}}/{{theme_mode}}/{{scale}}
-        return emoteTemplate.substring(0)
-            .replace("{{id}}", emote.id)
-            .replace("{{scale}}", "2x");
-    }
-
 }
-
-BTTVEmotes.getGlobalEmotes();

@@ -1,51 +1,53 @@
 import EmoteService from './EmoteService';
 import { fetchTwitchApi } from '../Twitch';
+import { Emote, EmoteMap } from './Emote';
 
-let globalEmotes = {};
-let emoteTemplate = "";
+let globalEmotes: EmoteMap = {};
+
+class TwitchEmote extends Emote {
+    static get url_template() {
+        const theme = "dark";
+        const format = "default";
+        return `https://static-cdn.jtvnw.net/emoticons/v2/{{id}}/${format}/${theme}/{{scale}}`;
+    }
+    static get scale_temlate() {
+        return {
+            x1: "1.0",
+            x2: "2.0",
+            x3: "3.0",
+        }
+    }
+}
 
 export default class TwitchEmotes extends EmoteService {
 
-    static get template() {
-        return emoteTemplate;
+    static get service_name(): string {
+        return "twitch";
     }
 
     static get global_emotes() {
         return globalEmotes;
     }
 
-    static getGlobalEmotes() {
+    static async getGlobalEmotes(): Promise<EmoteMap | undefined> {
         return fetchTwitchApi("/chat/emotes/global").then(data => {
-            emoteTemplate = data.template;
             for(let emote of data.data) {
-                globalEmotes[emote.name] = this.parseEmoteUrl(emote);
+                globalEmotes[emote.name] = new TwitchEmote(emote);
             }
             return globalEmotes;
         });
     }
 
-    static getChannelEmotes(id: string) {
+    static async getChannelEmotes(id: string): Promise<EmoteMap | undefined> {
         return fetchTwitchApi("/chat/emotes", "broadcaster_id=" + id).then(data => {
             if(data.status == 200) {
-                const channelEmotes = {};
+                const channelEmotes: EmoteMap = {};
                 for(let emote of data.data) {
-                    channelEmotes[emote.name] = this.parseEmoteUrl(emote);
+                    channelEmotes[emote.name] = new TwitchEmote(emote);
                 }
                 return channelEmotes;
             }
         });
     }
-    
-    static parseEmoteUrl(emote) {
-        // https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_a89c40939a4c4ce49ea2cbee83db26ca/static/light/2.0
-        // https://static-cdn.jtvnw.net/emoticons/v2/{{id}}/{{format}}/{{theme_mode}}/{{scale}}
-        return TwitchEmotes.template.substring(0)
-            .replace("{{id}}", emote.id)
-            .replace("{{format}}", "default")
-            .replace("{{theme_mode}}", "dark")
-            .replace("{{scale}}", "2.0");
-    }
 
 }
-
-TwitchEmotes.getGlobalEmotes();

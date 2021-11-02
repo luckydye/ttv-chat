@@ -2,8 +2,6 @@ use twitch_irc::login::StaticLoginCredentials;
 use twitch_irc::SecureTCPTransport;
 use twitch_irc::TwitchIRCClient;
 
-use crate::services::get_message_history;
-
 pub struct ChatApp {
   pub connected_channels: Vec<String>,
   pub chat_client: Option<TwitchIRCClient<SecureTCPTransport, StaticLoginCredentials>>,
