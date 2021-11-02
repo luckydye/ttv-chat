@@ -1,5 +1,5 @@
 import { css, html, LitElement } from 'lit-element';
-import IRCChatClient from '../services/IRCChatClient';
+import IRC from '../services/IRC';
 import { Application } from '../App';
 import EmotePicker from './EmotePicker';
 
@@ -118,7 +118,7 @@ export default class ChatInput extends LitElement {
     submit(e: KeyboardEvent) {
         if(this.value != "") {
             this.addToHistory(this.value);
-            IRCChatClient.sendMessage(Application.getSelectedRoom(), this.value);
+            IRC.sendMessage(Application.getSelectedRoom(), this.value);
             this.value = "";
         }
     }

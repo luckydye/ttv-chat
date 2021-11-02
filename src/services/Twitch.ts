@@ -1,6 +1,6 @@
 // import jwt from 'jsonwebtoken';
 import Webbrowser from '../Webbrowser';
-import IRCChatClient from './IRCChatClient';
+import IRC from './IRC';
 import TwichCommands from './twitch/TwichCommands';
 import TwitchPubsub from './twitch/Pubsub';
 
@@ -18,7 +18,7 @@ function connectToChatServer(username: string, token: string) {
     try {
         console.log('connecting');
 
-        IRCChatClient.connectoToChat(username, token).then(() => {
+        IRC.connectoToChat(username, token).then(() => {
             window.dispatchEvent(new Event("loggedin"));
         })
     } catch (err) {

@@ -1,7 +1,7 @@
 // http://tmi.twitch.tv/group/user/{{username}}/chatters
 
 import { css, html, LitElement } from 'lit-element';
-import IRCChatClient from '../services/IRCChatClient';
+import IRC from '../services/IRC';
 import Format from '../Format';
 
 export default class ChatUserList extends LitElement {
@@ -22,7 +22,7 @@ export default class ChatUserList extends LitElement {
 
     async request() {
         // TODO: I should reate limit this request, since its not gonna change every minute anyway
-        const list = await IRCChatClient.getUserlist(this.channel);
+        const list = await IRC.getUserlist(this.channel);
         this.list = list.chatters;
 
         const chatters = list.chatters;

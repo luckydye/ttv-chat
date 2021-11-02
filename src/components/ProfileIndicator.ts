@@ -1,6 +1,6 @@
 import { css, html, LitElement } from 'lit-element';
 import { getUserInfo } from '../services/Twitch';
-import IRCChatClient from '../services/IRCChatClient';
+import IRC from '../services/IRC';
 import { Application } from '../App';
 
 export default class ProfileIndicator extends LitElement {
@@ -39,7 +39,7 @@ export default class ProfileIndicator extends LitElement {
             update_info();
     
             // check if there are new unread messages
-            IRCChatClient.listen('chat.message', (msg: ChatMessage) => {
+            IRC.listen('chat.message', (msg: ChatMessage) => {
                 if(msg.channel === this.channel && Application.getSelectedRoom() !== this.channel && 
                     Application.getChats(this.channel).connect) {
                     this.new_message = true;

@@ -7,7 +7,7 @@ import './components/Login';
 import './components/Profile';
 import './components/TwitchChat';
 import './Tooltip';
-import IRCChatClient from './services/IRCChatClient';
+import IRC from './services/IRC';
 import MessageParser, { EventMessage, UserMessage } from './MessageParser';
 import Format from './Format';
 import Badges from './services/Badges';
@@ -65,7 +65,7 @@ async function createChat(channel: string) {
     })
 
     setTimeout(() => {
-        IRCChatClient.joinChatRoom(channel);
+        IRC.joinChatRoom(channel);
     }, 1000);
 }
 
@@ -115,7 +115,7 @@ async function main() {
         createChat(e.room_name);
     });
     window.addEventListener('closeroom', e => {
-        IRCChatClient.partChatRoom(e.room_name);
+        IRC.partChatRoom(e.room_name);
         delete chatElements[e.room_name];
     });
 
@@ -127,7 +127,7 @@ async function main() {
     // IRC shit
     // move this into the chat element
     //   or maybe move all of this irc logic out of the chat *Element* and put it somwhere else?
-    IRCChatClient.listen('chat.message', async (msg: UserMessage) => {
+    IRC.listen('chat.message', async (msg: UserMessage) => {
         const chat = chatElements[msg.channel];
         const chatMessages = MessageParser.parse(msg);
 
@@ -143,7 +143,7 @@ async function main() {
         }
     });
 
-    IRCChatClient.listen('chat.info', (msg: EventMessage) => {
+    IRC.listen('chat.info', (msg: EventMessage) => {
         const chat = chatElements[msg.channel];
         const chatMessages = MessageParser.parse(msg);
 
@@ -166,7 +166,7 @@ async function main() {
         }
     });
 
-    IRCChatClient.listen('chat.notice', (msg) => {
+    IRC.listen('chat.notice', (msg) => {
         const chat = chatElements[msg.channel_login];
         if (chat) {
             chat.appendNote(msg.message_text);
@@ -193,7 +193,7 @@ async function main() {
         server_timestamp: Date,
     }
 
-    IRCChatClient.listen('chat.clear', (msg: ClearChatMessage) => {
+    IRC.listen('chat.clear', (msg: ClearChatMessage) => {
         const chat = chatElements[msg.channel_login];
 
         if (chat) {

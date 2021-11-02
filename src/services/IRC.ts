@@ -43,7 +43,7 @@ export interface PartMessage {
 const listeners = new Map();
 
 // bindings to the rust api
-export default class IRCChatClient {
+export default class IRC {
 
     // appearence of the local user in different chat rooms
     static usermap: { [key: string]: UserState } = {};

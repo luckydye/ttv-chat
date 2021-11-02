@@ -1,4 +1,4 @@
-import IRCChatClient from './services/IRCChatClient';
+import IRC from './services/IRC';
 
 let applicationState = {
     selectedRoom: localStorage.getItem('selected') || "@",
@@ -150,11 +150,11 @@ export class Application {
     }
 
     static timeout(channel: string, user_name: string, secs: number) {
-        IRCChatClient.sendMessage(channel, `/timeout ${user_name} ${secs}`);
+        IRC.sendMessage(channel, `/timeout ${user_name} ${secs}`);
     }
 
     static unban(channel: string, user_name: string) {
-        IRCChatClient.sendMessage(channel, `/unban ${user_name}`);
+        IRC.sendMessage(channel, `/unban ${user_name}`);
     }
 
     static openUserCard(channel: string, user_name: string) {

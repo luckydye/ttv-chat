@@ -1,6 +1,6 @@
 import { css, html } from 'lit-element';
 import { Application } from '../App';
-import IRCChatClient from '../services/IRCChatClient';
+import IRC from '../services/IRC';
 import TwitchAPI, { getUserInfo } from '../services/Twitch';
 import Webbrowser from '../Webbrowser';
 import Chat from './Chat';
@@ -99,7 +99,7 @@ export default class TwitchChat extends Chat {
         super();
 
         
-        IRCChatClient.listen('chat.user', (msg) => {
+        IRC.listen('chat.user', (msg) => {
             if (msg.channel === this.roomName) {
                 this.moderator = msg.badges.find(b => b.name == "moderator") !== undefined;
                 this.broadcaster = msg.badges.find(b => b.name == "broadcaster") !== undefined;
@@ -134,7 +134,7 @@ export default class TwitchChat extends Chat {
             }
         })
 
-        IRCChatClient.listen('chat.state', msg => {
+        IRC.listen('chat.state', msg => {
             if (msg.channel_login == this.roomName) {
                 if (msg.r9k !== null) {
                     this.r9k = msg.r9k;
@@ -170,7 +170,7 @@ export default class TwitchChat extends Chat {
     }
 
     async updateChatterCount() {
-        return IRCChatClient.getUserlist(this.roomName).then(chatters => {
+        return IRC.getUserlist(this.roomName).then(chatters => {
             this.chatter_count = chatters.chatter_count;
             this.update();
         });
@@ -493,9 +493,9 @@ export default class TwitchChat extends Chat {
     toggleSlowMode() {
         if (this.moderator || this.broadcaster) {
             if (this.slow_mode) {
-                IRCChatClient.sendMessage(this.roomName, "/slowoff");
+                IRC.sendMessage(this.roomName, "/slowoff");
             } else {
-                IRCChatClient.sendMessage(this.roomName, "/slow " + this.slowmode_time);
+                IRC.sendMessage(this.roomName, "/slow " + this.slowmode_time);
             }
         }
     }
@@ -503,9 +503,9 @@ export default class TwitchChat extends Chat {
     toggleFollowerMode() {
         if (this.moderator || this.broadcaster) {
             if (this.follwers_only) {
-                IRCChatClient.sendMessage(this.roomName, "/followersoff");
+                IRC.sendMessage(this.roomName, "/followersoff");
             } else {
-                IRCChatClient.sendMessage(this.roomName, "/followers " + this.followermode_time);
+                IRC.sendMessage(this.roomName, "/followers " + this.followermode_time);
             }
         }
     }
@@ -513,9 +513,9 @@ export default class TwitchChat extends Chat {
     toggleEmoteOnlyMode() {
         if (this.moderator || this.broadcaster) {
             if (this.emote_only) {
-                IRCChatClient.sendMessage(this.roomName, "/emoteonlyoff");
+                IRC.sendMessage(this.roomName, "/emoteonlyoff");
             } else {
-                IRCChatClient.sendMessage(this.roomName, "/emoteonly");
+                IRC.sendMessage(this.roomName, "/emoteonly");
             }
         }
     }
@@ -523,9 +523,9 @@ export default class TwitchChat extends Chat {
     toggleSubOnlyMode() {
         if (this.moderator || this.broadcaster) {
             if (this.subscribers_only) {
-                IRCChatClient.sendMessage(this.roomName, "/subscribersoff");
+                IRC.sendMessage(this.roomName, "/subscribersoff");
             } else {
-                IRCChatClient.sendMessage(this.roomName, "/subscribers");
+                IRC.sendMessage(this.roomName, "/subscribers");
             }
         }
     }
@@ -533,9 +533,9 @@ export default class TwitchChat extends Chat {
     toggleR9kMode() {
         if (this.moderator || this.broadcaster) {
             if (this.r9k) {
-                IRCChatClient.sendMessage(this.roomName, "/r9kbetaoff");
+                IRC.sendMessage(this.roomName, "/r9kbetaoff");
             } else {
-                IRCChatClient.sendMessage(this.roomName, "/r9kbeta");
+                IRC.sendMessage(this.roomName, "/r9kbeta");
             }
         }
     }
