@@ -1,0 +1,124 @@
+// import jwt from 'jsonwebtoken';
+import Webbrowser from '../Webbrowser';
+import Account from '../Account';
+import LoginEvent from '../events/Login';
+import TwitchApi from './twitch/api';
+
+let logged_in_user: Account;
+let logged_in = false;
+
+export async function handleAuthenticatedUser(token: string) {
+    const userinfo = await fetchTwitchAuthApi("/oauth2/userinfo", token);
+    const username = userinfo.preferred_username;
+
+    console.log('Login', username);
+    if (username == null) {
+        // token invalid -> logout
+        logout();
+        return;
+    } else {
+        localStorage.setItem('user-token', token);
+        logged_in = true;
+    }
+
+    const user_data = await TwitchApi.getUserInfo(userinfo.login);
+    if(user_data) {
+        const account = new Account(user_data);
+        logged_in_user = account;
+        window.dispatchEvent(new LoginEvent(account));
+    }
+}
+
+export function getLoggedInUser() {
+    if(logged_in) {
+        return logged_in_user;
+    }
+}
+
+function logout() {
+    localStorage.removeItem('user-token');
+    logged_in = false;
+}
+
+async function fetchTwitchAuthApi(path: string = "/oauth2/userinfo", token: string) {
+    const url = `https://id.twitch.tv${path}`;
+    return fetch(url, {
+        headers: {
+            'Authorization': 'Bearer ' + token
+        }
+    })
+        .then(res => res.json())
+        .catch(err => {
+            console.error(err);
+        })
+}
+
+export function checLogin() {
+    const token = localStorage.getItem('user-token');
+    if (token && !logged_in) {
+        handleAuthenticatedUser(token);
+        return true;
+    }
+    return false;
+}
+
+export async function authClientUser() {
+    // check if already logged in
+    if (checLogin()) {
+        return;
+    }
+
+    // else start auth process
+    const type = "token+id_token";
+    const scopes = [
+        "channel:edit:commercial",
+        "channel:manage:polls",
+        "channel:manage:predictions",
+        "channel:manage:redemptions",
+        "channel:read:hype_train",
+        "channel:read:polls",
+        "channel:read:predictions",
+        "channel:read:redemptions",
+        "moderation:read",
+        "user:manage:blocked_users",
+        "user:read:blocked_users",
+
+        "bits:read",
+        "channel:moderate",
+        "chat:read",
+        "chat:edit",
+        "whispers:read",
+
+        "openid"
+    ];
+
+    const claims = {
+        "userinfo": {
+            "preferred_username": null
+        }
+    };
+
+    const url = `https://id.twitch.tv/oauth2/authorize?client_id=${TwitchApi.CLIENT_ID}` +
+        `&redirect_uri=${TwitchApi.REDIRECT_URI}` +
+        `&response_type=${type}` +
+        `&scope=${scopes.join("%20")}` +
+        `&claims=${JSON.stringify(claims)}`;
+
+    const win = open(url);
+
+    if (win) {
+        win.addEventListener('load', e => {
+            console.log("win load event", win);
+
+            const params = win.location.hash;
+            const parsed = Webbrowser.parseSearch(params);
+
+            const access_token = parsed.access_token;
+            handleAuthenticatedUser(access_token);
+
+            win.close();
+        })
+    } else {
+        throw new Error('could not open authentication window');
+    }
+}

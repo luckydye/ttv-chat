@@ -1,10 +1,10 @@
 import EmoteService from './EmoteService';
-import { fetchTwitchApi } from '../Twitch';
+import TwitchApi from '../twitch/Api';
 import { Emote, EmoteMap } from './Emote';
 
 let globalEmotes: EmoteMap = {};
 
-class TwitchEmote extends Emote {
+export class TwitchEmote extends Emote {
     static get url_template() {
         const theme = "dark";
         const format = "default";
@@ -30,7 +30,7 @@ export default class TwitchEmotes extends EmoteService {
     }
 
     static async getGlobalEmotes(): Promise<EmoteMap | undefined> {
-        return fetchTwitchApi("/chat/emotes/global").then(data => {
+        return TwitchApi.fetch("/chat/emotes/global").then(data => {
             for(let emote of data.data) {
                 globalEmotes[emote.name] = new TwitchEmote(emote);
             }
@@ -39,7 +39,7 @@ export default class TwitchEmotes extends EmoteService {
     }
 
     static async getChannelEmotes(id: string): Promise<EmoteMap | undefined> {
-        return fetchTwitchApi("/chat/emotes", "broadcaster_id=" + id).then(data => {
+        return TwitchApi.fetch("/chat/emotes", "broadcaster_id=" + id).then(data => {
             if(data.status == 200) {
                 const channelEmotes: EmoteMap = {};
                 for(let emote of data.data) {

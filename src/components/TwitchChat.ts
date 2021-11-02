@@ -1,7 +1,7 @@
 import { css, html } from 'lit-element';
 import { Application } from '../App';
 import IRC from '../services/IRC';
-import TwitchAPI, { getUserInfo } from '../services/Twitch';
+import TwitchAPI, { getUserInfo } from '../services/Auth';
 import Webbrowser from '../Webbrowser';
 import Chat from './Chat';
 import ContextMenu from './ContextMenu';

@@ -1,5 +1,5 @@
 import { css, html, LitElement } from 'lit-element';
-import { getUserInfo } from '../services/Twitch';
+import { getUserInfo } from '../services/Auth';
 import IRC from '../services/IRC';
 import { Application } from '../App';
 

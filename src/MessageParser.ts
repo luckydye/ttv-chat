@@ -2,11 +2,10 @@
 import { html, TemplateResult } from 'lit-element';
 import Badges from './services/Badges';
 import Emotes from './services/Emotes';
-import TwitchEmotes from './services/emotes/TwitchEmotes';
-import { getLoggedInUsername } from './services/Twitch';
+import { TwitchEmote } from './services/emotes/TwitchEmotes';
+import { getLoggedInUser } from './services/Auth';
 import Webbrowser from './Webbrowser';
 import { Application } from './App';
-import TwitchAPI from './services/Twitch';
 import Color from './Color';
 
 const Default_EventMessage_Color = "rgb(12, 12, 12)";
@@ -161,13 +160,18 @@ export default class MessageParser {
 
     static parseChatTextMessage(message: UserMessage): ChatMessage {
 
+        const client_user = getLoggedInUser();
+        const user_login = client_user?.user_login;
+
         const channel_id = message.tags['room-id'];
         const reward_id = message.tags['custom-reward-id'];
 
         let redemtion_title = "custom reward";
 
         if(reward_id) {
-            const redemtion = TwitchAPI.findReward(reward_id);
+            // const redemtion = TwitchAPI.findReward(reward_id);
+            // TODO:
+            const redemtion = null;
             if(redemtion) {
                 redemtion_title = redemtion.title;
             }
@@ -196,7 +200,7 @@ export default class MessageParser {
                 const end = emote.char_range.end;
 
                 const wordToReplace = message.text.slice(start, end);
-                const emoteURL = TwitchEmotes.parseEmoteUrl(emote);
+                const emoteURL = new TwitchEmote(emote).url_x2;
 
                 wordEmoteMap[wordToReplace] = {
                     name: wordToReplace,
@@ -235,8 +239,7 @@ export default class MessageParser {
                 wordMentionMap[str] = str;
             }
             // find highlight mentions
-            const client_user = getLoggedInUsername().toLocaleLowerCase();
-            if (client_user != "" && str.toLocaleLowerCase().match(client_user)) {
+            if (user_login && str.toLocaleLowerCase().match(user_login.toLocaleLowerCase())) {
                 wordMentionMap[str] = str;
                 tagged = true;
             }
@@ -324,7 +327,7 @@ export default class MessageParser {
                         <img src="./images/navigate_before_white_24dp.svg" width="18px" height="18px" />
                     </div>
                     
-                    ${message.user_name !== getLoggedInUsername() ? html`
+                    ${message.user_name !== user_login ? html`
                         <div class="chat-line-tool" title="Reply" @click="${() => Application.reply(message.channel, message)}">
                             <img src="./images/reply_white_24dp.svg" height="18px" width="18px" />
                         </div>

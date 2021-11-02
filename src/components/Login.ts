@@ -1,5 +1,5 @@
 import { css, html, LitElement } from 'lit-element';
-import { authClientUser, handleAuthenticatedUser, checLogin, getLoggedInUser } from '../services/Twitch';
+import { authClientUser, handleAuthenticatedUser, checLogin, getLoggedInUser } from '../services/Auth';
 import './Loader';
 
 export default class TwitchAuthComp extends LitElement {

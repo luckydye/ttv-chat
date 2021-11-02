@@ -1,5 +1,5 @@
 let global_badges: { [key: string]: any } = {};
-let channel_badges: { [key: string]: {} } = {};
+let channel_badges: { [key: string]: any } = {};
 
 export default class Badges {
 

@@ -1,6 +1,6 @@
-import IRCChatClient, { JoinMessage, PartMessage } from './services/IRCChatClient';
+import IRCChatClient, { JoinMessage, PartMessage } from './services/IRC';
 import TwitchPubsub from './services/twitch/Pubsub';
-import TwitchAPI from './services/Twitch';
+import TwitchAPI from './services/twitch/Api';
 import Account from './Account';
 
 export default class Channel {
@@ -122,6 +122,12 @@ export default class Channel {
                 }
             }
         });
+    }
+
+    static findReward(id: string) {
+        if (twitch_pubsub) {
+            return twitch_pubsub.rewards[id];
+        }
     }
 
 }

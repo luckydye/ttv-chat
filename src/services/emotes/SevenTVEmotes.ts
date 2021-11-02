@@ -3,7 +3,7 @@ import { Emote, EmoteMap } from './Emote';
 
 let globalEmotes: EmoteMap = {};
 
-class SevenTVEmote extends Emote {
+export class SevenTVEmote extends Emote {
     static get url_template() {
         return "https://cdn.7tv.app/emote/{{id}}/{{scale}}";
     }

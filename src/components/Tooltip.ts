@@ -1,6 +1,6 @@
-import PageOverlay from './components/PageOverlay';
-import LinkPreview from './components/LinkPreview';
-import './components/Loader';
+import PageOverlay from './PageOverlay';
+import LinkPreview from './LinkPreview';
+import './Loader';
 
 let lastTarget: EventTarget | null = null;
 let lastOverlay: PageOverlay | null = null;

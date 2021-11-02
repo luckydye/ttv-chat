@@ -1,5 +1,5 @@
 import { css, html, LitElement } from 'lit-element';
-import TwitchAPI, { getUserInfo, checLogin, getLoggedInUser } from '../services/Twitch';
+import TwitchAPI, { getUserInfo, checLogin, getLoggedInUser } from '../services/Auth';
 import ContextMenu from './ContextMenu';
 
 export default class TwitchAuthComp extends LitElement {

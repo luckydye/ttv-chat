@@ -3,7 +3,7 @@ import { Emote, EmoteMap } from './Emote';
 
 let globalEmotes: EmoteMap = {};
 
-class FFZEmote extends Emote {
+export class FFZEmote extends Emote {
     static get url_template() {
         return "https://cdn.frankerfacez.com/emote/{{id}}/{{scale}}";
     }
