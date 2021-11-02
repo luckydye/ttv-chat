@@ -7,7 +7,7 @@ export class FFZEmote extends Emote {
     static get url_template() {
         return "https://cdn.frankerfacez.com/emote/{{id}}/{{scale}}";
     }
-    static get scale_temlate() {
+    static get scale_template() {
         return {
             x1: "1",
             x2: "2",

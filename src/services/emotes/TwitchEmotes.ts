@@ -10,7 +10,7 @@ export class TwitchEmote extends Emote {
         const format = "default";
         return `https://static-cdn.jtvnw.net/emoticons/v2/{{id}}/${format}/${theme}/{{scale}}`;
     }
-    static get scale_temlate() {
+    static get scale_template() {
         return {
             x1: "1.0",
             x2: "2.0",

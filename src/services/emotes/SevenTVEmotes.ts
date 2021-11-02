@@ -7,7 +7,7 @@ export class SevenTVEmote extends Emote {
     static get url_template() {
         return "https://cdn.7tv.app/emote/{{id}}/{{scale}}";
     }
-    static get scale_temlate() {
+    static get scale_template() {
         return {
             x1: "1x",
             x2: "2x",

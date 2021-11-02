@@ -5,7 +5,7 @@ import Emotes from './services/Emotes';
 import { TwitchEmote } from './services/emotes/TwitchEmotes';
 import { getLoggedInUser } from './services/Auth';
 import Webbrowser from './Webbrowser';
-import { Application } from './App';
+import Application from './App';
 import Color from './Color';
 
 const Default_EventMessage_Color = "rgb(12, 12, 12)";

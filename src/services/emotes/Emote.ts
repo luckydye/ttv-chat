@@ -8,7 +8,7 @@ export class Emote {
         return "";
     }
 
-    static get scale_temlate() {
+    static get scale_template() {
         return {
             x1: "x1",
             x2: "x2",

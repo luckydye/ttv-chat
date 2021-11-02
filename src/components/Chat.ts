@@ -1,7 +1,7 @@
 import { css, html, LitElement } from 'lit-element';
 import AnimatedScroll from './AnimatedScroll';
 import { ChatInfoMessage, ChatMessage } from '../MessageParser';
-import { ChatInfo, ChatLine, ChatNote } from './ChatLine';
+import { ChatInfo, ChatNote } from './ChatLine';
 import { render } from 'lit-html';
 // Components
 import './FluidInput';
@@ -168,6 +168,7 @@ export default class Chat extends LitElement {
                 height: 100%;
             }
             .lines {
+                padding-top: 60px;
                 box-sizing: border-box;
                 position: absolute;
                 top: 0;
@@ -177,20 +178,44 @@ export default class Chat extends LitElement {
                 overflow: auto;
                 overflow-y: scroll;
                 overflow-x: hidden;
-                padding-top: 30px;
+            }
+            .line {
+
             }
 
             .chat-actions {
                 width: 100%;
-                background: rgb(25 25 28);
-                position: relative;
-                z-index: 1000;
                 display: grid;
                 grid-template-columns: 1fr auto 1fr;
                 align-items: center;
-                padding: 8px 8px;
+                padding: 4px 8px;
                 box-sizing: border-box;
-                z-index: 1000;
+            }
+
+            .chat-action {
+                display: inline-flex;
+                justify-content: center;
+                align-items: center;
+                position: relative;
+            }
+
+            .chat-actions button {
+                border: none;
+                padding: 0px;
+                margin: 0px;
+                background: transparent;
+                min-width: 24px;
+                height: 22px;
+                cursor: pointer;
+            }
+            .chat-actions button:hover {
+                outline: #464646 solid 1px;
+            }
+            .chat-actions button:active {
+                background: #333333;
+            }
+            .chat-actions button:active img {
+                transform: scale(0.95);
             }
 
             .chat-title {
@@ -198,7 +223,6 @@ export default class Chat extends LitElement {
                 position: relative;
                 z-index: 100;
                 width: 100%;
-                background: rgb(25, 25, 28);
                 padding: 5px 10px;
                 box-sizing: border-box;
                 overflow: hidden;
@@ -211,17 +235,20 @@ export default class Chat extends LitElement {
                 border-bottom: 1px solid black;
             }
 
+            .chat-title > div {
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
             .chat-title span {
                 opacity: 0.5;
             }
 
-            :host(:not([locked])) .scroll-to-bottom {
-                display: block;
-            }
-
             .scroll-to-bottom {
-                border: 1px solid #19191b;
-                display: none;
+                transition: opacity .125s ease, transform .125s ease;
+                transform: translate(0, 10px); 
+                opacity: 0;
+                pointer-events: none;
                 position: absolute;
                 bottom: 0;
                 left: 0;
@@ -233,14 +260,24 @@ export default class Chat extends LitElement {
                 box-sizing: border-box;
                 z-index: 100000;
                 cursor: pointer;
-                margin: 2px 10px;
+                margin: 4px 40px;
                 border-radius: 6px;
+                border: 1px solid #19191b;
             }
-            .scroll-to-bottom:hover {
-                opacity: 0.95;
-            }
-            .scroll-to-bottom:active {
+
+            :host(:not([locked])) .scroll-to-bottom {
+                transform: translate(0, 0);
                 opacity: 1;
+                pointer-events: all;
+                transition: opacity .25s ease, transform .25s ease;
+            }
+
+            :host(:not([locked])) .scroll-to-bottom:hover {
+                transform: scale(1.005);
+                transition: none;
+            }
+            :host(:not([locked])) .scroll-to-bottom:active {
+                transform: scale(0.995);
             }
 
             /* // webkit scrollbars */
@@ -269,6 +306,16 @@ export default class Chat extends LitElement {
                 opacity: 0.75;
                 font-size: 12px;
                 font-weight: 400;
+            }
+            .chat-channel-name:hover {
+                text-decoration: underline;
+                cursor: pointer;
+            }
+            .chat-channel-name:active {
+                opacity: 0.5;
+            }
+            :host([modview]) .chat-channel-name {
+                display: none;
             }
         `;
     }
