@@ -1,3 +1,4 @@
+import Events from './Events';
 import Channel from '../Channel';
 
 export default class ChannelCreatedEvent extends Event {
@@ -8,7 +9,7 @@ export default class ChannelCreatedEvent extends Event {
     };
 
     constructor(channel: Channel) {
-        super('app-channel-created');
+        super(Events.ChannelCreated);
         this.data = {
             id: channel.channel_id,
             channel

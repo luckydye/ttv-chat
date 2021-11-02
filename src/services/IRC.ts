@@ -1,10 +1,21 @@
 import { invoke } from '@tauri-apps/api/tauri';
 import { emit, listen } from '@tauri-apps/api/event';
 import Color from '../Color';
-import { Application } from '../App';
+import Application from '../App';
 
 // message types
 import { EventMessage, UserMessage } from '../MessageParser';
+
+export const IRCEvents = {
+    Joined: 'chat.joined',
+    Parted: 'chat.parted',
+    UserState: 'chat.user',
+    ChatState: 'chat.state',
+    ChatClear: 'chat.clear',
+    ChatInfo: 'chat.info',
+    ChatNote: 'chat.notice',
+    ChatMessage: 'chat.message',
+}
 
 export interface ChatClearMessage {
     id: string,

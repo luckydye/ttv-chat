@@ -66,6 +66,7 @@ Next goal: Beta Release
 - [ ] Notifications
 - [ ] Reccomend channels from follow list
 - [ ] Cache chatroom profile pictures for faster loading time and also will just look faster without actually beeing faster
+- [ ] manage third party emote libraries
 
 #### Visibility panel
 - [ ] Show/Hide delted messages

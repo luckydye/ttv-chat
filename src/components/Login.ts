@@ -10,10 +10,12 @@ export default class TwitchAuthComp extends LitElement {
     constructor() {
         super();
 
-        if(checLogin()) {
-            getLoggedInUser().then(info => {
+        const logged_in = checLogin();
+
+        if(logged_in instanceof Promise) {
+            logged_in.then(logged_in => {
                 this.loading = false;
-                this.loggedin = info.preferred_username ? true : false;
+                this.loggedin = logged_in;
                 this.update();
             })
         } else {
@@ -28,11 +30,14 @@ export default class TwitchAuthComp extends LitElement {
     pasteToken(e) {
         navigator.clipboard.readText().then(clipText => {
             const json = JSON.parse(clipText);
-            handleAuthenticatedUser(json.access_token);
-            
-            setTimeout(() => {
-                location.reload();
-            }, 1000);
+            handleAuthenticatedUser(json.access_token).then(logged_in => {
+                if(logged_in) {
+                    this.loggedin = logged_in;
+                    this.update();
+                } else {
+                    alert("Error logging in.");
+                }
+            })
         });
     }
 

@@ -1,7 +1,8 @@
 import { css, html, LitElement } from 'lit-element';
-import { Application } from '../App';
+import Application from '../App';
 import ProfileIndicator from './ProfileIndicator';
 import AddChannelDialog from './AddChannelDialog';
+import Events, { on } from '../events/Events';
 
 // TODO: Fix drag sorting
 
@@ -12,25 +13,16 @@ export default class ChatRooms extends LitElement {
     constructor() {
         super();
 
-        window.addEventListener('selectroom', e => {
+        on(Events.ChannelSelected, e => {
             this.update();
         });
-        window.addEventListener('addedroom', e => {
-            const pfp = new ProfileIndicator(e.room_name);
-            this.icons.push(pfp);
+        on(Events.ChannelRemoved, e => {
             this.update();
         });
-
-        window.addEventListener('closeroom', e => {
+        on(Events.Initialize, e => {
             this.update();
         });
-
-        window.addEventListener('stateloaded', e => {
-            const rooms = Application.getRooms();
-            rooms.forEach(room => {
-                const pfp = new ProfileIndicator(room);
-                this.icons.push(pfp);
-            })
+        on(Events.ChannelCreated, e => {
             this.update();
         });
     }
@@ -42,7 +34,7 @@ export default class ChatRooms extends LitElement {
     target: HTMLElement | null = null;
 
     render() {
-        const rooms = Application.getRooms();
+        const rooms = Application.getChannels();
 
         let dragging = false;
         let startY = 0;
@@ -103,20 +95,20 @@ export default class ChatRooms extends LitElement {
         return html`
             <div class="icon-list" @pointermove="${move}" @pointerup="${commitDrag}" @pointercancel="${commitDrag}">
 
-                <div channel="@" ?selected="${Application.getSelectedRoom() == "@"}" 
+                <div channel="@" ?selected="${Application.getSelectedChannel() == "@"}" 
                     class="room-icon mentions-icon" hint="Mentions" 
                     @mousedown="${() => {
-                        Application.selectRoom("@");
+                        Application.selectChannel("@");
                     }}">
                     <img src="./images/Mention.svg" width="18px" height="18px"/>
                 </div>
 
                 ${rooms.map(room => {
                     return html`
-                        <profile-indicator channel="${room}" ?selected="${Application.getSelectedRoom() == room}" 
+                        <profile-indicator channel="${room}" ?selected="${Application.getSelectedChannel() == room}" 
                             class="room-icon chat-room-icon" hint="${room}" 
                             @mousedown="${() => {
-                                Application.selectRoom(room);
+                                Application.selectChannel(room);
                             }}"
                             @pointerdown="${startDrag}">
                         </profile-indicator>
@@ -124,7 +116,7 @@ export default class ChatRooms extends LitElement {
                 })}
 
                 <div class="room-icon new-room" @click="${(e) => {
-                        AddChannelDialog.openOn(e.target);
+                        AddChannelDialog.openOn(e.target, 'right');
                     }}" hint="Join Room" >
                     +
                 </div>

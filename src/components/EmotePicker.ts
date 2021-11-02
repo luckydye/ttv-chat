@@ -1,7 +1,7 @@
 import { css, html } from 'lit-element';
 import ContextMenu from "./ContextMenu";
 import Emotes from '../services/Emotes';
-import { Application } from '../App';
+import Application from '../App';
 
 export default class EmotePicker extends ContextMenu {
 

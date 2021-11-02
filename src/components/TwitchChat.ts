@@ -1,7 +1,8 @@
 import { css, html } from 'lit-element';
-import { Application } from '../App';
+import Application from '../App';
 import IRC from '../services/IRC';
-import TwitchAPI, { getUserInfo } from '../services/Auth';
+import { getLoggedInUser } from '../services/Auth';
+import TwitchApi from '../services/twitch/Api';
 import Webbrowser from '../Webbrowser';
 import Chat from './Chat';
 import ContextMenu from './ContextMenu';
@@ -69,14 +70,13 @@ export default class TwitchChat extends Chat {
             updateStatus();
         }, 1000 * 15);
 
-        getUserInfo(this.roomName).then(async info => {
-            this.info = info;
+        const info = getLoggedInUser(this.roomName);
+        this.info = info;
 
-            updateStatus();
+        updateStatus();
 
-            const channel = await TwitchAPI.getChannel(info.id);
+        TwitchApi.getChannel(info.id).then((channel) => {
             info.channel_info = channel[0];
-
             this.update();
         })
 

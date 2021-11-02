@@ -1,6 +1,6 @@
 import { css, html, LitElement } from 'lit-element';
 import IRC from '../services/IRC';
-import { Application } from '../App';
+import Application from '../App';
 import EmotePicker from './EmotePicker';
 
 const MAX_HSITORY_LENGTH = 20;

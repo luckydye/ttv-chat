@@ -5,8 +5,10 @@
   "main": "index.js",
   "scripts": {
     "tauri": "tauri",
+    "prepretauri:build": "npm run build:client",
+    "pretauri:build": "npm run tauri icon --cion ./public/icon.png",
     "tauri:build": "npm run tauri build",
-    "pretauri:build": "npm run build:client",
+    "posttauri:build": "npm run tauri icon --cion ./public/icon_dev.png",
     "build:client": "rollup -c",
     "build:cw": "rollup -c -w"
   },

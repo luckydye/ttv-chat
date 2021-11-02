@@ -1,5 +1,5 @@
 import { css, html, LitElement } from 'lit-element';
-import { Application } from '../App';
+import Application from '../App';
 import ContextMenu from './ContextMenu';
 
 export default class AddChannelDialog extends ContextMenu {
@@ -40,7 +40,7 @@ export default class AddChannelDialog extends ContextMenu {
     }
 
     submit(e) {
-        Application.addRoom(e.target.value.toLocaleLowerCase());
+        Application.createChannel(e.target.value.toLocaleLowerCase());
         this.remove();
     }
 

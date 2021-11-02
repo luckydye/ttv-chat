@@ -2,12 +2,12 @@
 import Webbrowser from '../Webbrowser';
 import Account from '../Account';
 import LoginEvent from '../events/Login';
-import TwitchApi from './twitch/api';
+import TwitchApi from './twitch/Api';
 
-let logged_in_user: Account;
+let logged_in_user: Account | null;
 let logged_in = false;
 
-export async function handleAuthenticatedUser(token: string) {
+export async function handleAuthenticatedUser(token: string): Promise<boolean> {
     const userinfo = await fetchTwitchAuthApi("/oauth2/userinfo", token);
     const username = userinfo.preferred_username;
 
@@ -15,18 +15,25 @@ export async function handleAuthenticatedUser(token: string) {
     if (username == null) {
         // token invalid -> logout
         logout();
-        return;
+        return false;
     } else {
         localStorage.setItem('user-token', token);
         logged_in = true;
     }
 
-    const user_data = await TwitchApi.getUserInfo(userinfo.login);
+    const user_data = await TwitchApi.getUserInfo(username);
+    
     if(user_data) {
-        const account = new Account(user_data);
-        logged_in_user = account;
-        window.dispatchEvent(new LoginEvent(account));
+        if(!logged_in_user) {
+            const account = new Account(user_data, token);
+            logged_in_user = account;
+            window.dispatchEvent(new LoginEvent(account));
+        }
+
+        return true;
     }
+
+    return false;
 }
 
 export function getLoggedInUser() {
@@ -35,9 +42,12 @@ export function getLoggedInUser() {
     }
 }
 
-function logout() {
+export function logout() {
     localStorage.removeItem('user-token');
     logged_in = false;
+    logged_in_user = null;
+    
+    location.reload();
 }
 
 async function fetchTwitchAuthApi(path: string = "/oauth2/userinfo", token: string) {
@@ -53,18 +63,17 @@ async function fetchTwitchAuthApi(path: string = "/oauth2/userinfo", token: stri
         })
 }
 
-export function checLogin() {
+export function checLogin(): Promise<boolean> | boolean {
     const token = localStorage.getItem('user-token');
     if (token && !logged_in) {
-        handleAuthenticatedUser(token);
-        return true;
+        return handleAuthenticatedUser(token);
     }
     return false;
 }
 
 export async function authClientUser() {
     // check if already logged in
-    if (checLogin()) {
+    if (checLogin() !== false) {
         return;
     }
 

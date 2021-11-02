@@ -8,14 +8,14 @@ export default class Account {
 
     user_login: string;
     user_id: string;
+    profile_image: string;
 
-    constructor(user_info: UserInfo) {
+    constructor(user_info: UserInfo, oauth_token: string) {
         this.user_login = user_info.login;
         this.user_id = user_info.id;
+        this.profile_image = user_info.profile_image_url;
 
-        IRC.connectoToChat(username, token).then(() => {
-
-        })
+        IRC.connectoToChat(this.user_login, oauth_token);
     }
 
 }

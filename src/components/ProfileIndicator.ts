@@ -1,24 +1,25 @@
 import { css, html, LitElement } from 'lit-element';
-import { getUserInfo } from '../services/Auth';
-import IRC from '../services/IRC';
-import { Application } from '../App';
+import IRC, { IRCEvents } from '../services/IRC';
+import Application from '../App';
+import { ChatMessage } from '../MessageParser';
+import Events, { on } from '../events/Events';
 
 export default class ProfileIndicator extends LitElement {
 
     live = false;
     new_message = false;
-    channel: string;
+    channel: string | undefined;
 
     static get properties() {
         return {
-            channel: String,
+            channel: { type: String },
         };
     }
 
-    attributeChangedCallback(name, oldVal, newVal) {
+    attributeChangedCallback(name: string, oldVal: string, newVal: string) {
         super.attributeChangedCallback(name, oldVal, newVal);
         
-        if(name === "channel") {
+        if(name === "channel" && this.channel) {
             const img = new Image();
             img.width = 24;
             img.alt = this.channel;
@@ -26,32 +27,39 @@ export default class ProfileIndicator extends LitElement {
     
             this.profileImage = img;
     
-            const update_info = () => getUserInfo(this.channel).then(info => {
+            const update_info = async () => {
                 setTimeout(() => update_info(), 1000 * 30);
-    
-                this.live = info.stream?.type == "live" ? true : false;
-    
-                img.src = info.profile_image_url;
-                img.removeAttribute('loading');
-    
-                this.update();
-            });
+
+                const channel = Application.getChannel(this.channel);
+                if(channel) {
+                    const profile_img_url = await channel.getProfileImage();
+                    const stream = await channel.getStream();
+
+                    this.live = stream?.type == "live" ? true : false;
+        
+                    img.src = profile_img_url;
+                    img.removeAttribute('loading');
+        
+                    this.update();
+                }
+            };
             update_info();
     
             // check if there are new unread messages
-            IRC.listen('chat.message', (msg: ChatMessage) => {
-                if(msg.channel === this.channel && Application.getSelectedRoom() !== this.channel && 
+            IRC.listen(IRCEvents.ChatMessage, (msg: ChatMessage) => {
+                if(msg.channel === this.channel && Application.getSelectedChannel() !== this.channel && 
                     Application.getChats(this.channel).connect) {
                     this.new_message = true;
                     this.update();
                 }
             });
-            window.addEventListener('selectroom', e => {
-                if(Application.getSelectedRoom() === this.channel) {
+
+            on(Events.ChannelSelected, e => {
+                if(e.data.channel === this.channel) {
                     this.new_message = false;
                     this.update();
                 }
-            });
+            })
         }
     }
 

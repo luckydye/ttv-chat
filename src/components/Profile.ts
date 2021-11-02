@@ -1,5 +1,6 @@
 import { css, html, LitElement } from 'lit-element';
-import TwitchAPI, { getUserInfo, checLogin, getLoggedInUser } from '../services/Auth';
+import { logout } from '../services/Auth';
+import Account from '../Account';
 import ContextMenu from './ContextMenu';
 
 export default class TwitchAuthComp extends LitElement {
@@ -44,34 +45,27 @@ export default class TwitchAuthComp extends LitElement {
         `;
     }
 
-    user: { [key: string]: string } | null = null;
+    user: Account | null = null;
 
     constructor() {
         super();
 
-        if(checLogin()) {
-            getLoggedInUser().then(info => {
-                this.user = info;
-                this.update();
-            })
-        }
+        window.addEventListener('app-login', (e) => {
+            this.user = e.data.account;
+            this.update();
+        })
     }
 
     logout() {
-        TwitchAPI.logout();
+        logout();
     }
 
     render() {
         if(this.user) {
             const img = new Image();
             img.width = 24;
-            img.alt = this.user.preferred_username;
-            img.setAttribute('loading', '');
-
-            getUserInfo(this.user.preferred_username).then(info => {
-                img.src = info.profile_image_url;
-                img.removeAttribute('loading');
-            })
+            img.alt = this.user.user_login;
+            img.src = this.user.profile_image;
 
             return html`
                 <div class="auth">
