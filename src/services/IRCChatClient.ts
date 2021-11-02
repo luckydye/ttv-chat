@@ -1,10 +1,10 @@
 import { invoke } from '@tauri-apps/api/tauri';
 import { emit, listen } from '@tauri-apps/api/event';
-import { hexToRgb, rgbToHex, limitColorContrast } from './utils';
-import { Application } from './App';
+import Color from '../Color';
+import { Application } from '../App';
 
 // message types
-import { EventMessage, UserMessage } from './MessageParser';
+import { EventMessage, UserMessage } from '../MessageParser';
 
 export interface ChatClearMessage {
     id: string,
@@ -28,6 +28,16 @@ export interface UserState {
     username: string,
     badges: Array<object>,
     color: string,
+}
+
+export interface JoinMessage {
+    channel_login: string,
+    user_login: string,
+}
+
+export interface PartMessage {
+    channel_login: string,
+    user_login: string,
 }
 
 const listeners = new Map();
@@ -85,7 +95,7 @@ export default class IRCChatClient {
                         text: message,
                         user_name: user.username || "user not found",
                         user_id: "chat-client",
-                        color: hexToRgb(user.color),
+                        color: Color.hexToRgb(user.color),
                         emotes: [],
                         badges: user.badges || [],
                         timestamp: new Date(),
@@ -133,7 +143,7 @@ export default class IRCChatClient {
                             channel: payload.channel,
                             username: payload.username,
                             badges: payload.badges,
-                            color: rgbToHex(limitColorContrast(...payload.name_color)),
+                            color: Color.rgbToHex(Color.limitColorContrast(...payload.name_color)),
                         };
                         this.usermap[payload.channel] = message_data;
                         return callback(message_data);
@@ -155,6 +165,18 @@ export default class IRCChatClient {
                 case 'chat.state': {
                     if (event.payload) {
                         return callback(event.payload);
+                    }
+                    break;
+                }
+                case 'chat.joined': {
+                    if (event.payload) {
+                        return callback(event.payload as JoinMessage);
+                    }
+                    break;
+                }
+                case 'chat.parted': {
+                    if (event.payload) {
+                        return callback(event.payload as PartMessage);
                     }
                     break;
                 }

@@ -203,3 +203,5 @@ pub fn handle_user_notice_message(msg: twitch_irc::message::UserNoticeMessage) -
 }
 
 // pub fn handle_user_notice(msg: twitch_irc::message::NoticeMessage) {}
+
+// pub fn handle_join_message(msg: twitch_irc::message::JoinMessage) {}

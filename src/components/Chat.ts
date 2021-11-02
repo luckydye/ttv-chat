@@ -1,5 +1,5 @@
 import { css, html, LitElement } from 'lit-element';
-import AnimatedScroll from '../AnimatedScroll';
+import AnimatedScroll from './AnimatedScroll';
 import { ChatInfoMessage, ChatMessage } from '../MessageParser';
 import { ChatInfo, ChatLine, ChatNote } from './ChatLine';
 import { render } from 'lit-html';

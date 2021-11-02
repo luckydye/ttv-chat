@@ -1,6 +1,6 @@
 import { css, html } from 'lit-element';
 import { Application } from '../App';
-import IRCChatClient from '../IRCChatClient';
+import IRCChatClient from '../services/IRCChatClient';
 import TwitchAPI, { getUserInfo } from '../services/Twitch';
 import Webbrowser from '../Webbrowser';
 import Chat from './Chat';
@@ -476,10 +476,11 @@ export default class TwitchChat extends Chat {
                 position: absolute;
                 top: 60px;
                 left: 10px;
-                outline: 1px solid white;
+                /* outline: 1px solid white; */
                 right: 10px;
                 height: 40px;
                 z-index: 1000;
+                pointer-events: none;
             }
         `;
     }
@@ -576,15 +577,15 @@ export default class TwitchChat extends Chat {
                     <div>
                         <div class="chat-action">
                             <button title="Close chat" @click="${(e) => {
-                Application.closeRoom(this.roomName);
-            }}">
+                                Application.closeRoom(this.roomName);
+                            }}">
                                 <img src="./images/close.svg" width="16px" height="16px" />
                             </button>
                         </div>
                         <div class="chat-action">
                             <button class="user-list-button" title="Userlist" @click="${() => {
-                this.openUserlist();
-            }}">
+                                this.openUserlist();
+                            }}">    
                                 <img src="./images/people.svg" width="16px" height="16px" />
                             </button>
                             <div class="user-list-preview" tabindex="0">
@@ -593,22 +594,22 @@ export default class TwitchChat extends Chat {
                         </div>
                         <div class="chat-action">
                             <button title="Open Stream" @click="${() => {
-                Webbrowser.openInBrowwser(`https://www.twitch.tv/${this.roomName}`);
-            }}">
+                                Webbrowser.openInBrowwser(`https://www.twitch.tv/${this.roomName}`);
+                            }}">
                                 <img src="./images/open.svg" width="16px" height="16px" />
                             </button>
                         </div>
                         <div class="chat-action">
                             <button title="Relaod Chat" @click="${() => {
-                location.reload();
-            }}">
+                                location.reload();
+                            }}">
                                 <img src="./images/refresh_white_24dp.svg" width="16px" height="16px" />
                             </button>
                         </div>
                     </div>
                     <div class="chat-channel-name" @click="${() => {
-                Webbrowser.openInBrowwser(`https://www.twitch.tv/${this.roomName}`);
-            }}">
+                                Webbrowser.openInBrowwser(`https://www.twitch.tv/${this.roomName}`);
+                            }}">
                         ${this.roomName}
                     </div>
                     <div class="chat-state-icons">

@@ -1,7 +1,7 @@
 // http://tmi.twitch.tv/group/user/{{username}}/chatters
 
 import { css, html, LitElement } from 'lit-element';
-import IRCChatClient from '../IRCChatClient';
+import IRCChatClient from '../services/IRCChatClient';
 import Format from '../Format';
 
 export default class ChatUserList extends LitElement {

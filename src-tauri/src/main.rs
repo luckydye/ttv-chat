@@ -66,6 +66,12 @@ pub fn handle_server_message(message: ServerMessage, app_handle: &tauri::AppHand
     ServerMessage::Notice(msg) => {
       app_handle.emit_all("chat.notice", msg).unwrap();
     }
+    ServerMessage::Join(msg) => {
+      app_handle.emit_all("chat.joined", msg).unwrap();
+    }
+    ServerMessage::Part(msg) => {
+      app_handle.emit_all("chat.parted", msg).unwrap();
+    }
     msg => {
       println!("{:?}", msg);
     }

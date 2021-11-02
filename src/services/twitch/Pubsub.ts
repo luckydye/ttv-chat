@@ -1,5 +1,13 @@
 import Format from '../../Format';
-import { generateNonce } from '../../utils';
+
+export function generateNonce(length = 30) {
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    for (var i = 0; i < length; i++) {
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+    return text;
+}
 
 const reward_listeners: Set<Function> = new Set();
 const mod_action_listeners: Set<Function> = new Set();

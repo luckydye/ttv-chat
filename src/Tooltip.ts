@@ -1,5 +1,5 @@
 import PageOverlay from './components/PageOverlay';
-import LinkPreview from './LinkPreview';
+import LinkPreview from './components/LinkPreview';
 import './components/Loader';
 
 let lastTarget: EventTarget | null = null;

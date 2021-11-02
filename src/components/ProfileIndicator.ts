@@ -1,6 +1,6 @@
 import { css, html, LitElement } from 'lit-element';
 import { getUserInfo } from '../services/Twitch';
-import IRCChatClient from '../IRCChatClient';
+import IRCChatClient from '../services/IRCChatClient';
 import { Application } from '../App';
 
 export default class ProfileIndicator extends LitElement {

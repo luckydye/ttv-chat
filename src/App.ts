@@ -1,4 +1,4 @@
-import IRCChatClient from './IRCChatClient';
+import IRCChatClient from './services/IRCChatClient';
 
 let applicationState = {
     selectedRoom: localStorage.getItem('selected') || "@",
@@ -29,6 +29,7 @@ class CloseRoomEvent extends Event {
 let chatRooms = {};
 
 export class Application {
+    // TODO: get rid of this class
 
     static setChats(chatMap: object) {
         chatRooms = chatMap;

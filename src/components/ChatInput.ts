@@ -1,5 +1,5 @@
 import { css, html, LitElement } from 'lit-element';
-import IRCChatClient from '../IRCChatClient';
+import IRCChatClient from '../services/IRCChatClient';
 import { Application } from '../App';
 import EmotePicker from './EmotePicker';
 

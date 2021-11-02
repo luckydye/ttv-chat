@@ -7,7 +7,7 @@ import './components/Login';
 import './components/Profile';
 import './components/TwitchChat';
 import './Tooltip';
-import IRCChatClient from './IRCChatClient';
+import IRCChatClient from './services/IRCChatClient';
 import MessageParser, { EventMessage, UserMessage } from './MessageParser';
 import Format from './Format';
 import Badges from './services/Badges';

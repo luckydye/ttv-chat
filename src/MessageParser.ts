@@ -5,9 +5,9 @@ import Emotes from './services/Emotes';
 import TwitchEmotes from './services/emotes/TwitchEmotes';
 import { getLoggedInUsername } from './services/Twitch';
 import Webbrowser from './Webbrowser';
-import { limitColorContrast, rgbToHex } from './utils';
 import { Application } from './App';
 import TwitchAPI from './services/Twitch';
+import Color from './Color';
 
 const Default_EventMessage_Color = "rgb(12, 12, 12)";
 const ColorEventTypeMap = {
@@ -173,7 +173,7 @@ export default class MessageParser {
             }
         }
 
-        let color = rgbToHex(limitColorContrast(...message.color));
+        let color = Color.rgbToHex(Color.limitColorContrast(...message.color));
         let highlighted = message.tags['msg-id'] == "highlighted-message";
         let action = message.is_action;
         let timestamp = message.timestamp;

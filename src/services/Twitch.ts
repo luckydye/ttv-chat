@@ -1,6 +1,6 @@
 // import jwt from 'jsonwebtoken';
-import { parseSearch } from '../utils';
-import IRCChatClient from '../IRCChatClient';
+import Webbrowser from '../Webbrowser';
+import IRCChatClient from './IRCChatClient';
 import TwichCommands from './twitch/TwichCommands';
 import TwitchPubsub from './twitch/Pubsub';
 
@@ -153,7 +153,7 @@ export async function authClientUser() {
             console.log("win load event", win);
 
             const params = win.location.hash;
-            const parsed = parseSearch(params);
+            const parsed = Webbrowser.parseSearch(params);
 
             const access_token = parsed.access_token;
             handleAuthenticatedUser(access_token);
