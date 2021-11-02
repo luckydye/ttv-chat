@@ -6,6 +6,7 @@ import Webbrowser from '../Webbrowser';
 import Chat from './Chat';
 import ContextMenu from './ContextMenu';
 import Format from '../Format';
+import TwitchPubsub from '../services/twitch/Pubsub';
 // Components
 import './FluidInput';
 import './Timer';
@@ -28,28 +29,24 @@ export default class TwitchChat extends Chat {
 
     slowmode_time = 10;
     followermode_time = 10;
-    
+
     moderator = false;
     broadcaster = false;
 
-    appendMessage(...args) {
-        const line = super.appendMessage(...args);
-
-        if(!this.connect) {
-            line.style.opacity = "0.5";
-        }
-    }
-
-    setRoom(roomName: string) {
+    setRoom(roomName: string, channel_id: string) {
         super.setRoom(roomName);
 
-        if(!this.connect) {
+        this.channel_id = channel_id;
+
+        this.init();
+
+        if (!this.connect) {
             this.appendNote(`Connecting`);
         }
 
         const updateStatus = async () => {
             const stream = await TwitchAPI.getStreams(this.info.id);
-            if(stream[0]) {
+            if (stream[0]) {
 
                 const {
                     viewer_count,
@@ -86,66 +83,83 @@ export default class TwitchChat extends Chat {
         this.update();
     }
 
-    async updateChatterCount() {
-        return IRCChatClient.getUserlist(this.roomName).then(chatters => {
-            this.chatter_count = chatters.chatter_count;
-            this.update();
-        });
-    }
-
-    constructor() {
-        super();
-
+    init() {
         // update room info at interval
         const update_info = () => getUserInfo(this.roomName).then(info => {
-            this.setRoom(this.roomName);
+            this.setRoom(this.roomName, info.id);
             this.updateChatterCount();
             setTimeout(() => update_info(), 1000 * 60);
         });
         window.addEventListener('loggedin', e => {
             update_info();
         });
+    }
 
-        IRCChatClient.listen('chat.user', msg => {
-            if(msg.channel === this.roomName) {
+    constructor() {
+        super();
+
+        
+        IRCChatClient.listen('chat.user', (msg) => {
+            if (msg.channel === this.roomName) {
                 this.moderator = msg.badges.find(b => b.name == "moderator") !== undefined;
                 this.broadcaster = msg.badges.find(b => b.name == "broadcaster") !== undefined;
                 this.update();
 
-                if(this.moderator === true || this.broadcaster === true) {
+                if (this.moderator === true || this.broadcaster === true) {
                     this.setAttribute('modview', '');
                 } else {
                     this.removeAttribute('modview');
+                }
+
+                // PubSub for mod stuff
+                if (!this.mod_pubsub && (this.moderator || this.broadcaster)) {
+                    // mod events
+                    this.mod_pubsub = true;
+
+                    TwitchAPI.connectToPubSub().then(pubsub => {
+                        this.mod_pubsub = pubsub;
+
+                        const user_id = TwitchAPI.getCurrentUser().id;
+                        this.mod_pubsub.listen([
+                            `chat_moderator_actions.${user_id}.${this.channel_id}`,
+                            // `automod-queue.${user_id}.${this.channel_id}`
+                        ]);
+
+                        this.mod_pubsub.onModAction(data => {
+                            this.appendNote(data.message);
+                        });
+                    })
+
                 }
             }
         })
 
         IRCChatClient.listen('chat.state', msg => {
-            if(msg.channel_login == this.roomName) {
-                if(msg.r9k !== null) {
+            if (msg.channel_login == this.roomName) {
+                if (msg.r9k !== null) {
                     this.r9k = msg.r9k;
                 }
-                if(msg.subscribers_only !== null) {
+                if (msg.subscribers_only !== null) {
                     this.subscribers_only = msg.subscribers_only;
                 }
-                if(msg.emote_only !== null) {
+                if (msg.emote_only !== null) {
                     this.emote_only = msg.emote_only;
                 }
-                if(msg.follwers_only !== null) {
+                if (msg.follwers_only !== null) {
                     this.follwers_only = msg.follwers_only !== "Disabled" ? msg.follwers_only.Enabled.secs : 0;
-                    if(this.followermode_time === 0) {
+                    if (this.followermode_time === 0) {
                         this.followermode_time = this.follwers_only / 60;
                     }
                 }
-                if(msg.slow_mode !== null) {
+                if (msg.slow_mode !== null) {
                     this.slow_mode = msg.slow_mode.secs;
-                    if(this.slowmode_time === 0) {
+                    if (this.slowmode_time === 0) {
                         this.slowmode_time = this.slow_mode;
                     }
                 }
                 this.update();
 
-                if(!this.connect) {
+                if (!this.connect) {
                     this.appendNote(`Connected to ${this.roomName}`);
                     this.updateChatterCount();
 
@@ -154,6 +168,16 @@ export default class TwitchChat extends Chat {
             }
         });
     }
+
+    async updateChatterCount() {
+        return IRCChatClient.getUserlist(this.roomName).then(chatters => {
+            this.chatter_count = chatters.chatter_count;
+            this.update();
+        });
+    }
+
+    mod_pubsub: TwitchPubsub;
+    channel_id: string;
 
     static get styles() {
         return css`
@@ -447,6 +471,16 @@ export default class TwitchChat extends Chat {
             :host([modview]) .chat-channel-name {
                 display: none;
             }
+
+            .event-feed {
+                position: absolute;
+                top: 60px;
+                left: 10px;
+                outline: 1px solid white;
+                right: 10px;
+                height: 40px;
+                z-index: 1000;
+            }
         `;
     }
 
@@ -456,8 +490,8 @@ export default class TwitchChat extends Chat {
     }
 
     toggleSlowMode() {
-        if(this.moderator || this.broadcaster) {
-            if(this.slow_mode) {
+        if (this.moderator || this.broadcaster) {
+            if (this.slow_mode) {
                 IRCChatClient.sendMessage(this.roomName, "/slowoff");
             } else {
                 IRCChatClient.sendMessage(this.roomName, "/slow " + this.slowmode_time);
@@ -466,8 +500,8 @@ export default class TwitchChat extends Chat {
     }
 
     toggleFollowerMode() {
-        if(this.moderator || this.broadcaster) {
-            if(this.follwers_only) {
+        if (this.moderator || this.broadcaster) {
+            if (this.follwers_only) {
                 IRCChatClient.sendMessage(this.roomName, "/followersoff");
             } else {
                 IRCChatClient.sendMessage(this.roomName, "/followers " + this.followermode_time);
@@ -476,8 +510,8 @@ export default class TwitchChat extends Chat {
     }
 
     toggleEmoteOnlyMode() {
-        if(this.moderator || this.broadcaster) {
-            if(this.emote_only) {
+        if (this.moderator || this.broadcaster) {
+            if (this.emote_only) {
                 IRCChatClient.sendMessage(this.roomName, "/emoteonlyoff");
             } else {
                 IRCChatClient.sendMessage(this.roomName, "/emoteonly");
@@ -486,8 +520,8 @@ export default class TwitchChat extends Chat {
     }
 
     toggleSubOnlyMode() {
-        if(this.moderator || this.broadcaster) {
-            if(this.subscribers_only) {
+        if (this.moderator || this.broadcaster) {
+            if (this.subscribers_only) {
                 IRCChatClient.sendMessage(this.roomName, "/subscribersoff");
             } else {
                 IRCChatClient.sendMessage(this.roomName, "/subscribers");
@@ -496,8 +530,8 @@ export default class TwitchChat extends Chat {
     }
 
     toggleR9kMode() {
-        if(this.moderator || this.broadcaster) {
-            if(this.r9k) {
+        if (this.moderator || this.broadcaster) {
+            if (this.r9k) {
                 IRCChatClient.sendMessage(this.roomName, "/r9kbetaoff");
             } else {
                 IRCChatClient.sendMessage(this.roomName, "/r9kbeta");
@@ -542,15 +576,15 @@ export default class TwitchChat extends Chat {
                     <div>
                         <div class="chat-action">
                             <button title="Close chat" @click="${(e) => {
-                                Application.closeRoom(this.roomName);
-                            }}">
+                Application.closeRoom(this.roomName);
+            }}">
                                 <img src="./images/close.svg" width="16px" height="16px" />
                             </button>
                         </div>
                         <div class="chat-action">
                             <button class="user-list-button" title="Userlist" @click="${() => {
-                                this.openUserlist();
-                            }}">
+                this.openUserlist();
+            }}">
                                 <img src="./images/people.svg" width="16px" height="16px" />
                             </button>
                             <div class="user-list-preview" tabindex="0">
@@ -559,22 +593,22 @@ export default class TwitchChat extends Chat {
                         </div>
                         <div class="chat-action">
                             <button title="Open Stream" @click="${() => {
-                                Webbrowser.openInBrowwser(`https://www.twitch.tv/${this.roomName}`);
-                            }}">
+                Webbrowser.openInBrowwser(`https://www.twitch.tv/${this.roomName}`);
+            }}">
                                 <img src="./images/open.svg" width="16px" height="16px" />
                             </button>
                         </div>
                         <div class="chat-action">
                             <button title="Relaod Chat" @click="${() => {
-                                location.reload();
-                            }}">
+                location.reload();
+            }}">
                                 <img src="./images/refresh_white_24dp.svg" width="16px" height="16px" />
                             </button>
                         </div>
                     </div>
                     <div class="chat-channel-name" @click="${() => {
-                        Webbrowser.openInBrowwser(`https://www.twitch.tv/${this.roomName}`);
-                    }}">
+                Webbrowser.openInBrowwser(`https://www.twitch.tv/${this.roomName}`);
+            }}">
                         ${this.roomName}
                     </div>
                     <div class="chat-state-icons">
@@ -620,10 +654,13 @@ export default class TwitchChat extends Chat {
                     </div>
                 </div>
                 <div class="chat-title">
-                    ${this.stream_title == "" ? 
-                        (this.chatter_count > 0 ? `Offline - ${Format.number(this.chatter_count)} chatters` : "Offline") 
-                    : this.stream_title}
+                    ${this.stream_title == "" ?
+                (this.chatter_count > 0 ? `Offline - ${Format.number(this.chatter_count)} chatters` : "Offline")
+                : this.stream_title}
                 </div>
+            </div>
+            <div class="event-feed">
+                
             </div>
             <div class="scroll-to-bottom" @click="${() => this.lock()}">
                 <span>Scroll to the bottom</span>

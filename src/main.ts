@@ -20,17 +20,17 @@ import Focus from './Focus';
 const chatElements: { [key: string]: any } = {};
 
 let pubsub: TwitchPubsub;
+let pubsub_features: TwitchPubsub;
 
 async function createChat(channel: string) {
     chatElements[channel] = document.createElement("twitch-chat");
-    chatElements[channel].setRoom(channel);
 
     const info = await TwitchAPI.getUserInfo(channel);
     Application.setChannelDetails(channel, info);
     Badges.getChannelBadges(info.id);
     Emotes.getChannelEmotes(info.id);
 
-    IRCChatClient.joinChatRoom(channel.toLocaleLowerCase());
+    chatElements[channel].setRoom(channel, info.id);
 
     if (Application.getSelectedRoom() == channel) {
         renderSelecetdChat();
@@ -39,27 +39,34 @@ async function createChat(channel: string) {
     // public chat events
     // have to activly manage connections for the most recent selected chats or live chats actually
     pubsub.listen([
-        `community-points-channel-v1.${info.id}`
+        `community-points-channel-v1.${info.id}`,
+        `hype-train-events-v1.${info.id}`
+        
         // `predictions-channel-v1.${info.id}`
-        // `polls.${info.id}`
-        // `hype-train-events-v1.${info.id}`
-
         // `predictions-user-v1.${info.id}`
         // `raid.${info.id}`
     ]);
 
-    // mod events
-    // pubsub.listen([
-    //     `chat_moderator_actions.${user_id}.${info.id}`,
-    //     `automod-queue.${user_id}.${info.id}`
-    // ]);
+    pubsub_features.listen([
+        `polls.${info.id}`,
+    ]);
 
     pubsub.onRedemtion(data => {
         if (data.channel_id == info.id) {
-            // sort this by timestamp into the existing messages
             chatElements[channel].appendNote(html`${data.user_name} redeemed ${data.title} for ${data.cost} <img src="${data.image_url}" height="18px" width="18px"/>`);
         }
     })
+
+    pubsub.onHypeTrain(data => {
+        if (data.channel_id == info.id) {
+            const detla = Math.floor(data.started_at - data.expires_at / 1000);
+            chatElements[channel].appendNote(`Hypetrain! Level ${data.level}. ${Format.seconds(detla)} left.`);
+        }
+    })
+
+    setTimeout(() => {
+        IRCChatClient.joinChatRoom(channel);
+    }, 1000);
 }
 
 function renderSelecetdChat() {
@@ -89,6 +96,14 @@ function renderSelecetdChat() {
 async function main() {
 
     await Application.init();
+
+    pubsub = await TwitchAPI.connectToPubSub();
+    pubsub_features = await TwitchAPI.connectToPubSub();
+
+    // create chats
+    for (let channel of Application.getRooms()) {
+        createChat(channel);
+    }
 
     // custom mentions channel
     chatElements["@"] = document.createElement("sample-chat");
@@ -201,12 +216,6 @@ async function main() {
     //
     // IRC shit END
     //
-
-    pubsub = await TwitchAPI.connectToPubSub();
-
-    for (let channel of Application.getRooms()) {
-        createChat(channel);
-    }
 
     setTimeout(() => {
         pubsub.loadRedemtionHistory()

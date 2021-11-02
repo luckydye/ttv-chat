@@ -75,7 +75,7 @@ export default class IRCChatClient {
                 if(message[0] !== "/") {
                     // loop message back to display in chat if its not a command
                     if(!this.usermap[channel]) {
-                        throw new Error('User not listed');
+                        console.error('User not listed');
                     }
                     const user = this.usermap[channel];
                     const message_data: UserMessage = {
