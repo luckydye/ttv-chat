@@ -15,7 +15,7 @@ let currentAnimation: number = -1;
 export default class AnimatedScroll {
 
     static scrollTo(target: number, root: HTMLElement) {
-        clearTimeout(currentAnimation);
+        cancelAnimationFrame(currentAnimation);
 
         if(target > 0) {
             const maxScrollHeight = root.scrollHeight - root.clientHeight;
@@ -44,7 +44,7 @@ export default class AnimatedScroll {
             root.scrollTo(0, current);
 
             if(Math.abs(target - current) > 2) {
-                currentAnimation = setTimeout(loop, 1000 / 60);
+                currentAnimation = requestAnimationFrame(loop);
             }
         }
         loop();

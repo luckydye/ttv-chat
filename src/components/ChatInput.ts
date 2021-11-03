@@ -91,14 +91,17 @@ export default class ChatInput extends LitElement {
         EmotePicker.openOn(e.target, 'up');
     }
 
-    insert(emote: string) {
+    insert(str: string) {
         const ele = this.getInputElement();
         const index = this.getCursorPosition();
-        const part1 = ele.innerHTML.slice(0, index);
-        const part2 = ele.innerHTML.slice(index);
+        const part1 = ele.innerText.slice(0, index);
+        const part2 = ele.innerText.slice(index);
 
-        const newValue = [part1, emote, part2].join(" ");
-        ele.value = newValue;
+        const newValue = [part1, str, part2].join(" ");
+        this.value = newValue;
+
+        ele.focus();
+        this.setCursorPosition(1);
     }
 
     focus() {
