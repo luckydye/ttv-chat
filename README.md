@@ -40,11 +40,11 @@ Next goal: Beta Release
 - [x] fix the scrolling when switching channels
 - [x] bookmark line
 - [x] show point redemtions in chat !important
+- [x] make the profile ring red on a mention
 - [ ] Fix room drag n drop
 - [ ] finish Emote Picker
 - [ ] Chat commands and names sugestions
 - [ ] update title and game via websocket, not interval
-- [ ] make the profile ring red on a mention
 - [ ] implement dialog for one-click timeout, to prevent missclicks
 
 ## To be included features (TODOs):
@@ -62,7 +62,6 @@ Next goal: Beta Release
 - [x] Auth flow
 - [x] follower mode + mode dropdown
 - [x] (MessageParser) seperate out the message log part of the chat for seperate mention and whisper tab wihtout, chat-input, bio and room state stuff
-- [ ] Fix dragging rooms
 - [ ] Notifications
 - [ ] Reccomend channels from follow list
 - [ ] Cache chatroom profile pictures for faster loading time and also will just look faster without actually beeing faster
@@ -71,6 +70,7 @@ Next goal: Beta Release
 #### Visibility panel
 - [ ] Show/Hide delted messages
 - [ ] adjustable chat font size
+- [ ] Hide emtoes by service
 - [ ] Streamer features
     - Hide names
     - Hide badges
