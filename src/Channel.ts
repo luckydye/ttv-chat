@@ -8,6 +8,7 @@ import MessageParser, { ChatMessage, EventMessage, UserMessage, ChatInfoMessage 
 import TwitchChat from './components/TwitchChat';
 import ChannelStateChanged from './events/ChannelStateChanged';
 import ChannelInfoChanged from './events/ChannelInfoChanged';
+import ChatMessageEvent from './events/ChatMessage';
 import Badges from './services/Badges';
 import Emotes from './services/Emotes';
 
@@ -266,6 +267,7 @@ export default class Channel {
                     mentionChannel.chat.appendMessage(message);
                 }
                 this.chat.appendMessage(message);
+                window.dispatchEvent(new ChatMessageEvent(msg.channel, message));
             }
         });
 

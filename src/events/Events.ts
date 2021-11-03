@@ -5,6 +5,7 @@ export default {
     ChannelSelected: "app-channel-selected",
     ChannelInfoChanged: "app-channel-changed",
     ChannelStateChanged: "app-channel-state-changed",
+    ChatMessageEvent: "app-chat-message",
     Login: "app-login",
     Logout: "app-logout",
     Initialize: "app-initialize",

@@ -8,6 +8,7 @@ export default class ProfileIndicator extends LitElement {
 
     live = false;
     new_message = false;
+    tagged = false;
     channel: string;
 
     profile_image_url: string | undefined;
@@ -20,31 +21,45 @@ export default class ProfileIndicator extends LitElement {
 
     attributeChangedCallback(name: string, oldVal: string, newVal: string) {
         super.attributeChangedCallback(name, oldVal, newVal);
-        
-        if(name === "channel" && this.channel) {
+
+        if (name === "channel" && this.channel) {
             // check if there are new unread messages
             IRC.listen(IRCEvents.ChatMessage, (msg: UserMessage) => {
-                if(msg.channel === this.channel && Application.getSelectedChannel() !== this.channel &&
+                if (msg.channel === this.channel && Application.getSelectedChannel() !== this.channel &&
                     Application.getChannel(this.channel)?.chat_connected) {
                     this.new_message = true;
                     this.update();
                 }
             });
 
+            on(Events.ChatMessageEvent, e => {
+                if (e.data.channel === this.channel && Application.getSelectedChannel() !== this.channel &&
+                    Application.getChannel(this.channel)?.chat_connected) {
+                    this.new_message = true;
+
+                    if(e.data.message.tagged) {
+                        this.tagged = true;
+                    }
+
+                    this.update();
+                }
+            });
+
             on(Events.ChannelSelected, e => {
-                if(e.data.channel === this.channel) {
+                if (e.data.channel === this.channel) {
                     this.new_message = false;
+                    this.tagged = false;
                     this.update();
                 }
             });
 
             on(Events.ChannelInfoChanged, async e => {
                 const channel = e.data.channel;
-                if(channel.channel_login === this.channel) {
+                if (channel.channel_login === this.channel) {
 
                     this.live = channel.is_live;
                     this.profile_image_url = channel.profile_image_url;
-        
+
                     this.update();
                 }
             });
@@ -93,6 +108,9 @@ export default class ProfileIndicator extends LitElement {
                 border: 1px solid white;
                 opacity: 0.5;
             }
+            .profile-icon[tagged]::before {
+                border-color: hsl(0deg 97% 60%);
+            }
             .profile-icon .image {
                 overflow: hidden;
                 border-radius: 50%;
@@ -113,7 +131,7 @@ export default class ProfileIndicator extends LitElement {
 
     render() {
         return html`
-            <div class="profile-icon" ?live="${this.live}" ?newmessage="${this.new_message}">
+            <div class="profile-icon" ?live="${this.live}" ?tagged="${this.tagged}" ?newmessage="${this.new_message}">
                 <div class="image">
                     <img ?empty="${!this.profile_image_url}" width="24px" src="${this.profile_image_url || ''}" alt="${this.channel}" />
                 </div>
