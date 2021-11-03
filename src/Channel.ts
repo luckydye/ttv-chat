@@ -6,7 +6,28 @@ import Account from './Account';
 import Focus from './Focus';
 import MessageParser, { ChatMessage, EventMessage, UserMessage, ChatInfoMessage } from './MessageParser';
 import TwitchChat from './components/TwitchChat';
+import ChannelStateChanged from './events/ChannelStateChanged';
 import ChannelInfoChanged from './events/ChannelInfoChanged';
+
+// some chat structs
+interface ClearChatAction {
+    UserBanned: {
+        user_login: string,
+        user_id: string,
+    },
+    UserTimedOut: {
+        user_login: string,
+        user_id: string,
+        timeout_length: number,
+    }
+}
+
+interface ClearChatMessage {
+    channel_login: string,
+    channel_id: string,
+    action: ClearChatAction,
+    server_timestamp: Date,
+}
 
 
 export default class Channel {
@@ -164,7 +185,7 @@ export default class Channel {
         });
         IRC.listen(IRCEvents.Parted, (msg: PartMessage) => {
             const acc = Application.getCurrentAccount();
-            if (msg.channel_login == this.channel_login) {
+            if (msg.channel_login == this.channel_login && msg.user_login == acc.user_login) {
                 this.onPart(msg);
             }
         });
@@ -197,6 +218,8 @@ export default class Channel {
 
                 }
             }
+
+            window.dispatchEvent(new ChannelStateChanged(this));
         })
         IRC.listen(IRCEvents.ChatState, msg => {
             if (msg.channel_login == this.channel_login) {
@@ -222,31 +245,30 @@ export default class Channel {
                     }
                 }
             }
+
+            window.dispatchEvent(new ChannelStateChanged(this));
         });
 
         //
         // IRC shit
         // move this into the chat element
         //   or maybe move all of this irc logic out of the chat *Element* and put it somwhere else?
-        IRC.listen('chat.message', async (msg: UserMessage) => {
+        IRC.listen(IRCEvents.ChatMessage, async (msg: UserMessage) => {
             if(this.channel_login !== msg.channel) return;
 
-            const chat = this.chat;
-            const chatMessages = this.messageParser.parse(msg);
+            const chatMessages: Array<ChatMessage | ChatInfoMessage> = this.messageParser.parse(msg);
 
-            if (chat) {
-                for (let msg of chatMessages) {
-                    if (msg.tagged) {
-                        const mentionChat = Application.getChats("@");
-                        mentionChat.appendMessage(msg);
-                    }
-
-                    chat.appendMessage(msg);
+            for (let message of chatMessages) {
+                if (message.tagged) {
+                    // TODO: send mention to @ channel
+                    // const mentionChat = Application.getChats("@");
+                    // mentionChat.appendMessage(message);
                 }
+                this.chat.appendMessage(message);
             }
         });
 
-        IRC.listen('chat.info', (msg: EventMessage) => {
+        IRC.listen(IRCEvents.ChatInfo, (msg: EventMessage) => {
             if(this.channel_login !== msg.channel) return;
 
             const chatMessages = this.messageParser.parse(msg);
@@ -259,8 +281,9 @@ export default class Channel {
                     case "message":
                         msg.highlighted = true;
                         if (msg.tagged) {
-                            const mentionChat = Application.getChats("@");
-                            mentionChat.appendMessage(msg);
+                            // TODO: send mention to @ channel
+                            // const mentionChat = Application.getChats("@");
+                            // mentionChat.appendMessage(msg);
                         }
                         this.chat.appendMessage(msg);
                         break;
@@ -270,45 +293,24 @@ export default class Channel {
 
         IRC.listen(IRCEvents.ChatNote, (msg) => {
             if(this.channel_login !== msg.channel_login) return;
-
             this.chat.appendNote(msg.message_text);
         });
 
-        interface ClearChatAction {
-            UserBanned: {
-                user_login: string,
-                user_id: string,
-            },
-            UserTimedOut: {
-                user_login: string,
-                user_id: string,
-                timeout_length: number,
-            }
-        }
-
-        interface ClearChatMessage {
-            channel_login: string,
-            channel_id: string,
-            action: ClearChatAction,
-            server_timestamp: Date,
-        }
-
         IRC.listen(IRCEvents.ChatClear, (msg: ClearChatMessage) => {
             if (this.channel_login === msg.channel_login) {
-                const chat = this.chat;
                 const action = msg.action.UserBanned || msg.action.UserTimedOut;
-                const lines = chat.querySelectorAll(`[userid="${action.user_id}"]`);
+                const lines = this.chat.querySelectorAll(`[userid="${action.user_id}"]`);
                 for (let line of [...lines]) {
                     line.setAttribute("deleted", "");
                 }
 
                 if (msg.action.UserBanned) {
                     // got banned
-                    chat.appendNote(`${action.user_login} got banned.`);
+                    this.chat.appendNote(`${action.user_login} got banned.`);
                 }
                 if (msg.action.UserTimedOut) {
                     // got timed out for xs
-                    chat.appendNote(`${action.user_login} got timed out for ${Format.seconds(action.timeout_length.secs)}.`);
+                    this.chat.appendNote(`${action.user_login} got timed out for ${Format.seconds(action.timeout_length.secs)}.`);
                 }
             }
         });
@@ -372,23 +374,22 @@ export default class Channel {
         }
     }
 
-    getMessageById(channel:string, message_id: string) {
+    getMessageById(message_id: string) {
         const channels = Application.getChannels();
         for(let channel of channels) {
             const ch = Application.getChannel(channel);
             if(ch) {
                 const chat = ch.chat;
                 const msg = chat.querySelector(`[messageid="${message_id}"]`);
-
-                console.log(msg);
-                
-                return msg ? msg.message : undefined;
+                if(msg) {
+                    return msg ? msg.querySelector('.message').innerText : undefined;
+                }
             }
         }
     }
 
     reply(channel: string, message: ChatMessage) {
-        Application.selectRoom(channel);
+        Application.selectChannel(channel);
         const input = document.querySelector('chat-input');
         input.insert(message.user_name + ', ');
         input.focus();

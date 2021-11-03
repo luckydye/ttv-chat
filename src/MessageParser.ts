@@ -293,7 +293,7 @@ export default class MessageParser {
         let line_title = reward_id ? `Redeemed ${redemtion_title}.` : null;
 
         if(isReply) {
-            const parent_message = this.channel.getMessageById(message.channel, message.tags['reply-parent-msg-id']);
+            const parent_message = this.channel.getMessageById(message.tags['reply-parent-msg-id']);
             if(parent_message) {
                 line_title = `${parent_message.user_name}: ${parent_message.text}`;
             }
@@ -318,7 +318,7 @@ export default class MessageParser {
                         return html`<img class="badge" alt="${badge.name}" src="${badge_url}" width="18" height="18">`;
                     })}
                 </span>
-                <span class="username" @click="${() => this.channel.openUserCard(message.channel, message.user_name)}">${message.user_name}:</span>
+                <span class="username" @click="${() => this.channel.openUserCard(message.user_name)}">${message.user_name}:</span>
                 ${isReply && false ? html`
                     <button class="reply-icon" title="Reply">
                         <img src="./images/question_answer_white_24dp.svg" height="18px" width="18px" />

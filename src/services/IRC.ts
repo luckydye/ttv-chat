@@ -88,7 +88,7 @@ export default class IRC {
 
     static async sendMessage(channel_login: string, channel_id: string, message: string) {
         return invoke('chat_send_message', {
-            channel_login,
+            channel: channel_login,
             message,
         })
             .then(e => {

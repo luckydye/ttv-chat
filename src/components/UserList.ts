@@ -56,6 +56,7 @@ export default class ChatUserList extends LitElement {
             :host {
                 display: block;
                 animation: userlist-slidein .2s ease;
+                z-index: 10000000;
             }
             .list,
             .preview {

@@ -4,6 +4,7 @@ export default {
     ChannelRemoved: "app-channel-removed",
     ChannelSelected: "app-channel-selected",
     ChannelInfoChanged: "app-channel-changed",
+    ChannelStateChanged: "app-channel-state-changed",
     Login: "app-login",
     Logout: "app-logout",
     Initialize: "app-initialize",

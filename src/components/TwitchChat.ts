@@ -238,6 +238,20 @@ export default class TwitchChat extends Chat {
                 this.update();
             }
         });
+
+        on(Events.ChannelStateChanged, async e => {
+            const channel = e.data.channel;
+            if(channel.channel_login === this.channel) {
+                this.update();
+
+                if(channel.moderator || channel.broadcaster) {
+                    this.setAttribute('modview', '');
+                } else {
+                    this.removeAttribute('modview');
+                }
+            }
+
+        });
     }
 
     render() {
@@ -286,7 +300,7 @@ export default class TwitchChat extends Chat {
                     </div>
                     <div class="chat-state-icons">
                         <div class="chat-action">
-                            <div class="room-state-icon" title="Slow mode for ${channel.slow_mode}s" ?active="${channel.slow_mode !== 0}" @click="${channel.toggleSlowMode}">
+                            <div class="room-state-icon" title="Slow mode for ${channel.slow_mode}s" ?active="${channel.slow_mode !== 0}" @click="${channel.toggleSlowMode.bind(channel)}">
                                 <img src="./images/slowmode.svg" width="18px" height="18px"/>
                             </div>
                             <div class="room-state-icon action-expand" title="Slowmode time" @click="${this.openSlowModeSettins}">
@@ -294,7 +308,7 @@ export default class TwitchChat extends Chat {
                             </div>
                         </div>
                         <div class="chat-action">
-                            <div class="room-state-icon" title="Follow mode for ${channel.follwers_only}s" ?active="${channel.follwers_only !== 0}" @click="${channel.toggleFollowerMode}">
+                            <div class="room-state-icon" title="Follow mode for ${channel.follwers_only}s" ?active="${channel.follwers_only !== 0}" @click="${channel.toggleFollowerMode.bind(channel)}">
                                 <img src="./images/follower.svg" width="18px" height="18px"/>
                             </div>
                             <div class="room-state-icon action-expand" title="Follower time" @click="${this.openFollowerModeSettings}">
@@ -302,17 +316,17 @@ export default class TwitchChat extends Chat {
                             </div>
                         </div>
                         <div class="chat-action">
-                            <div class="room-state-icon" title="Emote only mode" ?active="${channel.emote_only}" @click="${channel.toggleEmoteOnlyMode}">
+                            <div class="room-state-icon" title="Emote only mode" ?active="${channel.emote_only}" @click="${channel.toggleEmoteOnlyMode.bind(channel)}">
                                 <img src="./images/emote.svg" width="18px" height="18px"/>
                             </div>
                         </div>
                         <div class="chat-action">
-                            <div class="room-state-icon" title="Sub only mode" ?active="${channel.subscribers_only}" @click="${channel.toggleSubOnlyMode}">
+                            <div class="room-state-icon" title="Sub only mode" ?active="${channel.subscribers_only}" @click="${channel.toggleSubOnlyMode.bind(channel)}">
                                 <img src="./images/subscriber.svg" width="18px" height="18px"/>
                             </div>
                         </div>
                         <div class="chat-action">
-                            <div class="room-state-icon" title="r9k mode" ?active="${channel.r9k}" @click="${channel.toggleR9kMode}">r9k</div>
+                            <div class="room-state-icon" title="r9k mode" ?active="${channel.r9k}" @click="${channel.toggleR9kMode.bind(channel)}">r9k</div>
                         </div>
                         <div class="chat-action">
                             <div class="user-state-icon" title="Moderator" ?active="${channel.moderator}">
