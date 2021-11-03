@@ -172,6 +172,7 @@ export default class TwitchChat extends Chat {
                 color: #ababab;
                 display: flex;
                 flex-wrap: wrap;
+                background: linear-gradient(180deg, rgb(0 0 0 / 15%), transparent);
             }
 
             .chat-title > div {
@@ -195,7 +196,7 @@ export default class TwitchChat extends Chat {
                 margin-bottom: 4px;
                 font-size: 12px;
                 color: #cbcbcb;
-                box-shadow: 1px 2px 8px #0000007a;
+                box-shadow: 1px 2px 8px #00000049;
             }
 
             .tag img {
@@ -206,6 +207,9 @@ export default class TwitchChat extends Chat {
                 width: 100%;
                 font-weight: 500;
                 font-size: 13px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
         `;
     }
@@ -404,7 +408,7 @@ export default class TwitchChat extends Chat {
                     ` : ""}
 
                 ` : html`
-                    <div class="tag title-tag" title="Title">${this.stream_title}</div>
+                    <div class="tag title-tag" title="${this.stream_title}">${this.stream_title}</div>
                     <div class="tag" title="Uptime">Live - <stream-timer starttime="${this.stream_start}"></stream-timer></div>
                     <div class="tag" title="Game">
                         <img src="./images/Game.svg" width="16px"/> 

@@ -11,6 +11,7 @@ import ChannelInfoChanged from './events/ChannelInfoChanged';
 import ChatMessageEvent from './events/ChatMessage';
 import Badges from './services/Badges';
 import Emotes from './services/Emotes';
+import Format from './Format';
 
 let pubsub;
 let pubsub_features;
