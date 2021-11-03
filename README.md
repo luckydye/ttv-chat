@@ -46,6 +46,7 @@ Next goal: Beta Release
 - [ ] Chat commands and names sugestions
 - [ ] update title and game via websocket, not interval
 - [ ] implement dialog for one-click timeout, to prevent missclicks
+- [ ] Edit stream information like title and game
 
 ## To be included features (TODOs):
 - [x] sub mode toggle
