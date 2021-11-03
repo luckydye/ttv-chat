@@ -4,6 +4,7 @@ import Webbrowser from '../Webbrowser';
 import Chat from './Chat';
 import ContextMenu from './ContextMenu';
 import Format from '../Format';
+import Events, { on } from '../events/Events';
 // Components
 import './FluidInput';
 import './Timer';
@@ -13,8 +14,9 @@ export default class TwitchChat extends Chat {
 
     channel: string | undefined;
 
-    slowmode_time = 10;
-    followermode_time = 10;
+    stream_title: any;
+
+    bio: any;
 
     static get styles() {
         return css`
@@ -174,31 +176,33 @@ export default class TwitchChat extends Chat {
     }
 
     openSlowModeSettins(e) {
+        const channel = Application.getChannel(this.channel);
         const menu = ContextMenu.openOn(e.target, 'down');
         const input = document.createElement('fluid-input');
-        input.value = this.slowmode_time;
+        input.value = channel?.slowmode_time;
         input.steps = "1";
         input.min = 1;
         input.max = 600;
         input.suffix = "sec";
         input.style.width = "100px";
         input.addEventListener('change', e => {
-            this.slowmode_time = input.value;
+            channel.slowmode_time = input.value;
         })
         menu.append(input);
     }
 
     openFollowerModeSettings(e) {
+        const channel = Application.getChannel(this.channel);
         const menu = ContextMenu.openOn(e.target, 'down');
         const input = document.createElement('fluid-input');
-        input.value = this.followermode_time;
+        input.value = channel.followermode_time;
         input.steps = "1";
         input.min = 1;
         input.max = 600;
         input.suffix = "min";
         input.style.width = "100px";
         input.addEventListener('change', e => {
-            this.followermode_time = input.value;
+            channel.followermode_time = input.value;
         })
         menu.append(input);
     }
@@ -207,13 +211,42 @@ export default class TwitchChat extends Chat {
         this.channel = channel_login;
     }
 
+    setTitle({
+        viewer_count = 0,
+        started_at = 0,
+        game_name = "",
+        title = ""
+    } = {}) {
+        this.stream_title = html`
+            <div title="${title}">
+                ${Format.number(viewer_count)} - <stream-timer starttime="${started_at}"></stream-timer> - ${game_name} - ${title}
+            </div>
+        `;
+    }
+
+    setBio(bio_data: any) {
+        this.bio = bio_data;
+        this.update();
+    }
+    
+    constructor() {
+        super();
+
+        on(Events.ChannelInfoChanged, async e => {
+            const channel = e.data.channel;
+            if(channel.channel_login === this.channel) {
+                this.update();
+            }
+        });
+    }
+
     render() {
-        if(!this.channel) {
+        if (!this.channel) {
             return html``;
         }
         const channel = Application.getChannel(this.channel);
 
-        if(!channel) {
+        if (!channel) {
             return html``;
         }
 
@@ -247,8 +280,8 @@ export default class TwitchChat extends Chat {
                         </div>
                     </div>
                     <div class="chat-channel-name" @click="${() => {
-                                Webbrowser.openInBrowwser(`https://www.twitch.tv/${channel.channel_login}`);
-                            }}">
+                        Webbrowser.openInBrowwser(`https://www.twitch.tv/${channel.channel_login}`);
+                    }}">
                         ${channel.channel_login}
                     </div>
                     <div class="chat-state-icons">
@@ -294,9 +327,9 @@ export default class TwitchChat extends Chat {
                     </div>
                 </div>
                 <div class="chat-title">
-                    ${channel.stream_title == "" ?
-                    (channel.chatter_count > 0 ? `Offline - ${Format.number(channel.chatter_count)} chatters` : "Offline")
-                    : channel.stream_title}
+                    ${!this.stream_title ?
+                        (channel.chatter_count > 0 ? `Offline - ${Format.number(channel.chatter_count)} chatters` : "Offline")
+                    : this.stream_title}
                 </div>
             </div>
             <div class="event-feed">
@@ -306,37 +339,35 @@ export default class TwitchChat extends Chat {
                 <span>Scroll to the bottom</span>
             </div>
             <div class="lines">
-                ${channel.channel_login ? html`
-                    ${channel.info ? html`
-                        <div class="bio">
-                            <div class="profile-image">
-                                <img src="${channel.info.profile_image_url}" width="125px" />
-                            </div>
-                            <div class="pin">
-                                <div class="profile-name">
-                                    ${channel.info.display_name}
-                                    ${channel.info.broadcaster_type == "partner" ? html`
-                                        <img src="./images/verified.svg" alt="verified"/>
-                                    ` : ""}
-                                </div>
-                                <div class="game">
-                                    ${channel.info.channel_info ? channel.info.channel_info.game_name : "-"}
-                                </div>
-                                <div class="language">
-                                    ${channel.info.channel_info ? Format.lang(channel.info.channel_info.broadcaster_language) : "-"}
-                                </div>
-                                <div class="viewcount">
-                                    ${Format.number(channel.info.view_count)} views
-                                </div>
-                            </div>
-                            ${channel.info.description == "" ? "" : html`
-                                <div class="profile-desc">
-                                    ${channel.info.description}
-                                </div>
-                            `}
+                ${this.bio ? html`
+                    <div class="bio">
+                        <div class="profile-image">
+                            <img src="${channel.profile_image_url || ''}" width="125px" />
                         </div>
-                    ` : ""}
-                `: ""}
+                        <div class="pin">
+                            <div class="profile-name">
+                                ${this.bio.broadcaster_name}
+                                ${this.bio.broadcaster_type == "partner" ? html`
+                                    <img src="./images/verified.svg" alt="verified"/>
+                                ` : ""}
+                            </div>
+                            <div class="game">
+                                ${this.bio.game_name}
+                            </div>
+                            <div class="language">
+                                ${Format.lang(this.bio.broadcaster_language)}
+                            </div>
+                            <div class="viewcount">
+                                ${Format.number(channel.channel_view_count)} views
+                            </div>
+                        </div>
+                        ${channel.channel_description == "" ? "" : html`
+                            <div class="profile-desc">
+                                ${channel.channel_description}
+                            </div>
+                        `}
+                    </div>
+                ` : ""}
                 <slot></slot>
             </div>
         `;

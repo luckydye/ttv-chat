@@ -3,6 +3,7 @@ export default {
     ChannelMoved: "app-channel-moved",
     ChannelRemoved: "app-channel-removed",
     ChannelSelected: "app-channel-selected",
+    ChannelInfoChanged: "app-channel-changed",
     Login: "app-login",
     Logout: "app-logout",
     Initialize: "app-initialize",

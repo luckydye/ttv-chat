@@ -1,18 +1,26 @@
 import IRC, { IRCEvents, JoinMessage, PartMessage } from './services/IRC';
 import TwitchPubsub from './services/twitch/Pubsub';
-import TwitchAPI, { UserInfo } from './services/twitch/Api';
+import TwitchApi, { UserInfo } from './services/twitch/Api';
 import Application from './App';
 import Account from './Account';
 import Focus from './Focus';
 import MessageParser, { ChatMessage, EventMessage, UserMessage, ChatInfoMessage } from './MessageParser';
+import TwitchChat from './components/TwitchChat';
+import ChannelInfoChanged from './events/ChannelInfoChanged';
 
 
 export default class Channel {
 
     // contains all the per channel logic like message handling n stuff
 
+    messageParser: MessageParser;
+
     channel_login: string;
-    channel_id: string | undefined;
+    channel_id: string;
+    profile_image_url: string | undefined;
+    is_live: boolean = false;
+    channel_description: string = "";
+
     chat_connected: boolean = false;
 
     r9k = false;
@@ -21,6 +29,10 @@ export default class Channel {
     follwers_only = 0;
     slow_mode = 0;
     chatter_count = 0;
+    channel_view_count: number = 0;
+
+    slowmode_time = 10;
+    followermode_time = 10;
 
     moderator = false;
     broadcaster = false;
@@ -28,16 +40,13 @@ export default class Channel {
     mod_pubsub: TwitchPubsub;
     account: Account;
 
-    stream_title: string;
-    info: any;
-
-    chat;
+    chat: TwitchChat;
 
     constructor(channel_name: string) {
         this.channel_login = channel_name;
+        this.messageParser = new MessageParser(this);
 
-        this.chat = document.createElement('twitch-chat');
-
+        this.chat = document.createElement('twitch-chat') as TwitchChat;
         this.chat.setRoom(this.channel_login);
 
         this.joinIRC();
@@ -46,8 +55,11 @@ export default class Channel {
         // and gather information about the channel in parallel
 
 
-        // pubsub = await TwitchAPI.connectToPubSub();
-        // pubsub_features = await TwitchAPI.connectToPubSub();
+        // pubsub = await TwitchApi.connectToPubSub();
+        // pubsub_features = await TwitchApi.connectToPubSub();
+        // setTimeout(() => {
+        //     pubsub.loadRedemtionHistory()
+        // }, 500);
 
         // bookmark placements
         Focus.onBlur(() => {
@@ -61,63 +73,84 @@ export default class Channel {
             }
         });
 
-        return this;
+        // get all the info out of the twitch api
+        this.getChannelInfo().then(info => {
+            if(!info) return;
 
-        // custom mentions channel
-        chatElements["@"] = document.createElement("sample-chat");
-        chatElements["@"].setRoom("Mentions");
+            this.channel_id = info.id;
+            this.profile_image_url = info.profile_image_url;
+            this.channel_view_count = info.view_count;
+            this.channel_description = info.description;
 
-        Application.setChats(chatElements);
+            this.fetchChannelStatus();
+            this.fetchChannelBio().then(bio => {
+                this.chat.setBio(bio);
+            })
 
-        window.addEventListener('closeroom', e => {
-            IRC.partChatRoom(e.room_name);
-            delete chatElements[e.room_name];
+            setInterval(() => {
+                this.fetchChannelStatus();
+            }, 1000 * 30);
+        })
+    }
+
+    async fetchChannelBio() {
+        return TwitchApi.getChannel(this.channel_id).then((channel) => {
+            return channel[0];
+        });
+    }
+
+    async fetchChannelStatus() {
+        if(!this.channel_id) throw new Error('requested channel status without id.');
+        // Stream
+        const stream = await TwitchApi.getStreams(this.channel_id);
+
+        if (stream[0]) {
+            this.is_live = true;
+
+            // const {
+            //     viewer_count,
+            //     started_at,
+            //     game_name,
+            //     title
+            // } = stream[0];
+
+            this.chat.setTitle(stream[0]);
+        } else {
+            this.is_live = false;
+        }
+
+        await IRC.getUserlist(this.channel_login).then(chatters => {
+            this.chatter_count = chatters.chatter_count;
         });
 
-        setTimeout(() => {
-            pubsub.loadRedemtionHistory()
-        }, 500);
+        window.dispatchEvent(new ChannelInfoChanged(this));
     }
 
     async getChannelInfo(): Promise<UserInfo | undefined> {
         if (this.channel_login) {
-            return TwitchAPI.getUserInfo(this.channel_login).then(info => {
-                if (info) {
-                    return info;
-                } else {
-                    return undefined;
-                }
+            return TwitchApi.getUserInfo(this.channel_login).then(info => {
+                return info;
             })
         }
         return undefined;
     }
 
-    async getProfileImage(): Promise<string> {
-        if (this.channel_login) {
-            return this.getChannelInfo().then(info => {
-                if (info) {
-                    this.channel_id = info.id;
-                    return info.profile_image_url;
-                } else {
-                    return "";
-                }
-            })
-        }
-        return "";
-    }
-
     async getStream() {
         if (this.channel_id) {
-            return (await TwitchAPI.getStreams(this.channel_id))[0];
+            return (await TwitchApi.getStreams(this.channel_id))[0];
         }
     }
 
-    onJoin() {
-        // put connected in the chat
+    onJoin(msg: JoinMessage) {
+        console.log("Joined ", msg.channel_login);
+        this.chat_connected = true;
+        this.chat.appendNote("Connected to " + msg.channel_login);
     }
 
-    onPart() {
-        // put disconnected in the chat
+    onPart(msg: PartMessage) {
+        console.log("Parted ", msg.channel_login);
+        this.chat_connected = false;
+        this.chat.appendNote("Disconnected from " + msg.channel_login);
     }
 
     joinIRC() {
@@ -126,19 +159,13 @@ export default class Channel {
         IRC.listen(IRCEvents.Joined, (msg: JoinMessage) => {
             const acc = Application.getCurrentAccount();
             if (msg.channel_login == this.channel_login && msg.user_login == acc.user_login) {
-                console.log("Joined ", this.channel_login);
-                this.chat_connected = true;
-                this.chat.appendNote("Connected to " + msg.channel_login);
-                this.onJoin();
+                this.onJoin(msg);
             }
         });
         IRC.listen(IRCEvents.Parted, (msg: PartMessage) => {
             const acc = Application.getCurrentAccount();
             if (msg.channel_login == this.channel_login) {
-                console.log("Parted ", this.channel_login && msg.user_login == acc.user_login);
-                this.chat_connected = false;
-                this.chat.appendNote("Disconnected from " + msg.channel_login);
-                this.onPart();
+                this.onPart(msg);
             }
         });
         IRC.listen(IRCEvents.UserState, (msg) => {
@@ -153,11 +180,11 @@ export default class Channel {
                     // set it to ture so this code doesnt execute multiple times
                     this.mod_pubsub = true;
 
-                    TwitchAPI.connectToPubSub().then(pubsub => {
+                    TwitchApi.connectToPubSub().then(pubsub => {
                         this.mod_pubsub = pubsub;
 
                         // TODO: dont do this here, do it bevore joining at all.
-                        const user_id = TwitchAPI.getCurrentUser().id;
+                        const user_id = Application.getCurrentAccount().user_id;
                         this.mod_pubsub.listen([
                             `chat_moderator_actions.${user_id}.${this.channel_id}`,
                             // `automod-queue.${user_id}.${this.channel_id}`
@@ -194,14 +221,6 @@ export default class Channel {
                         this.slowmode_time = this.slow_mode;
                     }
                 }
-                this.update();
-
-                if (!this.connect) {
-                    this.chat.appendNote(`Connected to ${this.channel_login}`);
-                    this.updateChatterCount();
-
-                    this.connect = true;
-                }
             }
         });
 
@@ -213,7 +232,7 @@ export default class Channel {
             if(this.channel_login !== msg.channel) return;
 
             const chat = this.chat;
-            const chatMessages = MessageParser.parse(msg);
+            const chatMessages = this.messageParser.parse(msg);
 
             if (chat) {
                 for (let msg of chatMessages) {
@@ -230,7 +249,7 @@ export default class Channel {
         IRC.listen('chat.info', (msg: EventMessage) => {
             if(this.channel_login !== msg.channel) return;
 
-            const chatMessages = MessageParser.parse(msg);
+            const chatMessages = this.messageParser.parse(msg);
 
             for (let msg of chatMessages) {
                 switch (msg.type) {
@@ -253,7 +272,6 @@ export default class Channel {
             if(this.channel_login !== msg.channel_login) return;
 
             this.chat.appendNote(msg.message_text);
-            this.chat.update();
         });
 
         interface ClearChatAction {
@@ -298,18 +316,12 @@ export default class Channel {
         IRC.joinChatRoom(this.channel_login.toLocaleLowerCase());
     }
 
-    async updateChatterCount() {
-        return IRC.getUserlist(this.channel_login).then(chatters => {
-            this.chatter_count = chatters.chatter_count;
-        });
-    }
-
     toggleSlowMode() {
         if (this.moderator || this.broadcaster) {
             if (this.slow_mode) {
-                IRC.sendMessage(this.channel_login, "/slowoff");
+                IRC.sendMessage(this.channel_login, this.channel_id, "/slowoff");
             } else {
-                IRC.sendMessage(this.channel_login, "/slow " + this.slowmode_time);
+                IRC.sendMessage(this.channel_login, this.channel_id, "/slow " + this.slowmode_time);
             }
         }
     }
@@ -317,9 +329,9 @@ export default class Channel {
     toggleFollowerMode() {
         if (this.moderator || this.broadcaster) {
             if (this.follwers_only) {
-                IRC.sendMessage(this.channel_login, "/followersoff");
+                IRC.sendMessage(this.channel_login, this.channel_id, "/followersoff");
             } else {
-                IRC.sendMessage(this.channel_login, "/followers " + this.followermode_time);
+                IRC.sendMessage(this.channel_login, this.channel_id, "/followers " + this.followermode_time);
             }
         }
     }
@@ -327,9 +339,9 @@ export default class Channel {
     toggleEmoteOnlyMode() {
         if (this.moderator || this.broadcaster) {
             if (this.emote_only) {
-                IRC.sendMessage(this.channel_login, "/emoteonlyoff");
+                IRC.sendMessage(this.channel_login, this.channel_id, "/emoteonlyoff");
             } else {
-                IRC.sendMessage(this.channel_login, "/emoteonly");
+                IRC.sendMessage(this.channel_login, this.channel_id, "/emoteonly");
             }
         }
     }
@@ -337,9 +349,9 @@ export default class Channel {
     toggleSubOnlyMode() {
         if (this.moderator || this.broadcaster) {
             if (this.subscribers_only) {
-                IRC.sendMessage(this.channel_login, "/subscribersoff");
+                IRC.sendMessage(this.channel_login, this.channel_id, "/subscribersoff");
             } else {
-                IRC.sendMessage(this.channel_login, "/subscribers");
+                IRC.sendMessage(this.channel_login, this.channel_id, "/subscribers");
             }
         }
     }
@@ -347,63 +359,11 @@ export default class Channel {
     toggleR9kMode() {
         if (this.moderator || this.broadcaster) {
             if (this.r9k) {
-                IRC.sendMessage(this.channel_login, "/r9kbetaoff");
+                IRC.sendMessage(this.channel_login, this.channel_id, "/r9kbetaoff");
             } else {
-                IRC.sendMessage(this.channel_login, "/r9kbeta");
+                IRC.sendMessage(this.channel_login, this.channel_id, "/r9kbeta");
             }
         }
-    }
-
-    // to be implemented
-    setRoom(roomName: string, channel_id: string) {
-        const updateStatus = async () => {
-            const stream = await TwitchAPI.getStreams(this.info.id);
-            if (stream[0]) {
-
-                const {
-                    viewer_count,
-                    started_at,
-                    game_name,
-                    title
-                } = stream[0];
-
-                this.stream_title = html`
-                    <div title="${title}">
-                        ${Format.number(viewer_count)} - <stream-timer starttime="${started_at}"></stream-timer> - ${game_name} - ${title}
-                    </div>
-                `;
-
-                this.update();
-            }
-        }
-
-        setInterval(() => {
-            updateStatus();
-        }, 1000 * 15);
-
-        const info = getLoggedInUser(this.channel_login);
-        this.info = info;
-
-        updateStatus();
-
-        TwitchApi.getChannel(info.id).then((channel) => {
-            info.channel_info = channel[0];
-            this.update();
-        })
-
-        this.update();
-    }
-
-    initChat() {
-        // update room info at interval
-        const update_info = () => getUserInfo(this.channel_login).then(info => {
-            this.setRoom(this.channel_login, info.id);
-            this.updateChatterCount();
-            setTimeout(() => update_info(), 1000 * 60);
-        });
-        window.addEventListener('loggedin', e => {
-            update_info();
-        });
     }
 
     static findReward(id: string) {
@@ -412,30 +372,19 @@ export default class Channel {
         }
     }
 
-    openThread(channel: string, message_id: string) {
-        const msg = document.querySelector(`[messageid="${message_id}"]`);
-        if(msg) {
-            const message = msg.message;
-
-            const chat2 = document.createElement('sample-chat');
-            chat2.appendMessage(message);
-
-            chat2.style.position = "fixed";
-            chat2.style.top = "auto";
-            chat2.style.bottom = "100px";
-            chat2.style.left = "40px";
-            chat2.style.width = "100%";
-            chat2.style.height = "100px";
-            chat2.style.background = "#333";
-
-            document.body.append(chat2);
-        }
-    }
-
     getMessageById(channel:string, message_id: string) {
-        const chat = this.getChats(channel);
-        const msg = chat.querySelector(`[messageid="${message_id}"]`);
-        return msg ? msg.message : undefined;
+        const channels = Application.getChannels();
+        for(let channel of channels) {
+            const ch = Application.getChannel(channel);
+            if(ch) {
+                const chat = ch.chat;
+                const msg = chat.querySelector(`[messageid="${message_id}"]`);
+
+                console.log(msg);
+                
+                return msg ? msg.message : undefined;
+            }
+        }
     }
 
     reply(channel: string, message: ChatMessage) {
@@ -448,15 +397,15 @@ export default class Channel {
     }
 
     timeout(channel: string, user_name: string, secs: number) {
-        IRC.sendMessage(channel, `/timeout ${user_name} ${secs}`);
+        IRC.sendMessage(channel, this.channel_id, `/timeout ${user_name} ${secs}`);
     }
 
     unban(channel: string, user_name: string) {
-        IRC.sendMessage(channel, `/unban ${user_name}`);
+        IRC.sendMessage(channel, this.channel_id, `/unban ${user_name}`);
     }
 
-    openUserCard(channel: string, user_name: string) {
-        const url = `https://www.twitch.tv/popout/${channel}/viewercard/${user_name}`;
+    openUserCard(user_name: string) {
+        const url = `https://www.twitch.tv/popout/${this.channel_login}/viewercard/${user_name}`;
         open(url);
     }
 

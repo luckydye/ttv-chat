@@ -11,6 +11,8 @@ import './components/Tooltip';
 import Events, { on } from './events/Events';
 import Application from './App';
 import Account from './Account';
+import Badges from './services/Badges';
+import Emotes from './services/Emotes';
 
 
 function renderSelecetdChat(channel: string) {
@@ -45,9 +47,18 @@ function renderSelecetdChat(channel: string) {
 async function onLogin(account: Account) {
     console.log('Logged in', account);
 
+    // load critical resources
+    await Badges.getGlobalBadges();
+    await Emotes.getGlobalEmotes();
+
+    // init state
     await Application.init();
 
     Application.setAccount(account);
+
+    // custom mentions channel
+    // chatElements["@"] = document.createElement("sample-chat");
+    // chatElements["@"].setRoom("Mentions");
 
     console.log('Initialized');
 

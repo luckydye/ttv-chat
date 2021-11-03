@@ -122,7 +122,13 @@ export default class MessageParser {
     // in short. recieve the network message and form into a client side representation.
     // like if its highligted, tagged or a reply...
 
-    static parse(message: UserMessage | EventMessage): Array<ChatMessage | ChatInfoMessage> {
+    channel: Channel;
+
+    constructor(channel: Channel) {
+        this.channel = channel;
+    }
+
+    parse(message: UserMessage | EventMessage): Array<ChatMessage | ChatInfoMessage> {
         if (message.message_type == "user") {
             return this.parseUserMessage(message);
         }
@@ -132,13 +138,13 @@ export default class MessageParser {
         return [];
     }
 
-    static parseUserMessage(message: UserMessage): Array<ChatMessage> {
+    parseUserMessage(message: UserMessage): Array<ChatMessage> {
         return [
             this.parseChatTextMessage(message)
         ];
     }
 
-    static parseEventMessage(message: EventMessage): Array<ChatMessage | ChatInfoMessage> {
+    parseEventMessage(message: EventMessage): Array<ChatMessage | ChatInfoMessage> {
 
         // null if no user message included
         const user = message.message ? this.parseChatTextMessage(message.message) : null;
@@ -158,7 +164,7 @@ export default class MessageParser {
         return user == null ? [event] : [user, event];
     }
 
-    static parseChatTextMessage(message: UserMessage): ChatMessage {
+    parseChatTextMessage(message: UserMessage): ChatMessage {
 
         const client_user = getLoggedInUser();
         const user_login = client_user?.user_login;
@@ -287,7 +293,7 @@ export default class MessageParser {
         let line_title = reward_id ? `Redeemed ${redemtion_title}.` : null;
 
         if(isReply) {
-            const parent_message = Application.getMessageById(message.channel, message.tags['reply-parent-msg-id']);
+            const parent_message = this.channel.getMessageById(message.channel, message.tags['reply-parent-msg-id']);
             if(parent_message) {
                 line_title = `${parent_message.user_name}: ${parent_message.text}`;
             }
@@ -312,9 +318,9 @@ export default class MessageParser {
                         return html`<img class="badge" alt="${badge.name}" src="${badge_url}" width="18" height="18">`;
                     })}
                 </span>
-                <span class="username" @click="${() => Application.openUserCard(message.channel, message.user_name)}">${message.user_name}:</span>
+                <span class="username" @click="${() => this.channel.openUserCard(message.channel, message.user_name)}">${message.user_name}:</span>
                 ${isReply && false ? html`
-                    <button class="reply-icon" title="Open Thread" @click="${() => Application.openThread(message.channel, message.tags['reply-parent-msg-id'])}">
+                    <button class="reply-icon" title="Reply">
                         <img src="./images/question_answer_white_24dp.svg" height="18px" width="18px" />
                     </button>
                 ` : ""}
@@ -323,18 +329,18 @@ export default class MessageParser {
                 <div class="tools">
                     <!-- //////// use PageOverlay for this? //////////-->
                     
-                    <div class="chat-line-tool mention-tool" @click="${() => Application.selectRoom(message.channel)}" title="Jump to chat">
+                    <div class="chat-line-tool mention-tool" @click="${() => Application.selectChannel(message.channel)}" title="Jump to chat">
                         <img src="./images/navigate_before_white_24dp.svg" width="18px" height="18px" />
                     </div>
                     
                     ${message.user_name !== user_login ? html`
-                        <div class="chat-line-tool" title="Reply" @click="${() => Application.reply(message.channel, message)}">
+                        <div class="chat-line-tool" title="Reply" @click="${() => this.channel.reply(message.channel, message)}">
                             <img src="./images/reply_white_24dp.svg" height="18px" width="18px" />
                         </div>
-                        <div class="chat-line-tool mod-tool" title="Timeout 10s" @click="${() => Application.timeout(message.channel, message.user_name, 10)}">
+                        <div class="chat-line-tool mod-tool" title="Timeout 10s" @click="${() => this.channel.timeout(message.channel, message.user_name, 10)}">
                             <img src="./images/block_white_24dp.svg" width="18px" height="18px" />
                         </div>
-                        <div class="chat-line-tool mod-tool-banned" title="Unban" @click="${() => Application.unban(message.channel, message.user_name)}">
+                        <div class="chat-line-tool mod-tool-banned" title="Unban" @click="${() => this.channel.unban(message.channel, message.user_name)}">
                             <img src="./images/done_white_24dp.svg" width="18px" height="18px" />
                         </div>
                     ` : ""}

@@ -118,7 +118,8 @@ export default class ChatInput extends LitElement {
     submit(e: KeyboardEvent) {
         if(this.value != "") {
             this.addToHistory(this.value);
-            IRC.sendMessage(Application.getSelectedRoom(), this.value);
+            const channel = Application.getChannel(Application.getSelectedChannel());
+            IRC.sendMessage(channel.channel_login, channel.channel_id, this.value);
             this.value = "";
         }
     }

@@ -44,5 +44,3 @@ export default class Badges {
     }
 
 }
-
-Badges.getGlobalBadges();

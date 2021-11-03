@@ -1,7 +1,6 @@
 import { invoke } from '@tauri-apps/api/tauri';
 import { emit, listen } from '@tauri-apps/api/event';
 import Color from '../Color';
-import Application from '../App';
 
 // message types
 import { EventMessage, UserMessage } from '../MessageParser';
@@ -87,20 +86,20 @@ export default class IRC {
         }).catch((e) => console.error(e))
     }
 
-    static async sendMessage(channel: string, message: string) {
+    static async sendMessage(channel_login: string, channel_id: string, message: string) {
         return invoke('chat_send_message', {
-            channel,
+            channel_login,
             message,
         })
             .then(e => {
                 if(message[0] !== "/") {
                     // loop message back to display in chat if its not a command
-                    if(!this.usermap[channel]) {
+                    if(!this.usermap[channel_login]) {
                         console.error('User not listed');
                     }
-                    const user = this.usermap[channel];
+                    const user = this.usermap[channel_login];
                     const message_data: UserMessage = {
-                        channel: channel,
+                        channel: channel_login,
                         message_type: 'user',
                         id: Math.floor(Math.random() * 100000000000).toString(),
                         text: message,
@@ -113,7 +112,7 @@ export default class IRC {
                         is_action: false,
                         bits: 0,
                         tags: {
-                            "room-id": Application.getChannelId(channel),
+                            "room-id": channel_id,
                         },
                     }
 

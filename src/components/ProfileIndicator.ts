@@ -1,14 +1,16 @@
 import { css, html, LitElement } from 'lit-element';
 import IRC, { IRCEvents } from '../services/IRC';
 import Application from '../App';
-import { ChatMessage } from '../MessageParser';
+import { UserMessage } from '../MessageParser';
 import Events, { on } from '../events/Events';
 
 export default class ProfileIndicator extends LitElement {
 
     live = false;
     new_message = false;
-    channel: string | undefined;
+    channel: string;
+
+    profile_image_url: string | undefined;
 
     static get properties() {
         return {
@@ -20,35 +22,10 @@ export default class ProfileIndicator extends LitElement {
         super.attributeChangedCallback(name, oldVal, newVal);
         
         if(name === "channel" && this.channel) {
-            const img = new Image();
-            img.width = 24;
-            img.alt = this.channel;
-            img.setAttribute('loading', '');
-    
-            this.profileImage = img;
-    
-            const update_info = async () => {
-                setTimeout(() => update_info(), 1000 * 30);
-
-                const channel = Application.getChannel(this.channel);
-                if(channel) {
-                    const profile_img_url = await channel.getProfileImage();
-                    const stream = await channel.getStream();
-
-                    this.live = stream?.type == "live" ? true : false;
-        
-                    img.src = profile_img_url;
-                    img.removeAttribute('loading');
-        
-                    this.update();
-                }
-            };
-            update_info();
-    
             // check if there are new unread messages
-            IRC.listen(IRCEvents.ChatMessage, (msg: ChatMessage) => {
-                if(msg.channel === this.channel && Application.getSelectedChannel() !== this.channel && 
-                    Application.getChats(this.channel).connect) {
+            IRC.listen(IRCEvents.ChatMessage, (msg: UserMessage) => {
+                if(msg.channel === this.channel && Application.getSelectedChannel() !== this.channel &&
+                    Application.getChannel(this.channel)?.chat_connected) {
                     this.new_message = true;
                     this.update();
                 }
@@ -59,7 +36,18 @@ export default class ProfileIndicator extends LitElement {
                     this.new_message = false;
                     this.update();
                 }
-            })
+            });
+
+            on(Events.ChannelInfoChanged, async e => {
+                const channel = e.data.channel;
+                if(channel.channel_login === this.channel) {
+
+                    this.live = channel.is_live;
+                    this.profile_image_url = channel.profile_image_url;
+        
+                    this.update();
+                }
+            });
         }
     }
 
@@ -117,7 +105,7 @@ export default class ProfileIndicator extends LitElement {
                 display: block;
                 pointer-events: none;
             }
-            .profile-icon img[loading] {
+            .profile-icon img[empty] {
                 opacity: 0;
             }
         `;
@@ -127,7 +115,7 @@ export default class ProfileIndicator extends LitElement {
         return html`
             <div class="profile-icon" ?live="${this.live}" ?newmessage="${this.new_message}">
                 <div class="image">
-                    ${this.profileImage}
+                    <img ?empty="${!this.profile_image_url}" width="24px" src="${this.profile_image_url || ''}" alt="${this.channel}" />
                 </div>
             </div>
         `;
