@@ -65,6 +65,10 @@ page-overlay net-loader {
     transform: scale(0.65);
 }
 
+page-overlay img {
+    vertical-align: bottom;
+}
+
 notification {
     position: fixed;
     bottom: 0;
@@ -118,8 +122,4 @@ twitch-login-panel {
     justify-content: center;
     align-items: center;
     height: 100%;
-}
-
-.clip-title img {
-    vertical-align: bottom;
 }

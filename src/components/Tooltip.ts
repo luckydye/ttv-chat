@@ -28,9 +28,11 @@ function createOverlayForLink(e: PointerEvent) {
 
     clearTimeout(linkOverlayTimeout);
     linkOverlayTimeout = setTimeout(() => {
-        LinkPreview.generate(target.innerText).then(data => {
-            render(data, overlay);
-        })
+        if(lastTarget == target) {
+            LinkPreview.generate(target.innerText).then(data => {
+                render(data, overlay);
+            })
+        }
     }, 200);
     
     document.body.append(overlay);

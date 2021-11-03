@@ -1,6 +1,28 @@
 import Webbrowser from "../Webbrowser";
 import TwitchApi from "../services/twitch/Api";
 import { html } from 'lit-element';
+import YouTubeApi from '../services/YouTube';
+
+async function renderYouTubeVideo(videoId: string) {
+    const vid = await YouTubeApi.getVideo(videoId);
+
+    const view_count = vid.statistics.viewCount;
+    const title = vid.snippet.title;
+    const channel = vid.snippet.channelTitle;
+    const thumb = vid.snippet.thumbnails.medium.url;
+
+    return html`
+        <div class="clip-thumbnail">
+            <img src="${thumb}" width="180px"/>
+        </div>
+        <div class="clip-title">${title}</div>
+        <div>${channel}</div>
+        <div>
+            <img src="./images/Viewer.svg" width="16px"/>
+            ${view_count}
+        </div>
+    `;
+}
 
 async function renderTwitchClip(clipId: string) {
     const clips = await TwitchApi.getClip(clipId);
@@ -11,7 +33,7 @@ async function renderTwitchClip(clipId: string) {
             <img src="${clip.thumbnail_url}" width="180px"/>
         </div>
         <div class="clip-title">${clip.title}</div>
-        <div class="clip-title">
+        <div>
             <img src="./images/Viewer.svg" width="16px"/>
             ${clip.view_count}
         </div>
@@ -27,14 +49,14 @@ export default class LinkPreview {
             // Example:
             // https://youtu.be/YvKT-VXi9V4
             const videoId = urlInstance.pathname.substring(1);
-            return "Youtube";
+            return renderYouTubeVideo(videoId);
         }
         if(urlInstance.hostname == "www.youtube.com") {
             // Example:
             // https://www.youtube.com/watch?v=CceGHKfOPWw
             const params = Webbrowser.parseSearch(urlInstance.search);
             const videoId = params.v;
-            return "Youtube";
+            return renderYouTubeVideo(videoId);
         }
 
         if(urlInstance.hostname == "www.twitch.tv") {
