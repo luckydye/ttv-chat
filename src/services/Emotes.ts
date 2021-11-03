@@ -44,7 +44,6 @@ export default class Emotes {
 
     static getChachedChannelEmotes(channel_id: string) {
         if (!channel_emotes[channel_id]) {
-            channel_emotes[channel_id] = {};
             Emotes.getChannelEmotes(channel_id);
         }
         return channel_emotes[channel_id];

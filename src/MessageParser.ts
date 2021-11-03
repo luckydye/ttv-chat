@@ -171,9 +171,7 @@ export default class MessageParser {
         let redemtion_title = "custom reward";
 
         if(reward_id) {
-            // const redemtion = TwitchAPI.findReward(reward_id);
-            // TODO:
-            const redemtion = null;
+            const redemtion = this.channel.findReward(reward_id);
             if(redemtion) {
                 redemtion_title = redemtion.title;
             }

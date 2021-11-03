@@ -40,7 +40,7 @@ export default class TwitchEmotes extends EmoteService {
 
     static async getChannelEmotes(id: string): Promise<EmoteMap | undefined> {
         return TwitchApi.fetch("/chat/emotes", "broadcaster_id=" + id).then(data => {
-            if(data.status == 200) {
+            if(data.data) {
                 const channelEmotes: EmoteMap = {};
                 for(let emote of data.data) {
                     channelEmotes[emote.name] = new TwitchEmote(emote);

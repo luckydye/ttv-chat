@@ -81,7 +81,7 @@ export default class Chat extends LitElement {
 
         const latest = scrollEle.scrollHeight - scrollEle.clientHeight;
 
-        if (this.scrollTarget >= latest - 1) {
+        if (this.scrollTarget >= latest - 40) {
             this.lock();
         }
         if (this.scrollTarget <= latest - 10) {
@@ -118,8 +118,11 @@ export default class Chat extends LitElement {
         this.addEventListener('wheel', e => {
             const scrollEle = this.shadowRoot?.querySelector('.lines');
             if (scrollEle) {
-                this.scrollTarget = scrollEle.scrollTop;
-                this.updateLock();
+                this.scrollTarget = scrollEle.scrollTop + e.deltaY;
+                
+                setTimeout(() => {
+                    this.updateLock();
+                }, 500);
 
                 if (e.deltaY < 0) {
                     this.unlock();

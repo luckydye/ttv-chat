@@ -406,7 +406,6 @@ export default class Channel {
 
     async connectPubsub() {
         if(!pubsub) {
-            // TODO: move pubsub events
             pubsub = await TwitchApi.connectToPubSub();
             pubsub_features = await TwitchApi.connectToPubSub();
         }
@@ -438,6 +437,12 @@ export default class Channel {
                 this.chat.appendNote(`Hypetrain! Level ${data.level}. ${Format.seconds(detla)} left.`);
             }
         })
+    }
+
+    findReward(id: string) {
+        if (pubsub) {
+            return pubsub.rewards[id];
+        }
     }
 
 }
