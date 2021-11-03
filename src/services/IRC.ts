@@ -14,6 +14,7 @@ export const IRCEvents = {
     ChatInfo: 'chat.info',
     ChatNote: 'chat.notice',
     ChatMessage: 'chat.message',
+    ChatDeleteMessage: 'chat.delete.message',
 }
 
 export interface ChatClearMessage {
@@ -168,6 +169,9 @@ export default class IRC {
                 }
                 case 'chat.message': {
                     return callback(event.payload as UserMessage);
+                }
+                case 'chat.delete.message': {
+                    return callback(event.payload);
                 }
                 case 'chat.info': {
                     return callback(event.payload as EventMessage);

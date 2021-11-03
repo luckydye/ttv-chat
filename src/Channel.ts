@@ -314,6 +314,13 @@ export default class Channel {
                 }
             }
         });
+        IRC.listen(IRCEvents.ChatDeleteMessage, (msg) => {
+            const line = this.chat.querySelector(`[messageid="${msg.message_id}"]`);
+            if(line) {
+                line.setAttribute("deleted", "");
+            }
+            console.log('Delete Message', msg);
+        });
 
         IRC.joinChatRoom(this.channel_login.toLocaleLowerCase());
     }
