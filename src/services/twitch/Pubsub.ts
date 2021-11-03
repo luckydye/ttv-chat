@@ -1,4 +1,4 @@
-import Format from '../../Format';
+import Format from '../../util/Format';
 
 export function generateNonce(length = 30) {
     var text = "";

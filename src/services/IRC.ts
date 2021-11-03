@@ -1,6 +1,6 @@
 import { invoke } from '@tauri-apps/api/tauri';
 import { emit, listen } from '@tauri-apps/api/event';
-import Color from '../Color';
+import Color from '../util/Color';
 
 // message types
 import { EventMessage, UserMessage } from '../MessageParser';

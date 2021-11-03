@@ -4,8 +4,8 @@ import Badges from './services/Badges';
 import Emotes from './services/Emotes';
 import { TwitchEmote } from './services/emotes/TwitchEmotes';
 import { getLoggedInUser } from './services/Auth';
-import Webbrowser from './Webbrowser';
-import Color from './Color';
+import Webbrowser from './util/Webbrowser';
+import Color from './util/Color';
 
 const Default_EventMessage_Color = "rgb(12, 12, 12)";
 const ColorEventTypeMap = {

@@ -1,4 +1,4 @@
-import Webbrowser from "../Webbrowser";
+import Webbrowser from "../util/Webbrowser";
 import TwitchApi from "../services/twitch/Api";
 import { html } from 'lit-element';
 import YouTubeApi from '../services/YouTube';

@@ -1,9 +1,9 @@
 import { css, html } from 'lit-element';
 import Application from '../App';
-import Webbrowser from '../Webbrowser';
+import Webbrowser from '../util/Webbrowser';
 import Chat from './Chat';
 import ContextMenu from './ContextMenu';
-import Format from '../Format';
+import Format from '../util/Format';
 import Events, { on } from '../events/Events';
 // Components
 import './FluidInput';

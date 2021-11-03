@@ -1,5 +1,5 @@
 // import jwt from 'jsonwebtoken';
-import Webbrowser from '../Webbrowser';
+import Webbrowser from '../util/Webbrowser';
 import Account from '../Account';
 import LoginEvent from '../events/Login';
 import TwitchApi from './twitch/Api';

@@ -3,7 +3,7 @@ import TwitchPubsub from './services/twitch/Pubsub';
 import TwitchApi, { UserInfo } from './services/twitch/Api';
 import Application from './App';
 import Account from './Account';
-import Focus from './Focus';
+import Focus from './util/Focus';
 import MessageParser, { ChatMessage, EventMessage, UserMessage, ChatInfoMessage } from './MessageParser';
 import TwitchChat from './components/TwitchChat';
 import ChannelStateChanged from './events/ChannelStateChanged';
@@ -11,7 +11,7 @@ import ChannelInfoChanged from './events/ChannelInfoChanged';
 import ChatMessageEvent from './events/ChatMessage';
 import Badges from './services/Badges';
 import Emotes from './services/Emotes';
-import Format from './Format';
+import Format from './util/Format';
 
 let pubsub;
 let pubsub_features;

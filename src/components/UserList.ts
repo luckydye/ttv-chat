@@ -2,7 +2,7 @@
 
 import { css, html, LitElement } from 'lit-element';
 import IRC from '../services/IRC';
-import Format from '../Format';
+import Format from '../util/Format';
 
 export default class ChatUserList extends LitElement {
 
