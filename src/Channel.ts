@@ -9,6 +9,9 @@ import TwitchChat from './components/TwitchChat';
 import ChannelStateChanged from './events/ChannelStateChanged';
 import ChannelInfoChanged from './events/ChannelInfoChanged';
 
+let pubsub;
+let pubsub_features;
+
 // some chat structs
 interface ClearChatAction {
     UserBanned: {
@@ -70,17 +73,8 @@ export default class Channel {
         this.chat = document.createElement('twitch-chat') as TwitchChat;
         this.chat.setRoom(this.channel_login);
 
-        this.joinIRC();
-
         // join the chat 
-        // and gather information about the channel in parallel
-
-
-        // pubsub = await TwitchApi.connectToPubSub();
-        // pubsub_features = await TwitchApi.connectToPubSub();
-        // setTimeout(() => {
-        //     pubsub.loadRedemtionHistory()
-        // }, 500);
+        this.joinIRC();
 
         // bookmark placements
         Focus.onBlur(() => {
@@ -110,7 +104,9 @@ export default class Channel {
 
             setInterval(() => {
                 this.fetchChannelStatus();
-            }, 1000 * 30);
+            }, 1000 * 60);
+
+            this.connectPubsub();
         })
     }
 
@@ -204,7 +200,6 @@ export default class Channel {
                     TwitchApi.connectToPubSub().then(pubsub => {
                         this.mod_pubsub = pubsub;
 
-                        // TODO: dont do this here, do it bevore joining at all.
                         const user_id = Application.getCurrentAccount().user_id;
                         this.mod_pubsub.listen([
                             `chat_moderator_actions.${user_id}.${this.channel_id}`,
@@ -212,7 +207,7 @@ export default class Channel {
                         ]);
 
                         this.mod_pubsub.onModAction(data => {
-                            // this.chat.appendNote(data.message);
+                            this.chat.appendNote(data.message);
                         });
                     })
 
@@ -368,12 +363,6 @@ export default class Channel {
         }
     }
 
-    static findReward(id: string) {
-        if (twitch_pubsub) {
-            return twitch_pubsub.rewards[id];
-        }
-    }
-
     getMessageById(message_id: string) {
         const channels = Application.getChannels();
         for(let channel of channels) {
@@ -382,7 +371,7 @@ export default class Channel {
                 const chat = ch.chat;
                 const msg = chat.querySelector(`[messageid="${message_id}"]`);
                 if(msg) {
-                    return msg ? msg.querySelector('.message').innerText : undefined;
+                    return msg ? msg.message : undefined;
                 }
             }
         }
@@ -408,6 +397,42 @@ export default class Channel {
     openUserCard(user_name: string) {
         const url = `https://www.twitch.tv/popout/${this.channel_login}/viewercard/${user_name}`;
         open(url);
+    }
+
+    async connectPubsub() {
+        if(!pubsub) {
+            // TODO: move pubsub events
+            pubsub = await TwitchApi.connectToPubSub();
+            pubsub_features = await TwitchApi.connectToPubSub();
+        }
+
+        // public chat events
+        // have to activly manage connections for the most recent selected chats or live chats actually
+        pubsub.listen([
+            `community-points-channel-v1.${this.channel_id}`,
+            `hype-train-events-v1.${this.channel_id}`
+            
+            // `predictions-channel-v1.${this.channel_id}`
+            // `predictions-user-v1.${this.channel_id}`
+            // `raid.${this.channel_id}`
+        ]);
+
+        pubsub_features.listen([
+            `polls.${this.channel_id}`,
+        ]);
+
+        pubsub.onRedemtion(data => {
+            if (data.channel_id == this.channel_id) {
+                this.chat.appendRedemtion(data);
+            }
+        })
+
+        pubsub.onHypeTrain(data => {
+            if (data.channel_id == this.channel_id) {
+                const detla = Math.floor(data.started_at - data.expires_at / 1000);
+                this.chat.appendNote(`Hypetrain! Level ${data.level}. ${Format.seconds(detla)} left.`);
+            }
+        })
     }
 
 }

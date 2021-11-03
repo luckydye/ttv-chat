@@ -20,6 +20,12 @@ let currentAccoumt: Account;
 
 export default class Application {
 
+    static findReward(id: string) {
+        if (twitch_pubsub) {
+            return twitch_pubsub.rewards[id];
+        }
+    }
+
     static getCurrentAccount(): Account {
         return currentAccoumt;
     }

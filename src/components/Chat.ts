@@ -1,4 +1,4 @@
-import { css, html, LitElement } from 'lit-element';
+import { css, html, LitElement, TemplateResult } from 'lit-element';
 import AnimatedScroll from './AnimatedScroll';
 import { ChatInfoMessage, ChatMessage } from '../MessageParser';
 import { ChatInfo, ChatNote } from './ChatLine';
@@ -35,6 +35,8 @@ export default class Chat extends LitElement {
             line.setAttribute('action', '');
         }
 
+        line.message = msg;
+
         render(msg.content, line);
 
         this.appendChild(line);
@@ -48,7 +50,7 @@ export default class Chat extends LitElement {
         this.afterAppend();
     }
 
-    appendNote(text: string) {
+    appendNote(text: string | TemplateResult) {
         const line = new ChatNote(text);
         this.appendChild(line);
         this.afterAppend();

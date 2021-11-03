@@ -175,6 +175,10 @@ export default class TwitchChat extends Chat {
         listEle.updateList();
     }
 
+    appendRedemtion(data: any) {
+        this.appendNote(html`${data.user_name} redeemed ${data.title} for ${data.cost} <img src="${data.image_url}" height="18px" width="18px"/>`);
+    }
+
     openSlowModeSettins(e) {
         const channel = Application.getChannel(this.channel);
         const menu = ContextMenu.openOn(e.target, 'down');

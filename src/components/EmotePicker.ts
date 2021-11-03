@@ -37,7 +37,7 @@ export default class EmotePicker extends ContextMenu {
     }
 
     render() {
-        const channel = Application.getChannelId(Application.getSelectedRoom());
+        const channel = Application.getSelectedChannel();
         const emotes = Emotes.getChachedChannelEmotes(channel);
         // TODO: Gotta check what sub emotes client can use
         console.log(emotes);
