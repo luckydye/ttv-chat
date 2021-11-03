@@ -21,6 +21,8 @@ export default class Badges {
     }
 
     static async getChannelBadges(channel_id: string) {
+        if(!channel_id) return;
+        
         return fetch(`https://badges.twitch.tv/v1/badges/channels/${channel_id}/display`)
             .then(res => res.json())
             .then(json => {

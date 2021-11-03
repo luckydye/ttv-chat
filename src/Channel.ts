@@ -8,6 +8,8 @@ import MessageParser, { ChatMessage, EventMessage, UserMessage, ChatInfoMessage 
 import TwitchChat from './components/TwitchChat';
 import ChannelStateChanged from './events/ChannelStateChanged';
 import ChannelInfoChanged from './events/ChannelInfoChanged';
+import Badges from './services/Badges';
+import Emotes from './services/Emotes';
 
 let pubsub;
 let pubsub_features;
@@ -73,9 +75,6 @@ export default class Channel {
         this.chat = document.createElement('twitch-chat') as TwitchChat;
         this.chat.setRoom(this.channel_login);
 
-        // join the chat 
-        this.joinIRC();
-
         // bookmark placements
         Focus.onBlur(() => {
             if(Application.getSelectedChannel() == this.channel_login) {
@@ -89,8 +88,16 @@ export default class Channel {
         });
 
         // get all the info out of the twitch api
-        this.getChannelInfo().then(info => {
+        this.getChannelInfo().then(async info => {
             if(!info) return;
+
+            // get cached channel badges
+            await Badges.getChannelBadges(this.channel_id);
+            // get cached channel emotes
+            await Emotes.getChannelEmotes(this.channel_id);
+            
+            // join the chat 
+            this.joinIRC();
 
             this.channel_id = info.id;
             this.profile_image_url = info.profile_image_url;
@@ -255,9 +262,8 @@ export default class Channel {
 
             for (let message of chatMessages) {
                 if (message.tagged) {
-                    // TODO: send mention to @ channel
-                    // const mentionChat = Application.getChats("@");
-                    // mentionChat.appendMessage(message);
+                    const mentionChannel = Application.getChannel("@");
+                    mentionChannel.chat.appendMessage(message);
                 }
                 this.chat.appendMessage(message);
             }
@@ -276,9 +282,8 @@ export default class Channel {
                     case "message":
                         msg.highlighted = true;
                         if (msg.tagged) {
-                            // TODO: send mention to @ channel
-                            // const mentionChat = Application.getChats("@");
-                            // mentionChat.appendMessage(msg);
+                            const mentionChannel = Application.getChannel("@");
+                            mentionChannel.chat.appendMessage(msg);
                         }
                         this.chat.appendMessage(msg);
                         break;

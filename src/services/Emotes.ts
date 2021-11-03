@@ -1,10 +1,13 @@
+import { EmoteMap } from './emotes/Emote';
 import TwitchEmotes from './emotes/TwitchEmotes';
 import BTTVEmotes from './emotes/BTTVEmotes';
 import FFZEmotes from './emotes/FFZEmotes';
 import SevenTVEmotes from './emotes/SevenTVEmotes';
 
-let global_emotes: { [key: string]: any } = {};
-let channel_emotes: { [key: string]: any } = {};
+let global_emotes: { [key: string]: EmoteMap | undefined } = {};
+let channel_emotes: { [key: string]: {
+    [key: string]: EmoteMap | undefined
+} } = {};
 
 const EMOTE_SERVICES = [
     TwitchEmotes,
@@ -20,7 +23,14 @@ export default class Emotes {
     }
 
     static getGlobalEmote(name: string) {
-        return global_emotes[name];
+        for(let service in global_emotes) {
+            if(!global_emotes[service]) {
+                continue;
+            }
+            if (name in global_emotes[service]) {
+                return global_emotes[service][name];
+            }
+        }
     }
 
     static async getGlobalEmotes() {
@@ -41,6 +51,8 @@ export default class Emotes {
     }
 
     static async getChannelEmotes(channel_id: string) {
+        if(!channel_id) return;
+        
         if(!channel_emotes[channel_id]) {
             channel_emotes[channel_id] = {};
         }

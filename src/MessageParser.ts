@@ -5,7 +5,6 @@ import Emotes from './services/Emotes';
 import { TwitchEmote } from './services/emotes/TwitchEmotes';
 import { getLoggedInUser } from './services/Auth';
 import Webbrowser from './Webbrowser';
-import Application from './App';
 import Color from './Color';
 
 const Default_EventMessage_Color = "rgb(12, 12, 12)";
@@ -114,9 +113,6 @@ export interface ChatInfoMessage {
 //
 //////
 
-let channel_emote_map: { [key: string]: any } = {};
-let channel_badge_map: { [key: string]: any } = {};
-
 export default class MessageParser {
 
     // in short. recieve the network message and form into a client side representation.
@@ -189,8 +185,8 @@ export default class MessageParser {
         let timestamp = message.timestamp;
         let isReply = message.tags['reply-parent-msg-id'] != null;
         let tagged = false;
-
-        const wordEmoteMap: { [key: string]: { name: string, url: string } } = {};
+                                                        // The services/emotes/Emote struct
+        const wordEmoteMap: { [key: string]: { name: string, emote: any, service: string } } = {};
         const wordLinkMap: { [key: string]: string } = {};
         const wordMentionMap: { [key: string]: string } = {};
 
@@ -206,11 +202,11 @@ export default class MessageParser {
                 const end = emote.char_range.end;
 
                 const wordToReplace = message.text.slice(start, end);
-                const emoteURL = new TwitchEmote(emote).url_x2;
 
                 wordEmoteMap[wordToReplace] = {
                     name: wordToReplace,
-                    url: emoteURL,
+                    service: "twitch",
+                    emote: new TwitchEmote(emote),
                 };
             }
         }
@@ -222,18 +218,34 @@ export default class MessageParser {
         msg_words.forEach(str => {
             // find channel emote repalcement
             // TODO: PROBLEM: it renders sub emotes for people that dont have those emotes lol
-            if (str in channel_emotes) {
-                wordEmoteMap[str] = {
-                    name: str,
-                    url: channel_emotes[str],
-                };
+            if(channel_emotes) {
+                for(let service in channel_emotes) {
+                    if(!channel_emotes[service] || service == "twitch") {
+                        continue;
+                    }
+                    if (str in channel_emotes[service]) {
+                        wordEmoteMap[str] = {
+                            name: str,
+                            service: service,
+                            emote: channel_emotes[service][str],
+                        };
+                    }
+                }
             }
             // global emotes repalcement
-            if (str in Emotes.global_emotes) {
-                wordEmoteMap[str] = {
-                    name: str,
-                    url: Emotes.getGlobalEmote(str),
-                };
+            if(Emotes.global_emotes) {
+                for(let service in Emotes.global_emotes) {
+                    if(!Emotes.global_emotes[service]) {
+                        continue;
+                    }
+                    if (str in Emotes.global_emotes[service]) {
+                        wordEmoteMap[str] = {
+                            name: str,
+                            service: service,
+                            emote: Emotes.global_emotes[service][str],
+                        };
+                    }
+                }
             }
             // find link repalcement
             const urlMatch = Webbrowser.matchURL(str);
@@ -259,7 +271,7 @@ export default class MessageParser {
 
         const renderEmote = (emoteInfo: any) => {
             return html`
-                <span class="emote"><img emote name="${emoteInfo.name}" alt="${emoteInfo.name}" src="${emoteInfo.url}" height="32"></span>
+                <span class="emote"><img emote service="${emoteInfo.service}" name="${emoteInfo.name}" alt="${emoteInfo.name}" src="${emoteInfo.emote.url_x2}" height="32"></span>
             `;
         };
 
@@ -328,11 +340,6 @@ export default class MessageParser {
                 
                 <div class="tools">
                     <!-- //////// use PageOverlay for this? //////////-->
-                    
-                    <div class="chat-line-tool mention-tool" @click="${() => Application.selectChannel(message.channel)}" title="Jump to chat">
-                        <img src="./images/navigate_before_white_24dp.svg" width="18px" height="18px" />
-                    </div>
-                    
                     ${message.user_name !== user_login ? html`
                         <div class="chat-line-tool" title="Reply" @click="${() => this.channel.reply(message.channel, message)}">
                             <img src="./images/reply_white_24dp.svg" height="18px" width="18px" />

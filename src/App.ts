@@ -45,6 +45,9 @@ export default class Application {
             applicationState = Object.assign(applicationState, json);
         }
 
+        const mentionChannel = new Channel("@");
+        channels.add(mentionChannel);
+
         for(let channel of applicationState.channels) {
             this.createChannel(channel);
         }

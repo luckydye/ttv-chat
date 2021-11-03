@@ -11,6 +11,7 @@ function createOverlayForImageElement(e: PointerEvent) {
     overlay.innerHTML = `
         <img src="${target.src}" />
         <div style="margin-top: 5px;">${target.alt}</div>
+        <div style="margin-top: 2px; opacity: 0.5;">${target.getAttribute('service')}</div>
     `;
     document.body.append(overlay);
     return overlay;

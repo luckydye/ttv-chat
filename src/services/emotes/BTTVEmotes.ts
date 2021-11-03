@@ -7,6 +7,13 @@ export class BTTVEmote extends Emote {
     static get url_template() {
         return "https://cdn.betterttv.net/emote/{{id}}/{{scale}}";
     }
+    static get scale_template() {
+        return {
+            x1: "1x",
+            x2: "2x",
+            x3: "3x",
+        }
+    }
 }
 
 export default class BTTVEmotes extends EmoteService {
