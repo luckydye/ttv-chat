@@ -41,9 +41,9 @@ Next goal: Beta Release
 - [x] bookmark line
 - [x] show point redemtions in chat !important
 - [x] make the profile ring red on a mention
+- [x] Chat commands and names sugestions
 - [ ] Fix room drag n drop
 - [ ] finish Emote Picker
-- [ ] Chat commands and names sugestions
 - [ ] update title and game via websocket, not interval
 - [ ] implement dialog for one-click timeout, to prevent missclicks
 - [ ] Edit stream information like title and game
@@ -97,9 +97,9 @@ Next goal: Beta Release
     - Person gets added to thread on mention
 
 #### Text Inputs
-- [ ] Username color picker
 - [x] input history navigation
-- [ ] Chat commands
+- [x] Chat commands
+- [ ] Username color picker
 - [ ] Suggest bot commands aswell if posible
 - [ ] Input emote parsing
 - [ ] UI for
