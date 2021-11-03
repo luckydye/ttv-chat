@@ -172,8 +172,19 @@ export default class Chat extends LitElement {
                 width: 100%;
                 height: 100%;
             }
+
+            .header {
+                background: rgba(25, 25, 28, 0.75);
+                backdrop-filter: blur(24px);
+                background: rgba(25, 25, 28, 0.9);
+                backdrop-filter: blur(24px);
+                position: relative;
+                z-index: 1000;
+                border-bottom: 1px solid black;
+            }
+            
             .lines {
-                padding-top: 60px;
+                padding-top: 30px;
                 box-sizing: border-box;
                 position: absolute;
                 top: 0;
@@ -221,32 +232,6 @@ export default class Chat extends LitElement {
             }
             .chat-actions button:active img {
                 transform: scale(0.95);
-            }
-
-            .chat-title {
-                grid-column: 2;
-                position: relative;
-                z-index: 100;
-                width: 100%;
-                padding: 5px 10px;
-                box-sizing: border-box;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                align-items: center;
-                white-space: nowrap;
-                font-size: 12px;
-                font-weight: 400;
-                color: #ababab;
-                border-bottom: 1px solid black;
-            }
-
-            .chat-title > div {
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-
-            .chat-title span {
-                opacity: 0.5;
             }
 
             .scroll-to-bottom {

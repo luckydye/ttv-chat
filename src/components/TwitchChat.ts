@@ -14,8 +14,6 @@ export default class TwitchChat extends Chat {
 
     channel: string | undefined;
 
-    stream_title: any;
-
     bio: any;
 
     static get styles() {
@@ -27,16 +25,6 @@ export default class TwitchChat extends Chat {
                 padding: 10px 15px;
             }
 
-            .header {
-                background: rgba(25, 25, 28, 0.75);
-                backdrop-filter: blur(24px);
-                background: rgba(25, 25, 28, 0.9);
-                backdrop-filter: blur(24px);
-                position: relative;
-                z-index: 1000;
-            }
-
-
             @keyframes bio-slidein {
                 from { transform: translate(0, -0px); opacity: 0; }
             }
@@ -44,7 +32,7 @@ export default class TwitchChat extends Chat {
                 animation: bio-slidein .2s ease;
                 display: grid;
                 grid-template-columns: auto 1fr;
-                padding: 30px 30px 40px 30px;
+                padding: 60px 30px 40px 30px;
                 margin-bottom: 10px;
                 background: #0c0c0c;
             }
@@ -167,6 +155,58 @@ export default class TwitchChat extends Chat {
                 z-index: 1000;
                 pointer-events: none;
             }
+
+            .chat-title {
+                grid-column: 2;
+                position: relative;
+                z-index: 100;
+                width: 100%;
+                padding: 5px 6px;
+                box-sizing: border-box;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                align-items: center;
+                white-space: nowrap;
+                font-size: 12px;
+                font-weight: 400;
+                color: #ababab;
+                display: flex;
+                flex-wrap: wrap;
+            }
+
+            .chat-title > div {
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .chat-title span {
+                opacity: 0.5;
+            }
+
+            .tag {
+                display: inline-block;
+                border-radius: 12px;
+                background: rgba(25, 25, 28, 0.9);
+                padding: 5px 10px;
+                backdrop-filter: blur(12px);
+                border: 1px solid #1f1f23;
+                max-width: 100%;
+                margin-right: 4px;
+                margin-bottom: 4px;
+                font-size: 12px;
+                color: #cbcbcb;
+                box-shadow: 1px 2px 8px #0000007a;
+            }
+
+            .tag img {
+                vertical-align: bottom;
+            }
+
+            .title-tag {
+                width: 100%;
+                font-weight: 500;
+                font-size: 13px;
+            }
         `;
     }
 
@@ -215,17 +255,24 @@ export default class TwitchChat extends Chat {
         this.channel = channel_login;
     }
 
+    stream_title: string = "";
+    game: string = "";
+    viewer_count: number = 0;
+    status: string = "";
+    stream_start: number = 0;
+
     setTitle({
         viewer_count = 0,
         started_at = 0,
         game_name = "",
         title = ""
     } = {}) {
-        this.stream_title = html`
-            <div title="${title}">
-                ${Format.number(viewer_count)} - <stream-timer starttime="${started_at}"></stream-timer> - ${game_name} - ${title}
-            </div>
-        `;
+        this.game = game_name;
+        this.stream_start = started_at;
+        this.stream_title = title;
+        this.viewer_count = viewer_count;
+
+        this.update();
     }
 
     setBio(bio_data: any) {
@@ -344,11 +391,30 @@ export default class TwitchChat extends Chat {
                         </div>
                     </div>
                 </div>
-                <div class="chat-title">
-                    ${!this.stream_title ?
-                        (channel.chatter_count > 0 ? `Offline - ${Format.number(channel.chatter_count)} chatters` : "Offline")
-                    : this.stream_title}
-                </div>
+            </div>
+            <div class="chat-title">
+                ${!this.stream_title ? html`
+                    <div class="tag" title="Status">Offline</div>
+
+                    ${channel.chatter_count > 0 ? html`
+                        <div class="tag" title="Chatters">
+                            <img src="./images/Viewer.svg" width="16px"/>
+                            ${Format.number(channel.chatter_count)}
+                        </div>
+                    ` : ""}
+
+                ` : html`
+                    <div class="tag title-tag" title="Title">${this.stream_title}</div>
+                    <div class="tag" title="Uptime">Live - <stream-timer starttime="${this.stream_start}"></stream-timer></div>
+                    <div class="tag" title="Game">
+                        <img src="./images/Game.svg" width="16px"/> 
+                        ${this.game}
+                    </div>
+                    <div class="tag" title="Viewercount">
+                        <img src="./images/Viewer.svg" width="16px"/>
+                        ${Format.number(this.viewer_count)}
+                    </div>
+                `}
             </div>
             <div class="event-feed">
                 
