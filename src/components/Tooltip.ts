@@ -8,10 +8,11 @@ let lastOverlay: PageOverlay | null = null;
 function createOverlayForImageElement(e: PointerEvent) {
     const target = e.target as HTMLImageElement;
     const overlay = new PageOverlay(e.x, e.y);
+    const service = target.getAttribute('service');
     overlay.innerHTML = `
         <img src="${target.src}" />
         <div style="margin-top: 5px;">${target.alt}</div>
-        <div style="margin-top: 2px; opacity: 0.5;">${target.getAttribute('service')}</div>
+        ${service ? `<div style="margin-top: 2px; opacity: 0.5;">${service}</div>` : ""}
     `;
     document.body.append(overlay);
     return overlay;
@@ -21,9 +22,9 @@ function createOverlayForLink(e: PointerEvent) {
     const target = e.target as HTMLLinkElement;
     const overlay = new PageOverlay(e.x, e.y);
     overlay.innerHTML = `<net-loader></net-loader>`;
-    // LinkPreview.generate(target.href).then(data => {
-    //     overlay.innerHTML = data;
-    // })
+    LinkPreview.generate(target.href).then(data => {
+        overlay.innerHTML = data;
+    })
     document.body.append(overlay);
     return overlay;
 }
