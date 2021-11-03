@@ -85,4 +85,8 @@ export default class TwitchApi {
         return TwichCommands;
     }
 
+    static async getClip(clip_id: string) {
+        return (await this.fetch('/clips', 'id=' + clip_id)).data;
+    }
+
 }

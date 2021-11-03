@@ -62,7 +62,7 @@ twitch-login-panel net-loader {
 }
 
 page-overlay net-loader {
-    transform: scale(0.75);
+    transform: scale(0.65);
 }
 
 notification {
@@ -118,4 +118,8 @@ twitch-login-panel {
     justify-content: center;
     align-items: center;
     height: 100%;
+}
+
+.clip-title img {
+    vertical-align: bottom;
 }

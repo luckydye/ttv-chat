@@ -1,5 +1,6 @@
 import PageOverlay from './PageOverlay';
 import LinkPreview from './LinkPreview';
+import { render } from 'lit-html';
 import './Loader';
 
 let lastTarget: EventTarget | null = null;
@@ -18,13 +19,20 @@ function createOverlayForImageElement(e: PointerEvent) {
     return overlay;
 }
 
+let linkOverlayTimeout: any;
+
 function createOverlayForLink(e: PointerEvent) {
     const target = e.target as HTMLLinkElement;
     const overlay = new PageOverlay(e.x, e.y);
     overlay.innerHTML = `<net-loader></net-loader>`;
-    LinkPreview.generate(target.href).then(data => {
-        overlay.innerHTML = data;
-    })
+
+    clearTimeout(linkOverlayTimeout);
+    linkOverlayTimeout = setTimeout(() => {
+        LinkPreview.generate(target.innerText).then(data => {
+            render(data, overlay);
+        })
+    }, 200);
+    
     document.body.append(overlay);
     return overlay;
 }

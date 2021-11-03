@@ -189,7 +189,7 @@ export default class TwitchChat extends Chat {
                 border-radius: 12px;
                 background: rgba(25, 25, 28, 0.9);
                 padding: 5px 10px;
-                backdrop-filter: blur(12px);
+                backdrop-filter: blur(8px);
                 border: 1px solid #1f1f23;
                 max-width: 100%;
                 margin-right: 4px;

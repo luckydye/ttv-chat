@@ -105,8 +105,7 @@ export default class ProfileIndicator extends LitElement {
                 border-radius: 50%;
                 background: #1f1f23;
                 z-index: -1;
-                border: 1px solid white;
-                opacity: 0.5;
+                border: 1px solid #858585;
             }
             .profile-icon[tagged]::before {
                 border-color: hsl(0deg 97% 60%);

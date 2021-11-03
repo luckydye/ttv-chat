@@ -215,7 +215,6 @@ export default class MessageParser {
         //  (3rd party emtoes | global emtoes | links | metions | msg tagged)
         msg_words.forEach(str => {
             // find channel emote repalcement
-            // TODO: PROBLEM: it renders sub emotes for people that dont have those emotes lol
             if(channel_emotes) {
                 for(let service in channel_emotes) {
                     if(!channel_emotes[service] || service == "twitch") {
