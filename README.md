@@ -34,6 +34,7 @@ A new Twitch Chat Client with some third party things.
 
 Look at [Latest Releases](https://github.com/luckydye/better-twitch-chat/releases).
 
+I am open to any feedback, please contact me on [Twitter](https://twitter.com/timh4v)
 
 ## Development
 
