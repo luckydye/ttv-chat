@@ -88,6 +88,8 @@ export async function authClientUser() {
         "channel:read:polls",
         "channel:read:predictions",
         "channel:read:redemptions",
+        "channel:manage:broadcast",
+        "channel:read:editors",
         "moderation:read",
         "user:manage:blocked_users",
         "user:read:blocked_users",

@@ -19,6 +19,18 @@ export interface UserInfo {
     created_at: string
 }
 
+interface ChannelInfo {
+    game_id?: string,
+    broadcaster_language?: string,
+    title?: string,
+}
+
+interface ChannelEditor {
+    user_id: string,
+    user_name: string,
+    created_at: string,
+}
+
 export default class TwitchApi {
 
     static get CLIENT_ID() {
@@ -54,10 +66,6 @@ export default class TwitchApi {
         return userinfo;
     }
 
-    static async requestMessageHistory() {
-
-    }
-
     static async connectToPubSub(): Promise<TwitchPubsub> {
         const token = localStorage.getItem('user-token');
         if (token) {
@@ -66,11 +74,6 @@ export default class TwitchApi {
         } else {
             throw new Error('not logged in, can not connect to pubsub.');
         }
-    }
-
-    static logout() {
-        localStorage.removeItem('user-token');
-        location.reload();
     }
 
     static async getStreams(user_id: string) {
@@ -87,6 +90,17 @@ export default class TwitchApi {
 
     static async getClip(clip_id: string) {
         return (await this.fetch('/clips', 'id=' + clip_id)).data;
+    }
+
+    static async setChannelInfo(channel_id: string, info: ChannelInfo) {
+        return fetch('https://api.twitch.tv/helix/channels?broadcaster_id=' + channel_id, {
+            method: "PATCH",
+            body: JSON.stringify(info),
+        })
+    }
+
+    static async getChannelEditors(channel_id: string): Promise<Array<ChannelEditor>> {
+        return (await this.fetch('/channels/editors', 'broadcaster_id='+channel_id)).data;
     }
 
 }
