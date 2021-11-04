@@ -1,4 +1,6 @@
-export default [
+import { CommandList } from "../CommandList";
+
+const defaultCommandList = [
     {
         command: 'mods',
         syntax: '/mods',
@@ -100,3 +102,21 @@ export default [
         description: 'An Affiliate and Partner command that runs a commercial, for 30 seconds, for all of your viewers.'
     }
 ]
+
+export default defaultCommandList;
+
+export class TwitchCommands {
+
+    static async fetchCommandList(_: string): Promise<CommandList> {
+        return {
+            serviceName: "Twitch",
+            commands: defaultCommandList.map((cmd: any) => {
+                return {
+                    command: cmd.command,
+                    description: cmd.description
+                }
+            })
+        }
+    }
+
+}

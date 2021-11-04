@@ -12,6 +12,9 @@ import ChatMessageEvent from './events/ChatMessage';
 import Badges from './services/Badges';
 import Emotes from './services/Emotes';
 import Format from './util/Format';
+import StreamElementsApi from './services/StreamElements';
+import NightbotApi from './services/Nightbot';
+import { TwitchCommands } from './services/twitch/TwichCommands';
 
 let pubsub;
 let pubsub_features;
@@ -35,6 +38,12 @@ interface ClearChatMessage {
     action: ClearChatAction,
     server_timestamp: Date,
 }
+
+const COMMAND_SERVICE = [
+    StreamElementsApi,
+    NightbotApi,
+    TwitchCommands
+];
 
 
 export default class Channel {
@@ -71,6 +80,8 @@ export default class Channel {
     chat: TwitchChat;
 
     constructor(channel_name: string) {
+        console.log(this);
+        
         this.channel_login = channel_name;
         this.messageParser = new MessageParser(this);
 
@@ -452,6 +463,14 @@ export default class Channel {
     findReward(id: string) {
         if (pubsub) {
             return pubsub.rewards[id];
+        }
+    }
+
+    fetchCommandList(callback: Function) {
+        for(let service of COMMAND_SERVICE) {
+            service.fetchCommandList(this.channel_login).then(list => {
+                callback(list);
+            })
         }
     }
 
