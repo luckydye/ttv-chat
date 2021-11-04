@@ -315,10 +315,10 @@ export default class MessageParser {
             ` : ''}
             <div class="line" style="--color: ${color}" ?action="${message.is_action}">
                 ${message.user_name !== user_login ? html`
-                    <span class="chat-line-tool inline-tool" title="Timeout 1m" @click="${() => this.channel.timeout(message.channel, message.user_name, 60)}">
+                    <span class="chat-line-tool mod-tool inline-tool" title="Timeout 1m" @click="${() => this.channel.timeout(message.channel, message.user_name, 60)}">
                         <img src="./images/block_white_24dp.svg" width="16px" height="16px" />
                     </span>
-                    <span class="chat-line-tool inline-tool delete-tool" title="Delete Message" @click="${() => this.channel.deleteMessage(message.channel, message.id)}">
+                    <span class="chat-line-tool mod-tool inline-tool delete-tool" title="Delete Message" @click="${() => this.channel.deleteMessage(message.channel, message.id)}">
                         <img src="./images/delete_white_24dp.svg" width="16px" height="16px" />
                     </span>
                     <span class="chat-line-tool inline-tool mod-tool-deleted" title="Unban" @click="${() => this.channel.unban(message.channel, message.user_name)}">

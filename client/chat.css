@@ -103,8 +103,12 @@ chat-line:hover .tools .chat-line-tool {
 }
 
 chat-line .chat-line-tool.inline-tool {
-    display: inline-flex;
-    transform: translateY(-1px);
+    transform: translateY(-1.5px);
+    margin-left: -3px;
+}
+
+chat-line .chat-line-tool:first-child {
+    margin-left: -2px;
 }
 
 :not([modview]) chat-line .chat-line-tool.mod-tool-deleted {
@@ -115,6 +119,9 @@ chat-line .chat-line-tool.inline-tool {
 }
 [modview] chat-line[deleted] .chat-line-tool.delete-tool {
     display: none;
+}
+[modview] chat-line .chat-line-tool.mod-tool {
+    display: inline-flex;
 }
 
 [modview] chat-line:hover .tools .chat-line-tool.mod-tool {
