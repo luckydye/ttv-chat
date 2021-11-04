@@ -56,7 +56,7 @@ chat-line:hover {
 chat-line .line-title {
     opacity: 0.5;
     line-height: 140%;
-    padding: 6px 0 4px 0;
+    padding: 4px 0 0 0;
     margin-left: -1px;
 }
 
@@ -98,7 +98,7 @@ chat-line .chat-line-tool:active {
     transform: scale(0.95);
 }
 
-chat-line:hover .tools .chat-line-tool {
+chat-line:not([deleted]):hover .tools .chat-line-tool {
     display: inline-flex;
 }
 
@@ -124,10 +124,6 @@ chat-line .chat-line-tool:first-child {
     display: inline-flex;
 }
 
-[modview] chat-line:hover .tools .chat-line-tool.mod-tool {
-    display: inline-flex;
-}
-
 chat-line[deleted] {
     opacity: 0.33;
 }
@@ -138,8 +134,8 @@ chat-line[tagged] {
 
 chat-line[highlighted] {
     background: rgb(148 74 255 / 25%);
-    padding-top: 8px;
-    padding-bottom: 8px;
+    padding-top: 4px;
+    padding-bottom: 4px;
 }
 
 chat-line .mention {

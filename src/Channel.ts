@@ -343,11 +343,13 @@ export default class Channel {
             }
         });
         IRC.listen(IRCEvents.ChatDeleteMessage, (msg) => {
-            const line = this.chat.querySelector(`[messageid="${msg.message_id}"]`);
-            if(line) {
-                line.setAttribute("deleted", "");
+            if(this.channel_login === msg.channel_login) {
+                const line = this.chat.querySelector(`[messageid="${msg.message_id}"]`);
+                if(line) {
+                    line.setAttribute("deleted", "");
+                }
+                this.chat.appendNote(`${msg.channel_login} deleted message.`);
             }
-            this.chat.appendNote(`${msg.channel_login} deleted message.`);
         });
 
         IRC.joinChatRoom(this.channel_login.toLocaleLowerCase());
