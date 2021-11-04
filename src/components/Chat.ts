@@ -68,11 +68,13 @@ export default class Chat extends LitElement {
     }
 
     scrollToLatest() {
-        const scrollEle = this.shadowRoot?.querySelector('.lines');
-        if (!scrollEle) return;
+        requestAnimationFrame(() => {
+            const scrollEle = this.shadowRoot?.querySelector('.lines');
+            if (!scrollEle) return;
 
-        this.scrollTarget = scrollEle.scrollHeight;
-        AnimatedScroll.scrollTo(this.scrollTarget, scrollEle);
+            this.scrollTarget = scrollEle.scrollHeight - scrollEle.clientHeight;
+            AnimatedScroll.scrollTo(this.scrollTarget, scrollEle);
+        })
     }
 
     toLatest() {
@@ -80,6 +82,22 @@ export default class Chat extends LitElement {
         if (!scrollEle) return;
         this.scrollTarget = scrollEle.scrollHeight;
         scrollEle.scrollTo(0, this.scrollTarget);
+        this.lock();
+    }
+
+    afterAppend() {
+        // update scroll position
+        if (this.scrollLock) {
+            this.scrollToLatest();
+        }
+
+        // clean out buffer
+        if (this.children.length > this.MAX_BUFFER_SIZE + 20) {
+            const rest = (this.children.length - this.MAX_BUFFER_SIZE);
+            for (let i = 0; i < rest; i++) {
+                this.children[i].remove();
+            }
+        }
     }
 
     updateLock() {
@@ -93,23 +111,6 @@ export default class Chat extends LitElement {
         }
         if (this.scrollTarget <= latest - 10) {
             this.unlock();
-        }
-    }
-
-    afterAppend() {
-        // update scroll position
-        if (this.scrollLock) {
-            setTimeout(() => {
-                this.scrollToLatest();
-            }, 10);
-        }
-
-        // clean out buffer
-        if (this.children.length > this.MAX_BUFFER_SIZE + 20) {
-            const rest = (this.children.length - this.MAX_BUFFER_SIZE);
-            for (let i = 0; i < rest; i++) {
-                this.children[i].remove();
-            }
         }
     }
 

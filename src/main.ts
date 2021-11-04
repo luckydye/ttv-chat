@@ -56,10 +56,6 @@ async function onLogin(account: Account) {
 
     Application.setAccount(account);
 
-    // custom mentions channel
-    // chatElements["@"] = document.createElement("sample-chat");
-    // chatElements["@"].setRoom("Mentions");
-
     console.log('Initialized');
 
     window.dispatchEvent(new Event(Events.Initialize));
