@@ -3,6 +3,7 @@ import { css, html, LitElement } from 'lit-element';
 import IRC from '../services/IRC';
 import Application from '../App';
 import EmotePicker from './EmotePicker';
+import Emotes from '../services/Emotes';
 
 // TODO: Emote Sugestions
 
@@ -188,19 +189,7 @@ export default class ChatInput extends LitElement {
         }
         if (e.key == "Tab") {
             e.preventDefault();
-            // autocomplete sugestion
-            if(this.value.length > 2) {
-                const sugs = this.commandSugestionsList;
-
-                let cmd = sugs[0];
-                if(cmd.command.replace(this.commandCharacter, "") == this.inputElement.innerText && sugs.length > 1) {
-                    cmd = sugs[1];
-                }
-                if(cmd) {
-                    this.inputElement.innerText = cmd.command.replace(this.commandCharacter, "");
-                    this.setCursorPosition(1);
-                }
-            }
+            this.autocomplete();
         }
 
         if(this.value == "" && e.key == "/") {
@@ -214,9 +203,45 @@ export default class ChatInput extends LitElement {
         }
     }
 
+    async autocomplete() {
+        if(this.value.length >= 2) {
+            // sugest commands
+            const sugs = this.commandSugestionsList;
+            let cmd = sugs[0];
+            if(cmd) {
+                if(cmd.command.replace(this.commandCharacter, "") == this.inputElement.innerText && sugs.length > 1) {
+                    cmd = sugs[1];
+                }
+                this.inputElement.innerText = cmd.command.replace(this.commandCharacter, "");
+                this.setCursorPosition(1);
+                return;
+            }
+
+            const words = this.inputElement.innerText.split(" ");
+            const currWord = words[words.length-1];
+
+            // suggest emotes
+            // TODO: Emotes
+            const emotes = await this.getEmnoteSugestions(currWord);
+            if(emotes[0]) {
+                this.inputElement.innerText = words.slice(0, words.length - 1).join(" ") + " " + emotes[0];
+                this.setCursorPosition(1);
+                return;
+            }
+
+            // suggest names
+            const names = this.getNameSugestions(currWord);
+
+            if(names[0]) {
+                this.inputElement.innerText = words.slice(0, words.length - 1).join(" ") + " " + names[0];
+                this.setCursorPosition(1);
+            }
+        }
+    }
+
     handleKeyUp(e: KeyboardEvent) {
         if (e.key == "Backspace") {
-            if(this.inputElement.innerText.length == 1 || this.inputElement.innerText == "") {
+            if(this.inputElement.innerText.length == 0 || this.inputElement.innerText == "") {
                 this.resetInput();
             }
         }
@@ -233,6 +258,38 @@ export default class ChatInput extends LitElement {
                 }, 1);
             });
         }
+    }
+
+    getNameSugestions(str: string) {
+        const channel = Application.getChannel(Application.getSelectedChannel());
+        if(channel) {
+            const chatters = channel.chatters;
+            return chatters.filter(name => name.toLocaleLowerCase().match(str.toLocaleLowerCase()));
+        }
+        return [];
+    }
+
+    async getEmnoteSugestions(str: string): Promise<Array<string>> {
+        const channel = Application.getChannel(Application.getSelectedChannel());
+        if(channel) {
+            const global = await Emotes.getGlobalEmotes();
+            const chnl = await Emotes.getChannelEmotes(channel.channel_id);
+            const allEmtoes = [];
+
+            for(let serivce in global) {
+                if(chnl) {
+                    for(let emote in chnl[serivce]) {
+                        allEmtoes.push(emote);
+                    }
+                }
+                for(let emote in global[serivce]) {
+                    allEmtoes.push(emote);
+                }
+            }
+
+            return allEmtoes.filter(name => name.toLocaleLowerCase().match(str.toLocaleLowerCase()));
+        }
+        return [];
     }
 
     getCommandSugestions(str: string, callback: Function): void {
