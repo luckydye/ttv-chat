@@ -10,6 +10,8 @@ import './FluidInput';
 import './Timer';
 import './UserList';
 
+// TODO: Make line tools buttons smaller
+
 export default class TwitchChat extends Chat {
 
     channel: string | undefined;

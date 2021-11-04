@@ -3,7 +3,10 @@ import { css, html, LitElement } from 'lit-element';
 import IRC from '../services/IRC';
 import Application from '../App';
 import EmotePicker from './EmotePicker';
-import TwitchCommands from '../services/twitch/TwichCommands';
+
+// TODO: Hide sugestions on input blur
+// TODO: Emote Sugestions
+// TODO: make a reply mode like command mode
 
 const MAX_HSITORY_LENGTH = 20;
 
