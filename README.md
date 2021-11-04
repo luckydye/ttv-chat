@@ -1,21 +1,40 @@
-# Better Twitch Chat
+# Better Twitch Chat (WIP)
 
 A new Twitch Chat Client with some third party things.
 
+![Screenshot](https://i.imgur.com/Zw0NifK.jpeg)
 
 ## Features
 
-Emotes
+
+#### Emotes
 - [x] Twitch
 - [x] BetterTTV
 - [x] FFZ
 - [x] 7TV
 
+#### All Mentions collected in one place in a Mentions tab.
+
+#### Command Sugestions and Autocomplete
+- [x] Twitch
+- [x] StreamElements
+- [x] Nightbot
+
+![Command Sugestions](https://i.imgur.com/A8eRDpW.jpeg)
+
+#### IRC replies
+
+![Screenshot Replise](https://i.imgur.com/8DjfJK0.jpeg)
+
+#### One Click Sub/Follower/Emoteonly mode
+
+![State Buttons](https://i.imgur.com/1vHIidZ.jpeg)
 
 ## Install
 
 Look at [Latest Releases](https://github.com/luckydye/better-twitch-chat/releases).
 
+I am open to any feedback, please contact me on [Twitter](https://twitter.com/timh4v)
 
 ## Development
 
