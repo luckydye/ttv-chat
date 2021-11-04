@@ -175,17 +175,15 @@ export default class ChatInput extends LitElement {
             e.preventDefault();
             // autocomplete sugestion
             if(this.value.length > 2) {
-                const sugs = this.commandSugestion();
+                const sugs = this.commandSugestionsList;
 
                 let cmd = sugs[0];
-                if(cmd.command == this.inputElement.innerText && sugs.length > 1) {
+                if(cmd.command.replace(this.commandCharacter, "") == this.inputElement.innerText && sugs.length > 1) {
                     cmd = sugs[1];
                 }
                 if(cmd) {
-                    this.inputElement.innerText = cmd.command;
-                    requestAnimationFrame(() => {
-                        this.setCursorPosition(1);
-                    });
+                    this.inputElement.innerText = cmd.command.replace(this.commandCharacter, "");
+                    this.setCursorPosition(1);
                 }
             }
         }
@@ -209,40 +207,38 @@ export default class ChatInput extends LitElement {
         }
 
         if(this.commandMode && this.value.length >= 2) {
-            const channel = Application.getChannel(Application.getSelectedChannel());
-            this.commandSugestionsList = [];
-            channel?.fetchCommandList((list_part: CommandList) => {                
-                if(list_part.commandPrefix == this.commandCharacter) {
-                    for(let cmd of list_part.commands) {
-                        if(cmd.command.match(this.inputElement.innerText)) {
-                            this.commandSugestionsList.push({
-                                service: list_part.serviceName,
-                                // remove prefix if present in provided data and add it manually
-                                command: list_part.commandPrefix + cmd.command.replace(list_part.commandPrefix, ""),
-                                description: cmd.description
-                            });
-                        }
-                    }
-                }
+            this.getCommandSugestions(this.inputElement.innerText, list => {
+                this.commandSugestionsList = list;
 
                 this.update();
 
                 setTimeout(() => {
                     const ele = this.shadowRoot?.querySelector('.flyout');
                     ele?.scrollTo(0, ele.scrollHeight);
-                }, 10)
+                }, 1);
             });
         }
     }
 
-    commandSugestion() {
-        const sugestions = [];
-        for(let cmd of TwitchCommands) {
-            if(cmd.command.match(this.inputElement.innerText)) {
-                sugestions.push(cmd);
+    getCommandSugestions(str: string, callback: Function): void {
+        const list: Array<any> = [];
+        const channel = Application.getChannel(Application.getSelectedChannel());
+        return channel?.fetchCommandList((list_part: CommandList) => {                
+            if(list_part.commandPrefix == this.commandCharacter) {
+                for(let cmd of list_part.commands) {
+                    if(cmd.command.match(str)) {
+                        list.push({
+                            service: list_part.serviceName,
+                            // remove prefix if present in provided data and add it manually
+                            command: list_part.commandPrefix + cmd.command.replace(list_part.commandPrefix, ""),
+                            description: cmd.description
+                        });
+                    }
+                }
+
+                callback(list);
             }
-        }
-        return sugestions;
+        });
     }
 
     constructor() {
