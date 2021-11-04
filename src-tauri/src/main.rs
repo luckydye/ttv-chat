@@ -48,9 +48,8 @@ pub fn handle_server_message(message: ServerMessage, app_handle: &tauri::AppHand
     }
     ServerMessage::ClearMsg(msg) => {
       // message deletes
-      let transport = messages::handle_clear_message(msg);
       app_handle
-        .emit_all("chat.delete.message", transport)
+        .emit_all("chat.delete.message", msg)
         .unwrap();
     }
     ServerMessage::ClearChat(msg) => {
@@ -137,6 +136,20 @@ async fn chat_send_message(channel: String, message: String) {
 }
 
 #[command]
+async fn chat_delete_message(channel_name: String, message_id: String, message: String, user: String) {
+  unsafe {
+    APP_CHAT.delete_message(channel_name, message_id, message, user).await;
+  }
+}
+
+#[command]
+async fn chat_reply(channel: String, message_id: String, message: String) {
+  unsafe {
+    APP_CHAT.reply(channel, message_id, message).await;
+  }
+}
+
+#[command]
 fn open_link(url: String) {
   if webbrowser::open(&url).is_ok() {
     println!("opened link");
@@ -155,6 +168,8 @@ fn main() {
       chat_join_room,
       chat_leave_room,
       chat_send_message,
+      chat_delete_message,
+      chat_reply,
       get_userlist,
       open_link
     ])

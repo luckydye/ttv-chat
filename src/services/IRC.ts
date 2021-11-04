@@ -87,44 +87,61 @@ export default class IRC {
         }).catch((e) => console.error(e))
     }
 
-    static async sendMessage(channel_login: string, channel_id: string, message: string) {
-        return invoke('chat_send_message', {
-            channel: channel_login,
-            message,
-        })
-            .then(e => {
-                if(message[0] !== "/") {
-                    // loop message back to display in chat if its not a command
-                    if(!this.usermap[channel_login]) {
-                        console.error('User not listed');
-                    }
-                    const user = this.usermap[channel_login];
-                    const message_data: UserMessage = {
-                        channel: channel_login,
-                        message_type: 'user',
-                        id: Math.floor(Math.random() * 100000000000).toString(),
-                        text: message,
-                        user_name: user.username || "user not found",
-                        user_id: "chat-client",
-                        color: Color.hexToRgb(user.color),
-                        emotes: [],
-                        badges: user.badges || [],
-                        timestamp: new Date(),
-                        is_action: false,
-                        bits: 0,
-                        tags: {
-                            "room-id": channel_id,
-                        },
-                    }
-
-                    for(let callback of listeners.get("chat.message")) {
-                        callback(message_data);
-                    }
+    static async sendMessage(channel_login: string, channel_id: string, message: string, reply_message_id?: string) {
+        const loopBackMessage = e => {
+            if(message[0] !== "/") {
+                // loop message back to display in chat if its not a command
+                if(!this.usermap[channel_login]) {
+                    console.error('User not listed');
+                }
+                const user = this.usermap[channel_login];
+                const message_data: UserMessage = {
+                    channel: channel_login,
+                    message_type: 'user',
+                    id: Math.floor(Math.random() * 100000000000).toString(),
+                    text: message,
+                    user_name: user.username || "user not found",
+                    user_id: "chat-client",
+                    color: Color.hexToRgb(user.color),
+                    emotes: [],
+                    badges: user.badges || [],
+                    timestamp: new Date(),
+                    is_action: false,
+                    bits: 0,
+                    tags: {
+                        "room-id": channel_id,
+                        "reply-parent-msg-id": reply_message_id != undefined ? reply_message_id : null
+                    },
                 }
 
-                console.log('message sent');
+                for(let callback of listeners.get("chat.message")) {
+                    callback(message_data);
+                }
+            }
+
+            console.log('message sent');
+        };
+
+        if(reply_message_id != undefined) {
+            return invoke('chat_reply', {
+                channel: channel_login, 
+                messageId: reply_message_id, 
+                message: message
             })
-            .catch((e) => console.error(e))
+                .then(loopBackMessage)
+                .catch((e) => console.error(e))
+        } else {
+            return invoke('chat_send_message', {
+                channel: channel_login,
+                message,
+            })
+                .then(loopBackMessage)
+                .catch((e) => console.error(e))
+        }
+    }
+
+    static async replyToMessage(channel_login: string, channel_id: string, message: string, message_id: string) {
+        return this.sendMessage(channel_login, channel_id, message, message_id);
     }
 
     static async sendCommand(channel: string, message: string) {

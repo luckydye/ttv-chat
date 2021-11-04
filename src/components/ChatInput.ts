@@ -4,9 +4,7 @@ import IRC from '../services/IRC';
 import Application from '../App';
 import EmotePicker from './EmotePicker';
 
-// TODO: Hide sugestions on input blur
 // TODO: Emote Sugestions
-// TODO: make a reply mode like command mode
 
 const MAX_HSITORY_LENGTH = 20;
 
@@ -20,6 +18,8 @@ export default class ChatInput extends LitElement {
     commandSugestionsList: Array<any> = [];
     commandCharacter: string = "/";
 
+    replyId: string | undefined;
+
     set value(v: string) {
         const ele = this.getInputElement();
         ele.innerHTML = v;
@@ -27,7 +27,7 @@ export default class ChatInput extends LitElement {
 
     get value() {
         const ele = this.getInputElement();
-        if(this.commandMode) {
+        if(this.commandMode && (this.commandCharacter == "!" || this.commandCharacter == "/")) {
             return this.commandCharacter + ele.innerText;
         } else {
             return ele.innerText;
@@ -56,8 +56,19 @@ export default class ChatInput extends LitElement {
         if (this.value != "") {
             this.addToHistory(this.value);
             const channel = Application.getChannel(Application.getSelectedChannel());
-            IRC.sendMessage(channel.channel_login, channel.channel_id, this.value);
+            if(this.replyId) {
+                IRC.replyToMessage(channel.channel_login, channel.channel_id, this.value, this.replyId);
+            } else {
+                IRC.sendMessage(channel.channel_login, channel.channel_id, this.value);
+            }
         }
+    }
+
+    reply(message_sender: string, message_id: string) {
+        this.enableCommandMode(message_sender);
+        this.replyId = message_id;
+        this.insert("<br>");
+        this.focus();
     }
 
     loadHistory() {
@@ -140,6 +151,7 @@ export default class ChatInput extends LitElement {
         this.historyPointer = -1;
         this.commandMode = false;
         this.commandSugestionsList = [];
+        this.replyId = undefined;
         this.update();
     }
 
@@ -420,6 +432,9 @@ export default class ChatInput extends LitElement {
                 z-index: 100000;
                 max-height: 200px;
                 overflow: auto;
+            }
+            :host(:not(:focus-within)) .flyout {
+                display: none;
             }
 
             .command-sugestion {

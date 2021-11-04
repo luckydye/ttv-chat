@@ -81,11 +81,12 @@ chat-line .reply-icon {
 
 chat-line .chat-line-tool {
     cursor: pointer;
-    padding: 4px 6px;
-    border-radius: 3px;
+    padding: 2px 2px;
+    border-radius: 4px;
     display: none;
     justify-content: center;
     align-items: center;
+    vertical-align: sub;
 }
 
 chat-line .chat-line-tool:hover {
@@ -98,23 +99,26 @@ chat-line .chat-line-tool:active {
 }
 
 chat-line:hover .tools .chat-line-tool {
-    display: flex;
+    display: inline-flex;
 }
 
-chat-line:hover .tools .chat-line-tool.mod-tool {
+chat-line .chat-line-tool.inline-tool {
+    display: inline-flex;
+    transform: translateY(-1px);
+}
+
+:not([modview]) chat-line .chat-line-tool.mod-tool-deleted {
     display: none;
 }
-
-chat-line:hover .tools .chat-line-tool.mod-tool-banned {
+[modview] chat-line[deleted] .chat-line-tool.mod-tool-deleted {
+    display: inline-flex;
+}
+[modview] chat-line[deleted] .chat-line-tool.delete-tool {
     display: none;
 }
 
 [modview] chat-line:hover .tools .chat-line-tool.mod-tool {
-    display: flex;
-}
-
-[modview] chat-line[deleted]:hover .tools .chat-line-tool.mod-tool-banned {
-    display: flex;
+    display: inline-flex;
 }
 
 chat-line[deleted] {

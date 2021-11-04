@@ -314,6 +314,17 @@ export default class MessageParser {
                 <div class="line-title">${line_title}</div>
             ` : ''}
             <div class="line" style="--color: ${color}" ?action="${message.is_action}">
+                ${message.user_name !== user_login ? html`
+                    <span class="chat-line-tool inline-tool" title="Timeout 1m" @click="${() => this.channel.timeout(message.channel, message.user_name, 60)}">
+                        <img src="./images/block_white_24dp.svg" width="16px" height="16px" />
+                    </span>
+                    <span class="chat-line-tool inline-tool delete-tool" title="Delete Message" @click="${() => this.channel.deleteMessage(message.channel, message.id)}">
+                        <img src="./images/delete_white_24dp.svg" width="16px" height="16px" />
+                    </span>
+                    <span class="chat-line-tool inline-tool mod-tool-deleted" title="Unban" @click="${() => this.channel.unban(message.channel, message.user_name)}">
+                        <img src="./images/done_white_24dp.svg" width="16px" height="16px" />
+                    </span>
+                ` : ""}
                 <span class="bages">
                     ${message.badges.map(badge => {
                         let badge_url = "";
@@ -340,12 +351,6 @@ export default class MessageParser {
                     ${message.user_name !== user_login ? html`
                         <div class="chat-line-tool" title="Reply" @click="${() => this.channel.reply(message.channel, message)}">
                             <img src="./images/reply_white_24dp.svg" height="18px" width="18px" />
-                        </div>
-                        <div class="chat-line-tool mod-tool" title="Timeout 10s" @click="${() => this.channel.timeout(message.channel, message.user_name, 10)}">
-                            <img src="./images/block_white_24dp.svg" width="18px" height="18px" />
-                        </div>
-                        <div class="chat-line-tool mod-tool-banned" title="Unban" @click="${() => this.channel.unban(message.channel, message.user_name)}">
-                            <img src="./images/done_white_24dp.svg" width="18px" height="18px" />
                         </div>
                     ` : ""}
                 </div>

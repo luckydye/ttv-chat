@@ -1,6 +1,7 @@
 use twitch_irc::login::StaticLoginCredentials;
 use twitch_irc::SecureTCPTransport;
 use twitch_irc::TwitchIRCClient;
+use twitch_irc::irc;
 
 pub struct ChatApp {
   pub connected_channels: Vec<String>,
@@ -50,6 +51,26 @@ impl ChatApp {
         .position(|n| *n == channel_name)
         .unwrap();
       self.connected_channels.remove(index);
+    }
+  }
+
+  pub async fn delete_message(&mut self, channel_name: String, message_id: String, message: String, user: String) {
+    if self.chat_client.is_some() {
+      let client = self.chat_client.as_ref().unwrap();
+      
+      // this ain workin, idk
+      let irc_msg = irc!["CLEARMSG", format!("@login={};target-msg-id={}", user, message_id), ":tmi.twitch.tv", format!("#{}", channel_name), format!(":{}", message)];
+
+      println!("{:?}", irc_msg);
+
+      client.send_message(irc_msg).await.unwrap();
+    }
+  }
+
+  pub async fn reply(&mut self, channel_name: String, message_id: String, message: String) {
+    if self.chat_client.is_some() {
+      let client = self.chat_client.as_ref().unwrap();
+      client.say_in_response(channel_name, message, Some(message_id)).await.unwrap();
     }
   }
 }

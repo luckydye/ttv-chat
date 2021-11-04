@@ -339,7 +339,7 @@ export default class Channel {
             if(line) {
                 line.setAttribute("deleted", "");
             }
-            console.log('Delete Message', msg);
+            this.chat.appendNote(`${msg.channel_login} deleted message.`);
         });
 
         IRC.joinChatRoom(this.channel_login.toLocaleLowerCase());
@@ -412,14 +412,17 @@ export default class Channel {
     reply(channel: string, message: ChatMessage) {
         Application.selectChannel(channel);
         const input = document.querySelector('chat-input');
-        input.insert(message.user_name + ', ');
-        input.focus();
+        input.reply(message.user_name, message.id);
         // message.id
         // also place the message id as parent message into the sumbited message
     }
 
     timeout(channel: string, user_name: string, secs: number) {
         IRC.sendMessage(channel, this.channel_id, `/timeout ${user_name} ${secs}`);
+    }
+
+    deleteMessage(channel: string, message_id: string) {
+        IRC.sendMessage(channel, this.channel_id, `/delete ${message_id}`);
     }
 
     unban(channel: string, user_name: string) {
