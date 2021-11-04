@@ -1,4 +1,4 @@
-# Better Twitch Chat
+# Better Twitch Chat (WIP)
 
 A new Twitch Chat Client with some third party things.
 
