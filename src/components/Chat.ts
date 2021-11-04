@@ -10,7 +10,7 @@ import './UserList';
 
 export default class Chat extends LitElement {
 
-    MAX_BUFFER_SIZE = 500;
+    MAX_BUFFER_SIZE = 400;
 
     scrollLock = true;
     roomName: string = "";

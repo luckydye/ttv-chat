@@ -122,7 +122,9 @@ export default class ContextMenu extends LitElement {
         this.addEventListener('blur', e => {
             setTimeout(() => {
                 // check if any inner element has the focus
-                this.close();
+                if(document.activeElement !== this) {
+                    this.close();
+                }
             }, 150);
         })
     }
