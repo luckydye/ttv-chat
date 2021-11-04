@@ -221,7 +221,6 @@ export default class ChatInput extends LitElement {
             const currWord = words[words.length-1];
 
             // suggest emotes
-            // TODO: Emotes
             const emotes = await this.getEmnoteSugestions(currWord);
             if(emotes[0]) {
                 this.inputElement.innerText = words.slice(0, words.length - 1).join(" ") + " " + emotes[0];

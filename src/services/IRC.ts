@@ -32,6 +32,7 @@ export interface ChatUser {
     badges: Array<object>,
     badge_info: Array<object>,
     name_color: Array<number>,
+    emote_sets: Array<number>
 }
 
 export interface UserState {
@@ -39,6 +40,7 @@ export interface UserState {
     username: string,
     badges: Array<object>,
     color: string,
+    emote_sets: Array<number>
 }
 
 export interface JoinMessage {
@@ -172,6 +174,7 @@ export default class IRC {
                             username: payload.username,
                             badges: payload.badges,
                             color: Color.rgbToHex(Color.limitColorContrast(...payload.name_color)),
+                            emote_sets: payload.emote_sets
                         };
                         this.usermap[payload.channel] = message_data;
                         return callback(message_data);

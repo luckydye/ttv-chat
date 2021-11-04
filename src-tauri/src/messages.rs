@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use twitch_irc::message::Badge;
 use twitch_irc::message::Emote;
 use twitch_irc::message::IRCTags;
@@ -33,6 +34,7 @@ pub struct ChatUser {
   badges: Vec<Badge>,
   badge_info: Vec<Badge>,
   name_color: Vec<u8>,
+  emote_sets: HashSet<u64>,
 }
 
 ///////////////////
@@ -119,6 +121,7 @@ pub fn handle_user_state_message(msg: twitch_irc::message::UserStateMessage) -> 
     username: msg.user_name.to_owned(),
     badges: msg.badges,
     badge_info: msg.badge_info,
+    emote_sets: msg.emote_sets,
     name_color: match msg.name_color {
       Some(nc) => {
         vec![nc.r, nc.g, nc.b]
