@@ -75,6 +75,13 @@ export default class Chat extends LitElement {
         AnimatedScroll.scrollTo(this.scrollTarget, scrollEle);
     }
 
+    toLatest() {
+        const scrollEle = this.shadowRoot?.querySelector('.lines');
+        if (!scrollEle) return;
+        this.scrollTarget = scrollEle.scrollHeight;
+        scrollEle.scrollTo(0, this.scrollTarget);
+    }
+
     updateLock() {
         const scrollEle = this.shadowRoot?.querySelector('.lines');
         if (!scrollEle) return;

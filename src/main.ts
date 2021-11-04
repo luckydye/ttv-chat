@@ -38,7 +38,7 @@ function renderSelecetdChat(channel: string) {
             }
     
             requestAnimationFrame(() => {
-                chatEle.lock();
+                chatEle.toLatest();
             });
         }
     }
