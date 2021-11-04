@@ -109,6 +109,7 @@ export class TwitchCommands {
 
     static async fetchCommandList(_: string): Promise<CommandList> {
         return {
+            commandPrefix: "/",
             serviceName: "Twitch",
             commands: defaultCommandList.map((cmd: any) => {
                 return {

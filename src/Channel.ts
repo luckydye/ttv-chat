@@ -1,3 +1,4 @@
+import { CommandList } from './services/CommandList';
 import IRC, { IRCEvents, JoinMessage, PartMessage } from './services/IRC';
 import TwitchPubsub from './services/twitch/Pubsub';
 import TwitchApi, { UserInfo } from './services/twitch/Api';
@@ -15,6 +16,8 @@ import Format from './util/Format';
 import StreamElementsApi from './services/StreamElements';
 import NightbotApi from './services/Nightbot';
 import { TwitchCommands } from './services/twitch/TwichCommands';
+
+const COMMAND_CACHE_LIFETIME = 1000 * 60;
 
 let pubsub;
 let pubsub_features;
@@ -66,6 +69,7 @@ export default class Channel {
     follwers_only = 0;
     slow_mode = 0;
     chatter_count = 0;
+    active_moderators = [];
     channel_view_count: number = 0;
 
     slowmode_time = 10;
@@ -79,9 +83,10 @@ export default class Channel {
 
     chat: TwitchChat;
 
+    commandListCache: Array<CommandList> = [];
+    commandListCacheTS: number = -1;
+
     constructor(channel_name: string) {
-        console.log(this);
-        
         this.channel_login = channel_name;
         this.messageParser = new MessageParser(this);
 
@@ -157,6 +162,7 @@ export default class Channel {
         }
 
         await IRC.getUserlist(this.channel_login).then(chatters => {
+            this.active_moderators = chatters.chatters.moderators;
             this.chatter_count = chatters.chatter_count;
         });
 
@@ -467,10 +473,23 @@ export default class Channel {
     }
 
     fetchCommandList(callback: Function) {
+        if(Date.now() - this.commandListCacheTS > COMMAND_CACHE_LIFETIME) {
+            // reset cache
+            this.commandListCache = [];
+            this.commandListCacheTS = Date.now();
+        } else {
+            // provide cached values
+            for(let list of this.commandListCache) {
+                callback(list);
+            }
+            return;
+        }
+
         for(let service of COMMAND_SERVICE) {
             service.fetchCommandList(this.channel_login).then(list => {
+                this.commandListCache.push(list);
                 callback(list);
-            })
+            });
         }
     }
 

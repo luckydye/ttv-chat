@@ -4,6 +4,7 @@ export interface Command {
 }
 
 export interface CommandList {
+    commandPrefix: string,
     serviceName: string,
     commands: Array<Command>
 }

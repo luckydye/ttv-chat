@@ -1,3 +1,4 @@
+import { CommandList } from './../services/CommandList';
 import { css, html, LitElement } from 'lit-element';
 import IRC from '../services/IRC';
 import Application from '../App';
@@ -13,6 +14,7 @@ export default class ChatInput extends LitElement {
     history: Array<string> = [];
     historyPointer: number = -1;
 
+    commandSugestionsList: Array<any> = [];
     commandCharacter: string = "/";
 
     set value(v: string) {
@@ -32,13 +34,15 @@ export default class ChatInput extends LitElement {
     set commandMode(val: boolean) {
         if(val === true) {
             this.inputElement.setAttribute('command', this.commandCharacter);
+            this.setAttribute('command', this.commandCharacter);
         } else {
             this.inputElement.removeAttribute('command');
+            this.removeAttribute('command');
         }
     }
 
     get commandMode() {
-        return this.inputElement.hasAttribute('command');
+        return this.hasAttribute('command');
     }
 
     getInputElement() {
@@ -132,6 +136,17 @@ export default class ChatInput extends LitElement {
         this.value = "";
         this.historyPointer = -1;
         this.commandMode = false;
+        this.commandSugestionsList = [];
+        this.update();
+    }
+
+    enableCommandMode(prefix: string = "/") {
+        this.commandCharacter = prefix;
+        this.inputElement.innerHTML += "<br>";
+        requestAnimationFrame(() => {
+            this.setCursorPosition(1);
+        });
+        this.commandMode = true;
     }
 
     handleKeyDown(e: KeyboardEvent) {
@@ -141,18 +156,26 @@ export default class ChatInput extends LitElement {
             e.preventDefault();
         }
         if (e.key == "ArrowUp") {
-            this.nextHistoryValue();
+            if(this.commandMode) {
+                // move command sugestion pointer up
+            } else {
+                this.nextHistoryValue();
+            }
             e.preventDefault();
         }
         if (e.key == "ArrowDown") {
-            this.prevHistoryValue();
+            if(this.commandMode) {
+                // move command sugestion pointer down
+            } else {
+                this.prevHistoryValue();
+            }
             e.preventDefault();
         }
         if (e.key == "Tab") {
             e.preventDefault();
             // autocomplete sugestion
             if(this.value.length > 2) {
-                const sugs = this.commandSugestions();
+                const sugs = this.commandSugestion();
 
                 let cmd = sugs[0];
                 if(cmd.command == this.inputElement.innerText && sugs.length > 1) {
@@ -178,15 +201,6 @@ export default class ChatInput extends LitElement {
         }
     }
 
-    enableCommandMode(prefix: string = "/") {
-        this.commandCharacter = prefix;
-        this.inputElement.innerHTML += "<br>";
-        requestAnimationFrame(() => {
-            this.setCursorPosition(1);
-        });
-        this.commandMode = true;
-    }
-
     handleKeyUp(e: KeyboardEvent) {
         if (e.key == "Backspace") {
             if(this.inputElement.innerText.length == 1 || this.inputElement.innerText == "") {
@@ -194,12 +208,34 @@ export default class ChatInput extends LitElement {
             }
         }
 
-        if(this.commandMode) {
-            // realtime sugestions
+        if(this.commandMode && this.value.length >= 2) {
+            const channel = Application.getChannel(Application.getSelectedChannel());
+            this.commandSugestionsList = [];
+            channel?.fetchCommandList((list_part: CommandList) => {                
+                if(list_part.commandPrefix == this.commandCharacter) {
+                    for(let cmd of list_part.commands) {
+                        if(cmd.command.match(this.inputElement.innerText)) {
+                            this.commandSugestionsList.push({
+                                service: list_part.serviceName,
+                                // remove prefix if present in provided data and add it manually
+                                command: list_part.commandPrefix + cmd.command.replace(list_part.commandPrefix, ""),
+                                description: cmd.description
+                            });
+                        }
+                    }
+                }
+
+                this.update();
+
+                setTimeout(() => {
+                    const ele = this.shadowRoot?.querySelector('.flyout');
+                    ele?.scrollTo(0, ele.scrollHeight);
+                }, 10)
+            });
         }
     }
 
-    commandSugestions() {
+    commandSugestion() {
         const sugestions = [];
         for(let cmd of TwitchCommands) {
             if(cmd.command.match(this.inputElement.innerText)) {
@@ -254,35 +290,40 @@ export default class ChatInput extends LitElement {
         })
     }
 
-    render() {
-        return html`
-            <div class="wrapper">
-                <div class="input-field">
-                    <div class="text-input">
-                        ${this.inputElement}
-                    </div>
-                    <div class="util">
-                        <!-- <button name="create poll">Y</button>
-                        <button name="create prediction">X</button> -->
-                        <button name="Emotes" @click="${this.openEmotePicker}">
-                            <img src="./images/sentiment_satisfied_alt_white_24dp.svg" width="22px" height="22px"/>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
     static get styles() {
         return css`
             :host {
                 display: block;
                 width: 100%;
+                position: relative;
             }
             :host([disabled]) {
                 pointer-events: none;
                 opacity: 0;
             }
+
+            /* // webkit scrollbars */
+            ::-webkit-scrollbar {
+                width: 8px;
+                margin: 5px 0;
+            }
+            ::-webkit-scrollbar-button {
+                display: none;
+            }
+            ::-webkit-scrollbar-track-piece  {
+                background: transparent;
+            }
+            ::-webkit-scrollbar-thumb {
+                background: var(--color-scrollbar-thumb, #1c1c1c);
+                border-radius: 5px;
+            }
+            ::-webkit-scrollbar-thumb:hover {
+                background: var(--color-scrollbar-thumb-hover, #333333);
+            }
+            ::-webkit-scrollbar-corner {
+                background: transparent;
+            }
+
             .wrapper {
                 padding: 8px;
             }
@@ -361,6 +402,94 @@ export default class ChatInput extends LitElement {
             button img {
                 display: block;
             }
+
+            .flyout {
+                display: none;
+            }
+            :host([command]) .flyout {
+                display: block;
+                position: absolute;
+                bottom: calc(100% - 10px);
+                left: 30px;
+                right: 30px;
+                min-height: 20px;
+                padding: 8px;
+                background: rgb(20 20 20);
+                border-radius: 6px;
+                box-shadow: 1px 2px 24px rgb(0 0 0 / 30%);
+                border: 1px solid rgb(16 16 16);
+                z-index: 100000;
+                max-height: 200px;
+                overflow: auto;
+            }
+
+            .command-sugestion {
+                border-radius: 4px;
+                display: grid;
+                grid-template-columns: 1fr auto;
+                padding: 8px;
+                gap: 4px;
+                align-items: center;
+                background: rgb(27, 27, 27);
+                cursor: pointer;
+            }
+            .command-sugestion:hover {
+                background: rgb(42, 42, 42);
+            }
+            .command-sugestion:not(:last-child) {
+                margin-bottom: 2px;
+            }
+            .command-name {
+                font-size: 14px;
+                font-weight: 400;
+            }
+            .command-service {
+                opacity: 0.25;
+                font-weight: 400;
+                font-size: 12px;
+            }
+            .command-description {
+                opacity: 0.5;
+                font-size: 12px;
+                grid-column: 1 / span 2;
+            }
+        `;
+    }
+
+    render() {
+        const insertCommand = (cmd) => {
+            this.value = cmd.command.replace(this.commandCharacter, "");
+            this.setCursorPosition(1);
+        }
+        return html`
+            ${this.commandSugestionsList.length == 0 ? "" : html`
+                <div class="flyout">
+                    ${this.commandSugestionsList.map(cmd => {
+                        return html`
+                            <div class="command-sugestion" @click="${e => insertCommand(cmd)}">
+                                <div class="command-name">${cmd.command}</div>
+                                <div class="command-service">${cmd.service}</div>
+                                <div class="command-description">${cmd.description}</div>
+                            </div>
+                        `;
+                    })}
+                </div>
+            `}
+
+            <div class="wrapper">
+                <div class="input-field">
+                    <div class="text-input">
+                        ${this.inputElement}
+                    </div>
+                    <div class="util">
+                        <!-- <button name="create poll">Y</button>
+                        <button name="create prediction">X</button> -->
+                        <button name="Emotes" @click="${this.openEmotePicker}">
+                            <img src="./images/sentiment_satisfied_alt_white_24dp.svg" width="22px" height="22px"/>
+                        </button>
+                    </div>
+                </div>
+            </div>
         `;
     }
 }

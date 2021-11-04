@@ -1,5 +1,6 @@
 import { CommandList } from "./CommandList";
 
+// refactor this into a "cachedFetch" with cache IDs and TTLs
 export default class StreamElementsApi {
 
     static async fetchCommandList(channel_login: string): Promise<CommandList> {
@@ -29,11 +30,18 @@ export default class StreamElementsApi {
         // },
 
         // https://api.streamelements.com/kappa/v2/bot/commands/${channel_id}/default
-        const url = `https://api.streamelements.com/kappa/v2/bot/commands/${user._id}/default`;
-        return fetch(url).then(res => res.json()).then(list => {
+        // and
+        // https://api.streamelements.com/kappa/v2/bot/commands/${channel_id}
+        const url1 = `https://api.streamelements.com/kappa/v2/bot/commands/${user._id}/default`;
+        const url2 = `https://api.streamelements.com/kappa/v2/bot/commands/${user._id}`;
+
+        return fetch(url2).then(res => res.json()).then(async list => {
+            const defaults = await fetch(url1).then(res => res.json());
+            
             return {
+                commandPrefix: "!",
                 serviceName: "StreamElements",
-                commands: list.map((cmd: any) => {
+                commands: [...defaults, ...list].map((cmd: any) => {
                     return {
                         command: cmd.command,
                         description: cmd.description

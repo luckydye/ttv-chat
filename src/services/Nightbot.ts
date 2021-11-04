@@ -13,6 +13,7 @@ export default class NightbotApi {
             }
         }).then(res => res.json()).then(({ commands }) => {
             return {
+                commandPrefix: "!",
                 serviceName: "Nightbot",
                 commands: commands.map((cmd: any) => {
                     return {
