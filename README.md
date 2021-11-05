@@ -62,8 +62,8 @@ Next goal: Beta Release
 - [x] show point redemtions in chat !important
 - [x] make the profile ring red on a mention
 - [x] Chat commands and names sugestions
+- [x] finish Emote Picker
 - [ ] Fix room drag n drop
-- [ ] finish Emote Picker
 - [ ] update title and game via websocket, not interval
 - [ ] (implement dialog for one-click timeout, to prevent missclicks)
 - [ ] Edit stream information like title and game
