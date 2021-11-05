@@ -19,6 +19,7 @@ A new Twitch Chat Client with some third party things.
 - [x] Twitch
 - [x] StreamElements
 - [x] Nightbot
+- [ ] Fossabot
 
 ![Command Sugestions](https://i.imgur.com/A8eRDpW.jpeg)
 
@@ -67,7 +68,7 @@ Next goal: Beta Release
 - [ ] (implement dialog for one-click timeout, to prevent missclicks)
 - [ ] Edit stream information like title and game
 
-## To be included features (TODOs):
+## Ideas (TODOs):
 - [x] sub mode toggle
 - [x] All the emotes
 - [x] Stream Title
@@ -84,10 +85,13 @@ Next goal: Beta Release
 - [x] (MessageParser) seperate out the message log part of the chat for seperate mention and whisper tab wihtout, chat-input, bio and room state stuff
 - [ ] Notifications
 - [ ] Reccomend channels from follow list
-- [ ] Cache chatroom profile pictures for faster loading time and also will just look faster without actually beeing faster
+- [ ] Cache profile pictures with service worker
+- [ ] UI for
+    - Pols
+    - Predictions
 
 #### Visibility panel
-- [ ] Show/Hide delted messages
+- [ ] Show/Hide deleted messages
 - [ ] adjustable chat font size
 - [ ] Hide emtoes by service
 - [ ] Streamer features
@@ -105,13 +109,11 @@ Next goal: Beta Release
 
 #### Chat
 - [x] emote and badge tool tips
-- [ ] Youtube chats
+- [x] User panel (used the twitch userpanel as popout)
 - [ ] Inline Notifications
-    - Follows?
     - Game change
     - Stream Title change
-- [x] User panel (used the twitch userpanel as popout)
-- [ ] "Threads" (Mentions)
+- [ ] "Threads" (Mentions and replies)
     - Optin thread
     - Person gets added to thread on mention
 
@@ -121,8 +123,3 @@ Next goal: Beta Release
 - [x] Suggest bot commands aswell if posible
 - [ ] Username color picker
 - [ ] Input emote parsing
-- [ ] UI for
-    - Pols
-    - Predictions
-- [ ] Chat input UI like the discord one with emote, pol/Pred feature, etc
-- [ ] Channel Point Redemtions
