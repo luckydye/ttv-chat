@@ -19,6 +19,7 @@ A new Twitch Chat Client with some third party things.
 - [x] Twitch
 - [x] StreamElements
 - [x] Nightbot
+- [ ] Fossabot
 
 ![Command Sugestions](https://i.imgur.com/A8eRDpW.jpeg)
 
