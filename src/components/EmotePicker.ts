@@ -1,4 +1,4 @@
-import { css, html } from 'lit-element';
+import { css, html, TemplateResult } from 'lit-element';
 import ContextMenu from "./ContextMenu";
 import Emotes from '../services/Emotes';
 import Application from '../App';
@@ -10,7 +10,7 @@ export default class EmotePicker extends ContextMenu {
             ${super.styles}
             :host {
                 display: block;
-                right: 20px !important;
+                right: 10px !important;
                 bottom: 60px;
                 top: auto;
                 left: auto;
@@ -24,17 +24,21 @@ export default class EmotePicker extends ContextMenu {
                 padding: 8px 12px;
             }
             .category {
-                grid-gap: 2px;
-                display: grid;
-                grid-template-columns: repeat(10, 1fr);
+                display: flex;
+                flex-wrap: wrap;
+                --grid-gap: 5px;
+                margin-right: calc(var(--grid-gap) * -1px);
+                padding: 0 4px;
             }
             img {
                 object-fit: contain;
                 cursor: pointer;
-                width: 100%;
+                max-height: 32px;
+                margin: 0 var(--grid-gap) var(--grid-gap) 0;
             }
             img:hover {
                 background: #333;
+                outline: 1px solid #eeeeeebe;
             }
             img:active {
                 transform: scale(0.95);
@@ -60,7 +64,7 @@ export default class EmotePicker extends ContextMenu {
             }
 
             .tab {
-                line-height: 32px;
+                line-height: 24px;
                 vertical-align: middle;
                 position: relative;
                 text-align: center;
@@ -69,6 +73,10 @@ export default class EmotePicker extends ContextMenu {
                 user-select: none;
                 border-radius: 4px;
                 font-size: 12px;
+                opacity: 0.5;
+            }
+            .tab[active] {
+                opacity: 1;
             }
             .tab[active]::after {
                 opacity: 1;
@@ -87,8 +95,12 @@ export default class EmotePicker extends ContextMenu {
                 width: 100%;
                 height: 2px;
                 background: grey;
-                opacity: 0.2;
+                opacity: 0.5;
                 text-align: center;
+            }
+
+            .emote-preview {
+                height: 10px;
             }
         `;
     }
@@ -99,68 +111,70 @@ export default class EmotePicker extends ContextMenu {
 
     tabSelected = "twitch";
 
+    renderEmoteTab(channel: Channel, tab: string) {
+        const channel_emotes = Emotes.getChachedChannelEmotes(channel.channel_id);
+        const global_emotes = Emotes.global_emotes;
+
+        return html`
+            ${channel_emotes[tab] ? html `
+                <label>Channel</label>
+                <div class="category">
+                    ${Object.keys(channel_emotes[tab]).map(emote => html`<img 
+                        src="${channel_emotes[tab][emote].url_x2}" 
+                        alt="${emote}"
+                        @click="${() => {
+                            const input = document.querySelector('chat-input');
+                            input.insert(emote);
+                        }}"/>`)
+                    }
+                </div>
+            ` : ""}
+            ${global_emotes[tab] ? html `
+                <label>Global</label>
+                <div class="category">
+                    ${Object.keys(global_emotes[tab]).map(emote => html`<img 
+                        src="${global_emotes[tab][emote].url_x2}" 
+                        alt="${emote}"
+                        @click="${() => {
+                            const input = document.querySelector('chat-input');
+                            input.insert(emote);
+                        }}"/>`)
+                    }
+                </div>
+            ` : ""}
+        `;
+    }
+
+    selectTab(tab: string) {
+        this.tabSelected = tab;
+        this.update();
+    }
+
     render() {
+        // TODO: Gotta check what sub emotes client can use
         const channel = Application.getSelectedChannel();
         const ch = Application.getChannel(channel);
-        const channel_emotes = Emotes.getChachedChannelEmotes(ch.channel_id);
-        const global_emotes = Emotes.global_emotes;
-        // TODO: Gotta check what sub emotes client can use
 
-        const selectTab = (tab: string) => {
-            this.tabSelected = tab;
-            this.update();
-        }
-        
+        const emoteTab = this.renderEmoteTab(ch, this.tabSelected);
+
         return html`
-            
             <div class="tabs">
                 <div class="tab" ?active="${this.tabSelected == "twitch"}" tab-id="twitch" 
-                    @click="${e => selectTab(e.target.getAttribute("tab-id"))}">Twitch</div>
+                    @click="${e => this.selectTab(e.target.getAttribute("tab-id"))}">Twitch</div>
                 <div class="tab" ?active="${this.tabSelected == "bttv"}" tab-id="bttv" 
-                    @click="${e => selectTab(e.target.getAttribute("tab-id"))}">BTTV</div>
+                    @click="${e => this.selectTab(e.target.getAttribute("tab-id"))}">BTTV</div>
                 <div class="tab" ?active="${this.tabSelected == "ffz"}" tab-id="ffz" 
-                    @click="${e => selectTab(e.target.getAttribute("tab-id"))}">FFZ</div>
+                    @click="${e => this.selectTab(e.target.getAttribute("tab-id"))}">FFZ</div>
                 <div class="tab" ?active="${this.tabSelected == "7tv"}" tab-id="7tv" 
-                    @click="${e => selectTab(e.target.getAttribute("tab-id"))}">7TV</div>
+                    @click="${e => this.selectTab(e.target.getAttribute("tab-id"))}">7TV</div>
             </div>
 
             <div class="emote-list">
-                ${channel_emotes[this.tabSelected] ? html `
-                    <label>Channel</label>
-                    <div class="category">
-                        ${Object.keys(channel_emotes[this.tabSelected]).map(emote => html`<img 
-                            src="${channel_emotes[this.tabSelected][emote].url_x2}" 
-                            alt="${emote}"
-                            @load="${(e) => {
-                                if(e.target.width > e.target.height * 2) {
-                                    e.target.style = "grid-column: span 3;";
-                                }
-                            }}"
-                            @click="${() => {
-                                const input = document.querySelector('chat-input');
-                                input.insert(emote);
-                            }}"/>`)
-                        }
-                    </div>
-                ` : ""}
-                ${global_emotes[this.tabSelected] ? html `
-                    <label>Global</label>
-                    <div class="category">
-                        ${Object.keys(global_emotes[this.tabSelected]).map(emote => html`<img 
-                            src="${global_emotes[this.tabSelected][emote].url_x2}" 
-                            alt="${emote}"
-                            @load="${(e) => {
-                                if(e.target.width > e.target.height * 2) {
-                                    e.target.style = "grid-column: span 3;";
-                                }
-                            }}"
-                            @click="${() => {
-                                const input = document.querySelector('chat-input');
-                                input.insert(emote);
-                            }}"/>`)
-                        }
-                    </div>
-                ` : ""}
+                ${emoteTab}
+            </div>
+
+            <div class="emote-preview">
+                
             </div>
         `;
     }
