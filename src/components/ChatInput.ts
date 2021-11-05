@@ -1,4 +1,4 @@
-import { CommandList } from './../services/CommandList';
+import { CommandList, UserLevel } from './../services/CommandList';
 import { css, html, LitElement } from 'lit-element';
 import IRC from '../services/IRC';
 import Application from '../App';
@@ -240,12 +240,15 @@ export default class ChatInput extends LitElement {
 
     handleKeyUp(e: KeyboardEvent) {
         if (e.key == "Backspace") {
-            if(this.inputElement.innerText.length == 0 || this.inputElement.innerText == "") {
+            if(this.inputElement.innerText.length == 0 || 
+                this.inputElement.innerText == " " ||
+                this.inputElement.innerText == "\n" ||
+                this.inputElement.innerText == "") {
                 this.resetInput();
             }
         }
 
-        if(this.commandMode && this.value.length >= 2) {
+        if(this.commandMode && this.value.length >= 1) {
             this.getCommandSugestions(this.inputElement.innerText, list => {
                 this.commandSugestionsList = list;
 
@@ -296,8 +299,12 @@ export default class ChatInput extends LitElement {
         const channel = Application.getChannel(Application.getSelectedChannel());
         return channel?.fetchCommandList((list_part: CommandList) => {                
             if(list_part.commandPrefix == this.commandCharacter) {
+                let currentUserLevel = 0;
+                if(channel.vip) currentUserLevel = UserLevel.vip;
+                if(channel.moderator) currentUserLevel = UserLevel.moderator;
+                if(channel.broadcaster) currentUserLevel = UserLevel.broadcaster;
                 for(let cmd of list_part.commands) {
-                    if(cmd.command.match(str)) {
+                    if(cmd.command.match(str) && cmd.userlevel <= currentUserLevel) {
                         list.push({
                             service: list_part.serviceName,
                             // remove prefix if present in provided data and add it manually
@@ -410,7 +417,7 @@ export default class ChatInput extends LitElement {
                 width: 100%;
                 border: none;
                 outline: none;
-                padding: 13px 12px 15px 12px;
+                padding: 13px 40px 15px 12px;
                 color: #eee;
                 font-family: 'Roboto', sans-serif;
                 font-size: 14px;

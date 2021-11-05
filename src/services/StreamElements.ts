@@ -1,4 +1,4 @@
-import { CommandList } from "./CommandList";
+import { CommandList, UserLevel } from "./CommandList";
 
 // refactor this into a "cachedFetch" with cache IDs and TTLs
 export default class StreamElementsApi {
@@ -38,13 +38,26 @@ export default class StreamElementsApi {
         return fetch(url2).then(res => res.json()).then(async list => {
             const defaults = await fetch(url1).then(res => res.json());
             
+            // everyone     - 100
+            // subscriber   - 250
+            // vip          - 400
+            // mod          - 500
+            // boradcaster  - 1500
+
             return {
                 commandPrefix: "!",
                 serviceName: "StreamElements",
-                commands: [...defaults, ...list].map((cmd: any) => {
+                commands: [...defaults, ...list].filter(cmd => cmd.enabled).map((cmd: any) => {
+                    let userlevel = cmd.accessLevel;
+                    if(cmd.accessLevel <= 100) userlevel = UserLevel.everyone;
+                    if(cmd.accessLevel >= 250) userlevel = UserLevel.subscriber;
+                    if(cmd.accessLevel >= 400) userlevel = UserLevel.vip;
+                    if(cmd.accessLevel >= 500) userlevel = UserLevel.moderator;
+                    if(cmd.accessLevel >= 1500) userlevel = UserLevel.broadcaster;
                     return {
                         command: cmd.command,
-                        description: cmd.description
+                        description: cmd.description,
+                        userlevel: userlevel
                     }
                 })
             };

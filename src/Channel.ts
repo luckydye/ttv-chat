@@ -75,6 +75,7 @@ export default class Channel {
     slowmode_time = 10;
     followermode_time = 10;
 
+    vip = false;
     moderator = false;
     broadcaster = false;
 
@@ -161,6 +162,7 @@ export default class Channel {
             this.chat.setTitle(stream[0]);
         } else {
             this.is_live = false;
+            this.chat.setTitle(null);
         }
 
         await IRC.getUserlist(this.channel_login).then(chatters => {
@@ -223,6 +225,10 @@ export default class Channel {
         });
         IRC.listen(IRCEvents.UserState, (msg) => {
             if (msg.channel === this.channel_login) {
+                this.vip = false;
+                this.moderator = false;
+
+                this.vip = msg.badges.find(b => b.name == "vip") !== undefined;
                 this.moderator = msg.badges.find(b => b.name == "moderator") !== undefined;
                 this.broadcaster = msg.badges.find(b => b.name == "broadcaster") !== undefined;
 

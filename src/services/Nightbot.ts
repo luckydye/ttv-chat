@@ -1,4 +1,4 @@
-import { CommandList } from "./CommandList";
+import { CommandList, UserLevel } from "./CommandList";
 
 export default class NightbotApi {
 
@@ -18,7 +18,8 @@ export default class NightbotApi {
                 commands: commands.map((cmd: any) => {
                     return {
                         command: cmd.name,
-                        description: cmd.message
+                        description: cmd.message,
+                        userlevel: UserLevel[cmd.userLevel]
                     }
                 })
             };

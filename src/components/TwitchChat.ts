@@ -265,16 +265,23 @@ export default class TwitchChat extends Chat {
     status: string = "";
     stream_start: number = 0;
 
-    setTitle({
-        viewer_count = 0,
-        started_at = 0,
-        game_name = "",
-        title = ""
-    } = {}) {
-        this.game = game_name;
-        this.stream_start = started_at;
-        this.stream_title = title;
-        this.viewer_count = viewer_count;
+    setTitle(options: any | null) {
+        if(options) {
+            const {
+                viewer_count = 0,
+                started_at = 0,
+                game_name = "",
+                title = ""
+            } = options;
+            this.game = game_name;
+            this.stream_start = started_at;
+            this.stream_title = title;
+            this.viewer_count = viewer_count;
+        } else {
+            this.stream_start = 0;
+            this.stream_title = "";
+            this.viewer_count = 0;
+        }
 
         this.update();
     }
