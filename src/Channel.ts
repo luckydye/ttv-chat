@@ -113,14 +113,16 @@ export default class Channel {
             await Badges.getChannelBadges(this.channel_id);
             // get cached channel emotes
             await Emotes.getChannelEmotes(this.channel_id);
-            
-            // join the chat 
-            this.joinIRC();
 
             this.channel_id = info.id;
             this.profile_image_url = info.profile_image_url;
             this.channel_view_count = info.view_count;
             this.channel_description = info.description;
+
+            window.dispatchEvent(new ChannelInfoChanged(this));
+            
+            // join the chat 
+            this.joinIRC();
 
             this.fetchChannelStatus();
             this.fetchChannelBio().then(bio => {

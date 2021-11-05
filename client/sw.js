@@ -1,9 +1,9 @@
 // Choose a cache name
 const cacheName = 'cache-v1';
-// List the files to precache
-const precacheResources = [
-    
-];
+
+const expectedCaches = ['cache-v1'];
+
+const precacheResources = [];
 
 const cahceResources = [
     // emotes
@@ -18,25 +18,40 @@ const cahceResources = [
     "https://static-cdn.jtvnw.net/jtv_user_pictures/",
     // user info
     "https://api.frankerfacez.com/v1/room/id/",
+
+    // api response cache
+    "https://api.twitch.tv/helix/users",
 ];
 
 // When the service worker is installing, open the cache and add the precache resources to it
 self.addEventListener('install', (event) => {
     console.log('Service worker install event!');
-    event.waitUntil(caches.open(cacheName).then((cache) => cache.addAll(precacheResources)));
+    event.waitUntil(caches.open(cacheName).then((cache) => {
+        cache.addAll(precacheResources);
+    }));
 });
 
 self.addEventListener('activate', (event) => {
     console.log('Service worker activate event!');
+
+    event.waitUntil(
+        caches.keys().then(keys => Promise.all(
+            keys.map(key => {
+                if (!expectedCaches.includes(key)) {
+                    return caches.delete(key);
+                }
+            })
+        )).then(() => {
+            console.log('Updated service worker!');
+        })
+    );
 });
 
 // When there's an incoming fetch request, try and respond with a precached resource, otherwise fall back to the network
 self.addEventListener('fetch', (event) => {
-    if(cahceResources.find(r => event.request.url.match(r))) {
-        // console.log('Fetch intercepted for:', event.request.url);
+    if (cahceResources.find(r => event.request.url.match(r))) {
         event.respondWith(fetchCache(event.request));
     } else {
-        console.log('Ignored cache for', event.request.url);
         event.respondWith(fetch(event.request));
     }
 });
