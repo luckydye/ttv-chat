@@ -12,6 +12,20 @@
     <link rel="stylesheet" href="./chat.css">
     <link rel="stylesheet" href="./rooms.css">
 
+    <script>
+        async function regSW() {
+            if ('serviceWorker' in navigator) {
+                try {
+                    const reg = await navigator.serviceWorker.register("./sw.js");
+                    console.log('Service worker registered! 😎', reg);
+                } catch (err) {
+                    console.log('😥 Service worker registration failed: ', err);
+                }
+            }
+        }
+        regSW();
+    </script>
+
     <script type="module" src="./main.js"></script>
 </head>
 
@@ -32,7 +46,7 @@
                 <chat-input></chat-input>
             </div>
         </div>
-        
+
     </div>
 </body>
 

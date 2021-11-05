@@ -66,7 +66,7 @@ export default class Channel {
     r9k = false;
     subscribers_only = false;
     emote_only = false;
-    follwers_only = 0;
+    follwers_only = -1;
     slow_mode = 0;
     chatter_count = 0;
     chatters: Array<string> = [];
@@ -262,9 +262,9 @@ export default class Channel {
                     this.emote_only = msg.emote_only;
                 }
                 if (msg.follwers_only !== null) {
-                    this.follwers_only = msg.follwers_only !== "Disabled" ? msg.follwers_only.Enabled.secs : 0;
+                    this.follwers_only = msg.follwers_only !== "Disabled" ? msg.follwers_only.Enabled.secs : -1;
                     if (this.followermode_time === 0) {
-                        this.followermode_time = this.follwers_only / 60;
+                        this.followermode_time = msg.follwers_only.Enabled.secs / 60;
                     }
                 }
                 if (msg.slow_mode !== null) {
@@ -367,7 +367,7 @@ export default class Channel {
 
     toggleFollowerMode() {
         if (this.moderator || this.broadcaster) {
-            if (this.follwers_only) {
+            if (this.follwers_only > -1) {
                 IRC.sendMessage(this.channel_login, this.channel_id, "/followersoff");
             } else {
                 IRC.sendMessage(this.channel_login, this.channel_id, "/followers " + this.followermode_time);
