@@ -83,6 +83,7 @@ export default class Channel {
     account: Account;
 
     chat: TwitchChat;
+    emoteSets: Array<number> = [];
 
     commandListCache: Array<CommandList> = [];
     commandListCacheTS: number = -1;
@@ -231,6 +232,8 @@ export default class Channel {
                 this.vip = msg.badges.find(b => b.name == "vip") !== undefined;
                 this.moderator = msg.badges.find(b => b.name == "moderator") !== undefined;
                 this.broadcaster = msg.badges.find(b => b.name == "broadcaster") !== undefined;
+
+                this.emoteSets = msg.emote_sets;
 
                 // PubSub for mod stuff
                 if (!this.mod_pubsub && (this.moderator || this.broadcaster)) {

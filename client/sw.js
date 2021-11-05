@@ -20,7 +20,7 @@ const cahceResources = [
     "https://api.frankerfacez.com/v1/room/id/",
 
     // api response cache
-    "https://api.twitch.tv/helix/users",
+    "https://api.twitch.tv/helix/chat/emotes/set",
 ];
 
 // When the service worker is installing, open the cache and add the precache resources to it

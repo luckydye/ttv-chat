@@ -326,8 +326,6 @@ export default class TwitchChat extends Chat {
             return html``;
         }
 
-        // TODO: Followers only mode with 0 seconds is possible btw.
-
         return html`
             <div class="header">
                 <div class="chat-actions">
@@ -372,7 +370,7 @@ export default class TwitchChat extends Chat {
                             </div>
                         </div>
                         <div class="chat-action">
-                            <div class="room-state-icon" title="Follow mode for ${channel.follwers_only > -1}s" ?active="${channel.follwers_only !== 0}" @click="${channel.toggleFollowerMode.bind(channel)}">
+                            <div class="room-state-icon" title="Follow mode for ${channel.follwers_only}s" ?active="${channel.follwers_only >= 0}" @click="${channel.toggleFollowerMode.bind(channel)}">
                                 <img src="./images/follower.svg" width="18px" height="18px"/>
                             </div>
                             <div class="room-state-icon action-expand" title="Follower time" @click="${this.openFollowerModeSettings}">

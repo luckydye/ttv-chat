@@ -55,6 +55,10 @@ export default class Application {
         return applicationState.channels;
     }
 
+    static getActiveChannel() {
+        return this.getChannel(applicationState.selectedChannel);
+    }
+
     static selectChannel(room_name: string) {
         applicationState.selectedChannel = room_name;
         window.dispatchEvent(new ChannelSelecteddEvent(room_name));

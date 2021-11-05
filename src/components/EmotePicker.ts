@@ -1,3 +1,4 @@
+import TwitchEmotes from './../services/emotes/TwitchEmotes';
 import { css, html, TemplateResult } from 'lit-element';
 import ContextMenu from "./ContextMenu";
 import Emotes from '../services/Emotes';
@@ -16,8 +17,7 @@ export default class EmotePicker extends ContextMenu {
                 left: auto;
             }
             .emote-list {
-                min-height: 200px;
-                max-height: 200px;
+                height: 300px;
                 width: 350px;
                 max-width: calc(100vw - 60px);
                 overflow: auto;
@@ -49,6 +49,7 @@ export default class EmotePicker extends ContextMenu {
                 font-weight: 300;
                 margin: 15px 0 10px 0;
                 opacity: 0.5;
+                text-transform: capitalize;
             }
             label:first-child {
                 margin-top: 0;
@@ -105,13 +106,51 @@ export default class EmotePicker extends ContextMenu {
         `;
     }
 
+    twitch_user_emotes: Array<EmoteSet> = [];
+
     connectedCallback() {
         super.connectedCallback();
+
+        const channel = Application.getActiveChannel();
+        TwitchEmotes.getEmoteSets(channel.emoteSets).then(sets => {
+            this.twitch_user_emotes = sets;
+            this.update();
+        })
     }
 
     tabSelected = "twitch";
 
     renderEmoteTab(channel: Channel, tab: string) {
+        const twitch_user_emotes = this.twitch_user_emotes;
+
+        if(tab == "twitch") {
+            if(twitch_user_emotes.length == 0) {
+                return html`<net-loader/>`;
+            } else {
+                return html`
+                    ${twitch_user_emotes.sort((setA, setB) => {
+                        // bring current channel emotes to the top
+                        return setA.name == channel.channel_name ? 1 : (setB.name == channel.channel_name ? -1 : 0);
+                    }).map(set => {
+                        const emotes = Object.keys(set.emotes);
+                        return emotes.length > 0 ? html`
+                            <label>${set.name}</label>
+                            <div class="category">
+                                ${emotes.map(emote => html`<img 
+                                    src="${set.emotes[emote].url_x2}" 
+                                    alt="${emote}"
+                                    @click="${() => {
+                                        const input = document.querySelector('chat-input');
+                                        input.insert(emote);
+                                    }}"/>`)
+                                }
+                            </div>
+                        ` : ""
+                    })}
+                `;
+            }
+        }
+
         const channel_emotes = Emotes.getChachedChannelEmotes(channel.channel_id);
         const global_emotes = Emotes.global_emotes;
 
@@ -151,11 +190,8 @@ export default class EmotePicker extends ContextMenu {
     }
 
     render() {
-        // TODO: Gotta check what sub emotes client can use
-        const channel = Application.getSelectedChannel();
-        const ch = Application.getChannel(channel);
-
-        const emoteTab = this.renderEmoteTab(ch, this.tabSelected);
+        const channel = Application.getActiveChannel();
+        const emoteTab = this.renderEmoteTab(channel, this.tabSelected);
 
         return html`
             <div class="tabs">
