@@ -8,7 +8,6 @@ const Ease = {
     easeInOutCubic: (t: number) => t < .5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1,
 }
 
-let scrollToYOffset = 0;
 let scrollToSpeed = 10;  // keep text movement above 100ms/line for readability
 let currentAnimation: number = -1;
 
@@ -39,7 +38,6 @@ export default class AnimatedScroll {
             if(elapsed < 0.85 && Math.abs(target - current) > 3) {
                 currentAnimation = requestAnimationFrame(loop);
             } else {
-                console.log(target - current);
                 root.scrollTo(0, target);
             }
         }

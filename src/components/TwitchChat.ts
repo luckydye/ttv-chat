@@ -430,10 +430,10 @@ export default class TwitchChat extends Chat {
             <div class="event-feed">
                 
             </div>
-            <div class="scroll-to-bottom" @click="${() => this.lock()}">
+            <div class="scroll-to-bottom" @click="${() => this.scrollToLatest()}">
                 <span>Scroll to the bottom</span>
             </div>
-            <div class="lines">
+            <div class="lines" @scroll="${(e) => this.onScroll(e)}">
                 ${this.bio ? html`
                     <div class="bio">
                         <div class="profile-image">

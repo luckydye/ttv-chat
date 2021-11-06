@@ -13,7 +13,7 @@ export default class Chat extends LitElement {
     MAX_BUFFER_SIZE = 400;
 
     scrollLock = true;
-    roomName: string = "";
+    channel: string = "";
     scrollTarget: number = 0;
 
     bookmark: HTMLElement;
@@ -56,87 +56,18 @@ export default class Chat extends LitElement {
         this.afterAppend();
     }
 
-    lock() {
-        this.scrollLock = true;
-        this.setAttribute('locked', '');
-        this.scrollToLatest();
-    }
-
-    unlock() {
-        this.scrollLock = false;
-        this.removeAttribute('locked');
-    }
-
-    scrollToLatest() {
-        requestAnimationFrame(() => {
-            const scrollEle = this.shadowRoot?.querySelector('.lines');
-            if (!scrollEle) return;
-
-            this.scrollTarget = scrollEle.scrollHeight - scrollEle.clientHeight;
-            AnimatedScroll.scrollTo(this.scrollTarget, scrollEle);
-        });
-    }
-
-    toLatest() {
-        const scrollEle = this.shadowRoot?.querySelector('.lines');
-        if (!scrollEle) return;
-        this.scrollTarget = scrollEle.scrollHeight;
-        scrollEle.scrollTo(0, this.scrollTarget);
-        this.lock();
-    }
-
-    afterAppend() {
-        // clean out buffer
-        if (this.children.length > this.MAX_BUFFER_SIZE + 20) {
-            const rest = (this.children.length - this.MAX_BUFFER_SIZE);
-            for (let i = 0; i < rest; i++) {
-                this.children[i].remove();
-            }
-        }
-
-        // update scroll position
-        if (this.scrollLock) {
-            this.scrollToLatest();
-        }
-    }
-
-    updateLock() {
-        const scrollEle = this.shadowRoot?.querySelector('.lines');
-        if (!scrollEle) return;
-
-        const latest = scrollEle.scrollHeight - scrollEle.clientHeight;
-
-        if (this.scrollTarget >= latest - 40 && !this.scrollLock) {
-            this.lock();
-        }
-        if (this.scrollTarget <= latest - 10) {
-            this.unlock();
-        }
-    }
-
-    setRoom(roomName: string) {
-        this.roomName = roomName;
+    setRoom(channel: string) {
+        this.channel = channel;
         this.update();
-        this.setAttribute('name', this.roomName);
+        this.setAttribute('name', this.channel);
     }
 
     constructor() {
         super();
 
         this.addEventListener('wheel', e => {
-            const scrollEle = this.shadowRoot?.querySelector('.lines');
-            if (scrollEle) {
-                this.scrollTarget = scrollEle.scrollTop + e.deltaY;
-                
-                setTimeout(() => {
-                    this.updateLock();
-                }, 500);
-
-                if (e.deltaY < 0) {
-                    this.unlock();
-                }
-            }
-        })
+            if (e.deltaY < 0) this.unlock();
+        });
     }
 
     connectedCallback() {
@@ -314,19 +245,97 @@ export default class Chat extends LitElement {
         `;
     }
 
+    lastOffset: number = 0;
+
+    onScroll(e: any) {
+        const scrollTop = e.target.scrollTop;
+        const dir = scrollTop - this.lastOffset;
+        
+        if(dir < -1) {
+            this.unlock();
+        }
+        
+        this.lastOffset = scrollTop;
+
+        const latest = e.target.scrollHeight - e.target.clientHeight;
+        this.scrollTarget = e.target.scrollTop;
+
+        if (this.scrollTarget >= latest - 40 && !this.scrollLock) {
+            this.lock();
+        }
+    }
+
+    lock() {
+        this.scrollLock = true;
+        this.setAttribute('locked', '');
+    }
+
+    unlock() {
+        this.scrollLock = false;
+        this.removeAttribute('locked');
+    }
+
+    scrollToLatest() {
+        if(this.clientHeight == 0) {
+            // dont animaate scroll if chat is not in view.
+            // if it tries to animate, it may block the active chat from correctly animate scrolling to the latest position.
+            return;
+        }
+        requestAnimationFrame(() => {
+            const scrollEle = this.shadowRoot?.querySelector('.lines');
+            if (!scrollEle) return;
+
+            this.scrollTarget = scrollEle.scrollHeight - scrollEle.clientHeight;
+
+            console.log(this.channel, this.scrollTarget);
+
+            AnimatedScroll.scrollTo(this.scrollTarget, scrollEle);
+            this.lock();
+
+            setTimeout(() => {
+                const target = scrollEle.scrollHeight - scrollEle.clientHeight;
+                console.log(this.channel, this.scrollTarget - target);
+                AnimatedScroll.scrollTo(target, scrollEle);
+            }, 500);
+        });
+    }
+
+    toLatest() {
+        const scrollEle = this.shadowRoot?.querySelector('.lines');
+        if (!scrollEle) return;
+        this.scrollTarget = scrollEle.scrollHeight - scrollEle.clientHeight;
+        scrollEle.scrollTo(0, this.scrollTarget);
+        this.lock();
+    }
+
+    afterAppend() {
+        // clean out buffer
+        if (this.children.length > this.MAX_BUFFER_SIZE + 20) {
+            const rest = (this.children.length - this.MAX_BUFFER_SIZE);
+            for (let i = 0; i < rest; i++) {
+                this.children[i].remove();
+            }
+        }
+
+        // update scroll position
+        if (this.scrollLock) {
+            this.scrollToLatest();
+        }
+    }
+
     render() {
         return html`
             <div class="chat-actions">
                 <div></div>
                 <div class="chat-channel-name">
-                    ${this.roomName}
+                    ${this.channel}
                 </div>
                 <div class="chat-state-icons"></div>
             </div>
-            <div class="scroll-to-bottom" @click="${() => this.lock()}">
+            <div class="scroll-to-bottom" @click="${() => this.scrollToLatest()}">
                 <span>Scroll to the bottom</span>
             </div>
-            <div class="lines">
+            <div class="lines" @scroll="${(e) => this.onScroll(e)}">
                 <slot></slot>
             </div>
         `;
