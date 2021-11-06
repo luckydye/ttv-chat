@@ -166,13 +166,13 @@ export default class ChatInput extends LitElement {
     }
 
     async autocomplete() {
-        if(this.value.length >= 2) {
+        if(this.value.length >= 1) {
             // sugest commands
             const sugs = this.commandSugestionsList;
-            let cmd = sugs[0];
+            let cmd = sugs[sugs.length-1];
             if(cmd) {
                 if(cmd.command.replace(this.commandCharacter, "") == this.inputElement.innerText && sugs.length > 1) {
-                    cmd = sugs[1];
+                    cmd = sugs[sugs.length-2];
                 }
                 this.inputElement.innerText = cmd.command.replace(this.commandCharacter, "");
                 this.setCursorPosition(1);
@@ -257,10 +257,10 @@ export default class ChatInput extends LitElement {
             }
         }
 
-        if(this.commandMode && this.value.length >= 1) {
+        if(this.commandMode && this.value.length >= 0) {
             this.getCommandSugestions(this.inputElement.innerText, list => {
                 this.commandSugestionsList = list;
-
+                
                 this.update();
 
                 setTimeout(() => {
@@ -313,7 +313,7 @@ export default class ChatInput extends LitElement {
                 if(channel.moderator) currentUserLevel = UserLevel.moderator;
                 if(channel.broadcaster) currentUserLevel = UserLevel.broadcaster;
                 for(let cmd of list_part.commands) {
-                    if(cmd.command.match(str) && cmd.userlevel <= currentUserLevel) {
+                    if((cmd.command.match(str) || str == "\n") && cmd.userlevel <= currentUserLevel) {
                         list.push({
                             service: list_part.serviceName,
                             // remove prefix if present in provided data and add it manually

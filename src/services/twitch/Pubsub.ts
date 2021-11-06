@@ -64,7 +64,11 @@ export default class TwitchPubsub {
     }
 
     reconnect() {
-        // TODO: reconnect
+        console.log('reconnecting...');
+        
+        setTimeout(() => {
+            this.connect();
+        }, 1000);
     }
 
     async connect() {
@@ -112,6 +116,9 @@ export default class TwitchPubsub {
             });
             this.socket.addEventListener('error', e => {
                 reject();
+            });
+            this.socket.addEventListener('close', e => {
+                this.reconnect();
             });
         })
     }

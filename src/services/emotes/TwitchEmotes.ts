@@ -30,7 +30,7 @@ export class TwitchEmote extends Emote {
     }
 }
 
-interface EmoteSet {
+export interface EmoteSet {
     name: string,
     emotes: EmoteMap,
 }

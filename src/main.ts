@@ -15,6 +15,7 @@ import Badges from './services/Badges';
 import Emotes from './services/Emotes';
 
 
+// TODO: get a better method to switch between views
 function renderSelecetdChat(channel: string) {
     const input = document.querySelector('chat-input');
     const container = document.querySelector('.chat');

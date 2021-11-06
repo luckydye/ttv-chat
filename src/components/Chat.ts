@@ -277,6 +277,7 @@ export default class Chat extends LitElement {
 
     scrollToLatest() {
         if(this.clientHeight == 0) {
+            // TODO: could also use hasAttribute("hidden")
             // dont animaate scroll if chat is not in view.
             // if it tries to animate, it may block the active chat from correctly animate scrolling to the latest position.
             return;
@@ -287,16 +288,8 @@ export default class Chat extends LitElement {
 
             this.scrollTarget = scrollEle.scrollHeight - scrollEle.clientHeight;
 
-            console.log(this.channel, this.scrollTarget);
-
             AnimatedScroll.scrollTo(this.scrollTarget, scrollEle);
             this.lock();
-
-            setTimeout(() => {
-                const target = scrollEle.scrollHeight - scrollEle.clientHeight;
-                console.log(this.channel, this.scrollTarget - target);
-                AnimatedScroll.scrollTo(target, scrollEle);
-            }, 500);
         });
     }
 

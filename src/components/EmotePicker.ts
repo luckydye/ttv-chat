@@ -1,9 +1,10 @@
 import TwitchEmotes from './../services/emotes/TwitchEmotes';
-import { css, html, TemplateResult } from 'lit-element';
+import { css, html } from 'lit-element';
 import ContextMenu from "./ContextMenu";
 import Emotes from '../services/Emotes';
 import Application from '../App';
-import { createTooltipListener } from './Tooltip';
+import { EmoteSet } from '../services/emotes/TwitchEmotes';
+import Channel from '../Channel';
 
 export default class EmotePicker extends ContextMenu {
 
@@ -142,13 +143,13 @@ export default class EmotePicker extends ContextMenu {
 
         this.shadowRoot.addEventListener('pointermove', e => {
             let newTarget = null;
-            if(e.target.hasAttribute("emote")) {
+            if (e.target.hasAttribute("emote")) {
                 newTarget = e.target;
             } else {
                 newTarget = null;
             }
 
-            if(newTarget !== this.currentEmote) {
+            if (newTarget !== this.currentEmote) {
                 this.currentEmote = newTarget as HTMLImageElement;
                 this.update();
             }
@@ -157,20 +158,47 @@ export default class EmotePicker extends ContextMenu {
 
     tabSelected = "twitch";
 
-    renderEmoteTab(channel: Channel, tab: string) {
-        const twitch_user_emotes = this.twitch_user_emotes;
+    groupEmoteSets(sets: Array<EmoteSet>, currentChannel: Channel): Array<EmoteSet> {
+        const groups = [];
 
-        if(tab == "twitch") {
-            if(twitch_user_emotes.length == 0) {
+        setLoop: for (let set of sets) {
+            for (let group of groups) {
+                if (group.name == set.name) {
+                    group.emotes = Object.assign(group.emotes, set.emotes);
+                    continue setLoop;
+                }
+            }
+            groups.unshift(set);
+        }
+
+        return groups.sort((a, b) => {
+            if (a.name == "globals") {
+                return 1;
+            }
+            if (b.name == "globals") {
+                return -1;
+            }
+            if (a.name.toLocaleLowerCase() == currentChannel.channel_login.toLocaleLowerCase()) {
+                return -1;
+            }
+            if (b.name.toLocaleLowerCase() == currentChannel.channel_login.toLocaleLowerCase()) {
+                return 1;
+            }
+            return 0;
+        });
+    }
+
+    renderEmoteTab(channel: Channel, tab: string) {
+        const grouped = this.groupEmoteSets(this.twitch_user_emotes, channel);
+
+        if (tab == "twitch") {
+            if (grouped.length == 0) {
                 return html`<net-loader/>`;
             } else {
                 return html`
-                    ${twitch_user_emotes.sort((setA, setB) => {
-                        // bring current channel emotes to the top
-                        return setA.name == channel.channel_name ? 1 : (setB.name == channel.channel_name ? -1 : 0);
-                    }).map(set => {
-                        const emotes = Object.keys(set.emotes);
-                        return emotes.length > 0 ? html`
+                    ${grouped.map(set => {
+                    const emotes = Object.keys(set.emotes);
+                    return emotes.length > 0 ? html`
                             <label>${set.name}</label>
                             <div class="category">
                                 ${emotes.map(emote => html`<img 
@@ -180,11 +208,11 @@ export default class EmotePicker extends ContextMenu {
                                     @click="${() => {
                                         const input = document.querySelector('chat-input');
                                         input.insert(emote);
-                                    }}"/>`)
-                                }
+                                    }}"/>
+                                `)}
                             </div>
-                        ` : ""
-                    })}
+                        ` : "";
+                })}
                 `;
             }
         }
@@ -193,7 +221,7 @@ export default class EmotePicker extends ContextMenu {
         const global_emotes = Emotes.global_emotes;
 
         return html`
-            ${channel_emotes[tab] ? html `
+            ${(channel_emotes[tab] && Object.keys(channel_emotes[tab]).length > 0) ? html`
                 <label>Channel</label>
                 <div class="category">
                     ${Object.keys(channel_emotes[tab]).map(emote => html`<img 
@@ -203,11 +231,11 @@ export default class EmotePicker extends ContextMenu {
                         @click="${() => {
                             const input = document.querySelector('chat-input');
                             input.insert(emote);
-                        }}"/>`)
-                    }
+                        }}"/>
+                    `)}
                 </div>
             ` : ""}
-            ${global_emotes[tab] ? html `
+            ${global_emotes[tab] && Object.keys(global_emotes[tab]).length > 0 ? html`
                 <label>Global</label>
                 <div class="category">
                     ${Object.keys(global_emotes[tab]).map(emote => html`<img 
@@ -217,8 +245,8 @@ export default class EmotePicker extends ContextMenu {
                         @click="${() => {
                             const input = document.querySelector('chat-input');
                             input.insert(emote);
-                        }}"/>`)
-                    }
+                        }}"/>
+                    `)}
                 </div>
             ` : ""}
         `;
