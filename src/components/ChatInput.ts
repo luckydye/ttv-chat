@@ -165,6 +165,41 @@ export default class ChatInput extends LitElement {
         this.commandMode = true;
     }
 
+    async autocomplete() {
+        if(this.value.length >= 2) {
+            // sugest commands
+            const sugs = this.commandSugestionsList;
+            let cmd = sugs[0];
+            if(cmd) {
+                if(cmd.command.replace(this.commandCharacter, "") == this.inputElement.innerText && sugs.length > 1) {
+                    cmd = sugs[1];
+                }
+                this.inputElement.innerText = cmd.command.replace(this.commandCharacter, "");
+                this.setCursorPosition(1);
+                return;
+            }
+
+            const words = this.inputElement.innerText.split(" ");
+            const currWord = words[words.length-1];
+
+            // suggest emotes
+            const emotes = await this.getEmnoteSugestions(currWord);
+            if(emotes[0]) {
+                this.inputElement.innerText = words.slice(0, words.length - 1).join(" ") + " " + emotes[0];
+                this.setCursorPosition(1);
+                return;
+            }
+
+            // suggest names
+            const names = this.getNameSugestions(currWord);
+
+            if(names[0]) {
+                this.inputElement.innerText = words.slice(0, words.length - 1).join(" ") + " " + names[0];
+                this.setCursorPosition(1);
+            }
+        }
+    }
+
     handleKeyDown(e: KeyboardEvent) {
         if (e.key == "Enter") {
             this.submit(e);
@@ -201,39 +236,13 @@ export default class ChatInput extends LitElement {
             e.preventDefault();
             this.enableCommandMode("!");
         }
-    }
 
-    async autocomplete() {
-        if(this.value.length >= 2) {
-            // sugest commands
-            const sugs = this.commandSugestionsList;
-            let cmd = sugs[0];
-            if(cmd) {
-                if(cmd.command.replace(this.commandCharacter, "") == this.inputElement.innerText && sugs.length > 1) {
-                    cmd = sugs[1];
-                }
-                this.inputElement.innerText = cmd.command.replace(this.commandCharacter, "");
-                this.setCursorPosition(1);
-                return;
-            }
-
-            const words = this.inputElement.innerText.split(" ");
-            const currWord = words[words.length-1];
-
-            // suggest emotes
-            const emotes = await this.getEmnoteSugestions(currWord);
-            if(emotes[0]) {
-                this.inputElement.innerText = words.slice(0, words.length - 1).join(" ") + " " + emotes[0];
-                this.setCursorPosition(1);
-                return;
-            }
-
-            // suggest names
-            const names = this.getNameSugestions(currWord);
-
-            if(names[0]) {
-                this.inputElement.innerText = words.slice(0, words.length - 1).join(" ") + " " + names[0];
-                this.setCursorPosition(1);
+        if (e.key == "Backspace") {
+            if(this.inputElement.innerText.length == 0 || 
+                this.inputElement.innerText == " " ||
+                this.inputElement.innerText == "\n" ||
+                this.inputElement.innerText == "") {
+                this.resetInput();
             }
         }
     }

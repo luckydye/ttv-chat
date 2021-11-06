@@ -68,6 +68,8 @@ async function onLogin(account: Account) {
     renderSelecetdChat(Application.getSelectedChannel());
 }
 
+window.Events = Events;
+
 window.addEventListener('app-login', (e) => {
     onLogin(e.data.account);
 })

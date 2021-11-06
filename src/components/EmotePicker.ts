@@ -3,6 +3,7 @@ import { css, html, TemplateResult } from 'lit-element';
 import ContextMenu from "./ContextMenu";
 import Emotes from '../services/Emotes';
 import Application from '../App';
+import { createTooltipListener } from './Tooltip';
 
 export default class EmotePicker extends ContextMenu {
 
@@ -30,17 +31,17 @@ export default class EmotePicker extends ContextMenu {
                 margin-right: calc(var(--grid-gap) * -1px);
                 padding: 0 4px;
             }
-            img {
+            .category img {
                 object-fit: contain;
                 cursor: pointer;
                 max-height: 32px;
                 margin: 0 var(--grid-gap) var(--grid-gap) 0;
             }
-            img:hover {
+            .category img:hover {
                 background: #333;
                 outline: 1px solid #eeeeeebe;
             }
-            img:active {
+            .category img:active {
                 transform: scale(0.95);
             }
 
@@ -101,7 +102,21 @@ export default class EmotePicker extends ContextMenu {
             }
 
             .emote-preview {
-                height: 10px;
+                position: absolute;
+                bottom: calc(100% + 8px);
+                left: 0;
+                background: inherit;
+                border: inherit;
+                border-radius: inherit;
+                display: flex;
+                align-items: center;
+                padding: 12px;
+                backdrop-filter: inherit;
+                font-size: 18px;
+                font-weight: 400;
+            }
+            .emote-preview img {
+                margin-right: 20px;
             }
         `;
     }
@@ -115,6 +130,28 @@ export default class EmotePicker extends ContextMenu {
         TwitchEmotes.getEmoteSets(channel.emoteSets).then(sets => {
             this.twitch_user_emotes = sets;
             this.update();
+        })
+    }
+
+    currentEmote: HTMLImageElement | null = null;
+
+    constructor(...args) {
+        super(...args);
+
+        this.currentEmote = null;
+
+        this.shadowRoot.addEventListener('pointermove', e => {
+            let newTarget = null;
+            if(e.target.hasAttribute("emote")) {
+                newTarget = e.target;
+            } else {
+                newTarget = null;
+            }
+
+            if(newTarget !== this.currentEmote) {
+                this.currentEmote = newTarget as HTMLImageElement;
+                this.update();
+            }
         })
     }
 
@@ -139,6 +176,7 @@ export default class EmotePicker extends ContextMenu {
                                 ${emotes.map(emote => html`<img 
                                     src="${set.emotes[emote].url_x2}" 
                                     alt="${emote}"
+                                    emote
                                     @click="${() => {
                                         const input = document.querySelector('chat-input');
                                         input.insert(emote);
@@ -161,6 +199,7 @@ export default class EmotePicker extends ContextMenu {
                     ${Object.keys(channel_emotes[tab]).map(emote => html`<img 
                         src="${channel_emotes[tab][emote].url_x2}" 
                         alt="${emote}"
+                        emote
                         @click="${() => {
                             const input = document.querySelector('chat-input');
                             input.insert(emote);
@@ -174,6 +213,7 @@ export default class EmotePicker extends ContextMenu {
                     ${Object.keys(global_emotes[tab]).map(emote => html`<img 
                         src="${global_emotes[tab][emote].url_x2}" 
                         alt="${emote}"
+                        emote
                         @click="${() => {
                             const input = document.querySelector('chat-input');
                             input.insert(emote);
@@ -209,9 +249,12 @@ export default class EmotePicker extends ContextMenu {
                 ${emoteTab}
             </div>
 
-            <div class="emote-preview">
-                
-            </div>
+            ${this.currentEmote != null ? html`
+                <div class="emote-preview">
+                    <img src="${this.currentEmote.src}"/>
+                    <span>${this.currentEmote.alt}</span>
+                </div>
+            ` : ""}
         `;
     }
 }

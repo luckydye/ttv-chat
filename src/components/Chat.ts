@@ -74,7 +74,7 @@ export default class Chat extends LitElement {
 
             this.scrollTarget = scrollEle.scrollHeight - scrollEle.clientHeight;
             AnimatedScroll.scrollTo(this.scrollTarget, scrollEle);
-        })
+        });
     }
 
     toLatest() {
@@ -106,7 +106,7 @@ export default class Chat extends LitElement {
 
         const latest = scrollEle.scrollHeight - scrollEle.clientHeight;
 
-        if (this.scrollTarget >= latest - 40) {
+        if (this.scrollTarget >= latest - 40 && !this.scrollLock) {
             this.lock();
         }
         if (this.scrollTarget <= latest - 10) {
@@ -145,10 +145,6 @@ export default class Chat extends LitElement {
         const scrollEle = this.shadowRoot?.querySelector('.lines');
         if (scrollEle) {
             scrollEle.scrollTo(0, this.scrollTarget);
-
-            scrollEle.addEventListener('scroll', e => {
-                this.updateLock();
-            });
         }
     }
 

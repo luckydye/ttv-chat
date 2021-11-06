@@ -359,7 +359,7 @@ export default class Channel {
                 if(line) {
                     line.setAttribute("deleted", "");
                 }
-                this.chat.appendNote(`${msg.channel_login} deleted message.`);
+                this.chat.appendNote(`${msg.sender_login} deleted message.`);
             }
         });
 

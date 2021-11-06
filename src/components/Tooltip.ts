@@ -39,37 +39,39 @@ function createOverlayForLink(e: PointerEvent) {
     return overlay;
 }
 
-window.addEventListener('pointermove', e => {
-    const target = e.target;
+export function createTooltipListener(root: EventTarget = window) {
+    root.addEventListener('pointermove', e => {
+        const target = e.target;
 
-    if(lastOverlay != null) {
-        lastOverlay.setPosition(e.x, e.y);
-    }
-
-    if(target !== lastTarget) {
-        // remove old tooltip
-        lastTarget = null;
-        if(lastOverlay) {
-            lastOverlay.remove();
-            lastOverlay = null;
+        if(lastOverlay != null) {
+            lastOverlay.setPosition(e.x, e.y);
         }
-
-        if(target && (target as HTMLImageElement).hasAttribute('emote')) {
-            lastOverlay = createOverlayForImageElement(e);
-            lastTarget = target;
-        }
-
-        if(target && (target as HTMLImageElement).classList.contains('badge')) {
-            lastOverlay = createOverlayForImageElement(e);
-            lastTarget = target;
-        }
-
-        if(target && (target as HTMLImageElement).classList.contains('inline-link')) {
-            // inline link preview
-            lastOverlay = createOverlayForLink(e);
-            lastTarget = target;
-        }
-    }
-
     
-})
+        if(target !== lastTarget) {
+            // remove old tooltip
+            lastTarget = null;
+            if(lastOverlay) {
+                lastOverlay.remove();
+                lastOverlay = null;
+            }
+    
+            if(target && (target as HTMLImageElement).hasAttribute('emote')) {
+                lastOverlay = createOverlayForImageElement(e);
+                lastTarget = target;
+            }
+    
+            if(target && (target as HTMLImageElement).classList.contains('badge')) {
+                lastOverlay = createOverlayForImageElement(e);
+                lastTarget = target;
+            }
+    
+            if(target && (target as HTMLImageElement).classList.contains('inline-link')) {
+                // inline link preview
+                lastOverlay = createOverlayForLink(e);
+                lastTarget = target;
+            }
+        }
+    })
+}
+
+createTooltipListener(window);

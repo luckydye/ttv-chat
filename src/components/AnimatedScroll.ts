@@ -9,20 +9,13 @@ const Ease = {
 }
 
 let scrollToYOffset = 0;
-let scrollToSpeed = 8;  // keep text movement above 100ms/line for readability
+let scrollToSpeed = 10;  // keep text movement above 100ms/line for readability
 let currentAnimation: number = -1;
 
 export default class AnimatedScroll {
 
     static scrollTo(target: number, root: HTMLElement) {
         cancelAnimationFrame(currentAnimation);
-
-        if(target > 0) {
-            const maxScrollHeight = root.scrollHeight - root.clientHeight;
-            target = Math.min(target, maxScrollHeight);
-        } else {
-            target = 0;
-        }
 
         const start = root.scrollTop;
         const dist = target - start;
@@ -43,10 +36,14 @@ export default class AnimatedScroll {
 
             root.scrollTo(0, current);
 
-            if(Math.abs(target - current) > 2) {
+            if(elapsed < 0.85 && Math.abs(target - current) > 3) {
                 currentAnimation = requestAnimationFrame(loop);
+            } else {
+                console.log(target - current);
+                root.scrollTo(0, target);
             }
         }
+        
         loop();
     }
 
