@@ -13,6 +13,7 @@ import Application from './App';
 import Account from './Account';
 import Badges from './services/Badges';
 import Emotes from './services/Emotes';
+import IRC from './services/IRC';
 
 
 // TODO: get a better method to switch between views
@@ -70,6 +71,7 @@ async function onLogin(account: Account) {
 }
 
 window.Events = Events;
+window.IRC = IRC;
 
 window.addEventListener('app-login', (e) => {
     onLogin(e.data.account);

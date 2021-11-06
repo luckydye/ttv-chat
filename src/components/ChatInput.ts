@@ -552,7 +552,7 @@ export default class ChatInput extends LitElement {
                 <div class="flyout">
                     ${this.commandSugestionsList.map(cmd => {
                         return html`
-                            <div class="command-sugestion" @click="${e => insertCommand(cmd)}">
+                            <div class="command-sugestion" @mousedown="${e => insertCommand(cmd)}">
                                 <div class="command-name">${cmd.command}</div>
                                 <div class="command-service">${cmd.service}</div>
                                 <div class="command-description">${cmd.description}</div>

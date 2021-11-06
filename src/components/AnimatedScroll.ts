@@ -44,6 +44,10 @@ export default class AnimatedScroll {
         }
         
         loop();
+
+        return () => {
+            cancelAnimationFrame(currentAnimation)
+        }
     }
 
 }

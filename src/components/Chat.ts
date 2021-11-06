@@ -10,13 +10,14 @@ import './UserList';
 
 export default class Chat extends LitElement {
 
-    MAX_BUFFER_SIZE = 400;
+    MAX_BUFFER_SIZE = 500;
 
     scrollLock = true;
     channel: string = "";
     scrollTarget: number = 0;
 
     bookmark: HTMLElement;
+    chatHeight: number = 0;
 
     appendMessage(msg: ChatMessage) {
         const line = document.createElement('chat-line');
@@ -65,9 +66,11 @@ export default class Chat extends LitElement {
     constructor() {
         super();
 
-        this.addEventListener('wheel', e => {
-            if (e.deltaY < 0) this.unlock();
-        });
+        window.addEventListener('resize', e => {
+            this.chatHeight = this.clientHeight;
+        })
+
+        this.addEventListener('wheel', e => this.onWheel(e));
     }
 
     connectedCallback() {
@@ -77,6 +80,10 @@ export default class Chat extends LitElement {
         if (scrollEle) {
             scrollEle.scrollTo(0, this.scrollTarget);
         }
+
+        requestAnimationFrame(() => {
+            this.chatHeight = this.clientHeight;
+        });
     }
 
     placeBookmarkLine() {
@@ -245,23 +252,21 @@ export default class Chat extends LitElement {
         `;
     }
 
-    lastOffset: number = 0;
-
-    onScroll(e: any) {
-        const scrollTop = e.target.scrollTop;
-        const dir = scrollTop - this.lastOffset;
-        
-        if(dir < -1) {
-            this.unlock();
+    onScroll(e: any) {        
+        if(!this.scrollLock) {
+            const latest = e.target.scrollHeight - this.chatHeight;
+            this.scrollTarget = e.target.scrollTop;
+    
+            if (this.scrollTarget >= latest - 2) {
+                this.lock();
+            }
         }
-        
-        this.lastOffset = scrollTop;
+    }
 
-        const latest = e.target.scrollHeight - e.target.clientHeight;
-        this.scrollTarget = e.target.scrollTop;
-
-        if (this.scrollTarget >= latest - 40 && !this.scrollLock) {
-            this.lock();
+    onWheel(e: any) {
+        const dir = e.deltaY;
+        if(dir < 0) {
+            this.unlock();            
         }
     }
 
@@ -271,13 +276,18 @@ export default class Chat extends LitElement {
     }
 
     unlock() {
+        if(this.cancelAnimate) {
+            this.cancelAnimate();
+        }
         this.scrollLock = false;
         this.removeAttribute('locked');
     }
 
+    cancelAnimate: Function | undefined;
+
     scrollToLatest() {
-        if(this.clientHeight == 0) {
-            // TODO: could also use hasAttribute("hidden")
+        if(this.hasAttribute('hidden')) {
+            console.log("is hidden");
             // dont animaate scroll if chat is not in view.
             // if it tries to animate, it may block the active chat from correctly animate scrolling to the latest position.
             return;
@@ -286,9 +296,9 @@ export default class Chat extends LitElement {
             const scrollEle = this.shadowRoot?.querySelector('.lines');
             if (!scrollEle) return;
 
-            this.scrollTarget = scrollEle.scrollHeight - scrollEle.clientHeight;
+            this.scrollTarget = scrollEle.scrollHeight - this.chatHeight;
 
-            AnimatedScroll.scrollTo(this.scrollTarget, scrollEle);
+            this.cancelAnimate = AnimatedScroll.scrollTo(this.scrollTarget, scrollEle);
             this.lock();
         });
     }
@@ -296,7 +306,7 @@ export default class Chat extends LitElement {
     toLatest() {
         const scrollEle = this.shadowRoot?.querySelector('.lines');
         if (!scrollEle) return;
-        this.scrollTarget = scrollEle.scrollHeight - scrollEle.clientHeight;
+        this.scrollTarget = scrollEle.scrollHeight - this.chatHeight;
         scrollEle.scrollTo(0, this.scrollTarget);
         this.lock();
     }
