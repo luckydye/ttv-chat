@@ -17,7 +17,7 @@ export default class ChatInput extends LitElement {
     history: Array<string> = [];
     historyPointer: number = -1;
 
-    commandSugestionsList: Array<any> = [];
+    commandSugestionsList: Array<any> | null = null;
     commandCharacter: string = "/";
 
     replyId: string | undefined;
@@ -29,7 +29,7 @@ export default class ChatInput extends LitElement {
 
     get value() {
         const ele = this.getInputElement();
-        if(this.commandMode && (this.commandCharacter == "!" || this.commandCharacter == "/")) {
+        if (this.commandMode && (this.commandCharacter == "!" || this.commandCharacter == "/")) {
             return this.commandCharacter + ele.innerText;
         } else {
             return ele.innerText;
@@ -37,7 +37,7 @@ export default class ChatInput extends LitElement {
     }
 
     set commandMode(val: boolean) {
-        if(val === true) {
+        if (val === true) {
             this.inputElement.setAttribute('command', this.commandCharacter);
             this.setAttribute('command', this.commandCharacter);
         } else {
@@ -58,14 +58,14 @@ export default class ChatInput extends LitElement {
         if (this.value != "") {
             this.addToHistory(this.value);
             const channel = Application.getChannel(Application.getSelectedChannel());
-            if(this.replyId) {
+            if (this.replyId) {
                 IRC.replyToMessage(channel.channel_login, channel.channel_id, this.value, this.replyId);
             } else {
                 const ev = new ChatCommandEvent(this.value);
-                if(this.commandMode) {
+                if (this.commandMode) {
                     window.dispatchEvent(ev);
                 }
-                if(!ev.canceled) {
+                if (!ev.canceled) {
                     IRC.sendMessage(channel.channel_login, channel.channel_id, this.value);
                 }
             }
@@ -123,7 +123,9 @@ export default class ChatInput extends LitElement {
         const part1 = ele.innerText.slice(0, index);
         const part2 = ele.innerText.slice(index);
 
-        const newValue = [part1, str, part2].join(" ");
+        // TODO: Respect selection. Replace selected text with inserted str. Otherwise place it at cursor position.
+
+        const newValue = [part1, str, part2].join("");
         this.value = newValue;
 
         ele.focus();
@@ -135,20 +137,20 @@ export default class ChatInput extends LitElement {
     }
 
     getCursorPosition() {
-        if(this.shadowRoot) {
+        if (this.shadowRoot) {
             return this.shadowRoot.getSelection().focusOffset;
         }
     }
 
     setCursorPosition(index: number) {
-        if(this.shadowRoot) {
+        if (this.shadowRoot) {
             const el = this.inputElement;
             const range = document.createRange();
             const sel = this.shadowRoot.getSelection();
-            
+
             range.setStart(el, index);
             range.collapse(true);
-            
+
             sel.removeAllRanges();
             sel.addRange(range);
         }
@@ -158,7 +160,7 @@ export default class ChatInput extends LitElement {
         this.value = "";
         this.historyPointer = -1;
         this.commandMode = false;
-        this.commandSugestionsList = [];
+        this.commandSugestionsList = null;
         this.replyId = undefined;
         this.update();
     }
@@ -170,28 +172,31 @@ export default class ChatInput extends LitElement {
             this.setCursorPosition(1);
         });
         this.commandMode = true;
+        this.update();
     }
 
     async autocomplete() {
-        if(this.value.length >= 1) {
+        if (this.value.length >= 1) {
             // sugest commands
             const sugs = this.commandSugestionsList;
-            let cmd = sugs[sugs.length-1];
-            if(cmd) {
-                if(cmd.command.replace(this.commandCharacter, "") == this.inputElement.innerText && sugs.length > 1) {
-                    cmd = sugs[sugs.length-2];
+            if (sugs) {
+                let cmd = sugs[sugs.length - 1];
+                if (cmd) {
+                    if (cmd.command.replace(this.commandCharacter, "") == this.inputElement.innerText && sugs.length > 1) {
+                        cmd = sugs[sugs.length - 2];
+                    }
+                    this.inputElement.innerText = cmd.command.replace(this.commandCharacter, "");
+                    this.setCursorPosition(1);
+                    return;
                 }
-                this.inputElement.innerText = cmd.command.replace(this.commandCharacter, "");
-                this.setCursorPosition(1);
-                return;
             }
 
             const words = this.inputElement.innerText.split(" ");
-            const currWord = words[words.length-1];
+            const currWord = words[words.length - 1];
 
             // suggest emotes
             const emotes = await this.getEmnoteSugestions(currWord);
-            if(emotes[0]) {
+            if (emotes[0]) {
                 this.inputElement.innerText = words.slice(0, words.length - 1).join(" ") + " " + emotes[0];
                 this.setCursorPosition(1);
                 return;
@@ -200,7 +205,7 @@ export default class ChatInput extends LitElement {
             // suggest names
             const names = this.getNameSugestions(currWord);
 
-            if(names[0]) {
+            if (names[0]) {
                 this.inputElement.innerText = words.slice(0, words.length - 1).join(" ") + " " + names[0];
                 this.setCursorPosition(1);
             }
@@ -214,7 +219,7 @@ export default class ChatInput extends LitElement {
             e.preventDefault();
         }
         if (e.key == "ArrowUp") {
-            if(this.commandMode) {
+            if (this.commandMode) {
                 // move command sugestion pointer up
             } else {
                 this.nextHistoryValue();
@@ -222,7 +227,7 @@ export default class ChatInput extends LitElement {
             e.preventDefault();
         }
         if (e.key == "ArrowDown") {
-            if(this.commandMode) {
+            if (this.commandMode) {
                 // move command sugestion pointer down
             } else {
                 this.prevHistoryValue();
@@ -234,18 +239,18 @@ export default class ChatInput extends LitElement {
             this.autocomplete();
         }
 
-        if(this.value == "" && e.key == "/") {
+        if (this.value == "" && e.key == "/") {
             e.preventDefault();
             this.enableCommandMode("/");
         }
 
-        if(this.value == "" && e.key == "!") {
+        if (this.value == "" && e.key == "!") {
             e.preventDefault();
             this.enableCommandMode("!");
         }
 
         if (e.key == "Backspace") {
-            if(this.inputElement.innerText.length == 0 || 
+            if (this.inputElement.innerText.length == 0 ||
                 this.inputElement.innerText == " " ||
                 this.inputElement.innerText == "\n" ||
                 this.inputElement.innerText == "") {
@@ -256,7 +261,7 @@ export default class ChatInput extends LitElement {
 
     handleKeyUp(e: KeyboardEvent) {
         if (e.key == "Backspace") {
-            if(this.inputElement.innerText.length == 0 || 
+            if (this.inputElement.innerText.length == 0 ||
                 this.inputElement.innerText == " " ||
                 this.inputElement.innerText == "\n" ||
                 this.inputElement.innerText == "") {
@@ -264,10 +269,11 @@ export default class ChatInput extends LitElement {
             }
         }
 
-        if(this.commandMode && this.value.length >= 0) {
+        const commandSugestiosn = this.commandCharacter == "/" || this.commandCharacter == "!";
+        if (this.commandMode && commandSugestiosn && this.value.length >= 0) {
             this.getCommandSugestions(this.inputElement.innerText, list => {
                 this.commandSugestionsList = list;
-                
+
                 this.update();
 
                 setTimeout(() => {
@@ -280,7 +286,7 @@ export default class ChatInput extends LitElement {
 
     getNameSugestions(str: string) {
         const channel = Application.getChannel(Application.getSelectedChannel());
-        if(channel) {
+        if (channel) {
             const chatters = channel.chatters;
             return chatters.filter(name => name.toLocaleLowerCase().match(str.toLocaleLowerCase()));
         }
@@ -289,18 +295,18 @@ export default class ChatInput extends LitElement {
 
     async getEmnoteSugestions(str: string): Promise<Array<string>> {
         const channel = Application.getChannel(Application.getSelectedChannel());
-        if(channel) {
+        if (channel) {
             const global = await Emotes.getGlobalEmotes();
             const chnl = await Emotes.getChannelEmotes(channel.channel_id);
             const allEmtoes = [];
 
-            for(let serivce in global) {
-                if(chnl) {
-                    for(let emote in chnl[serivce]) {
+            for (let serivce in global) {
+                if (chnl) {
+                    for (let emote in chnl[serivce]) {
                         allEmtoes.push(emote);
                     }
                 }
-                for(let emote in global[serivce]) {
+                for (let emote in global[serivce]) {
                     allEmtoes.push(emote);
                 }
             }
@@ -310,17 +316,17 @@ export default class ChatInput extends LitElement {
         return [];
     }
 
-    getCommandSugestions(str: string, callback: Function): void {
+    getCommandSugestions(str: string, callback: Function): void {        
         const list: Array<any> = [];
         const channel = Application.getChannel(Application.getSelectedChannel());
-        return channel?.fetchCommandList((list_part: CommandList) => {                
-            if(list_part.commandPrefix == this.commandCharacter) {
+        return channel?.fetchCommandList((list_part: CommandList) => {
+            if (list_part.commandPrefix == this.commandCharacter) {
                 let currentUserLevel = 0;
-                if(channel.vip) currentUserLevel = UserLevel.vip;
-                if(channel.moderator) currentUserLevel = UserLevel.moderator;
-                if(channel.broadcaster) currentUserLevel = UserLevel.broadcaster;
-                for(let cmd of list_part.commands) {
-                    if((cmd.command.match(str) || str == "\n") && cmd.userlevel <= currentUserLevel) {
+                if (channel.vip) currentUserLevel = UserLevel.vip;
+                if (channel.moderator) currentUserLevel = UserLevel.moderator;
+                if (channel.broadcaster) currentUserLevel = UserLevel.broadcaster;
+                for (let cmd of list_part.commands) {
+                    if ((cmd.command.match(str) || str.replace(" ", "") == "\n") && cmd.userlevel <= currentUserLevel) {
                         list.push({
                             service: list_part.serviceName,
                             // remove prefix if present in provided data and add it manually
@@ -361,16 +367,29 @@ export default class ChatInput extends LitElement {
             this.focus();
         });
 
-        window.addEventListener('paste', e => {
-            if (document.activeElement == document.body) {
-                const ele = this.getInputElement();
-                const data = e.clipboardData.items[0];
-                data.getAsString((str: string) => {
+        const handlePaste = e => {
+            const ele = this.getInputElement();
+            const item = [...e.clipboardData.items].find(item => {
+                return item.type == "text/plain";
+            });
+            item.getAsString((str: string) => {
+                if(str[0] == "!" || str[0] == "/") {
+                    this.enableCommandMode(str[0]);
+                    this.insert(str.slice(1));
+                } else {
                     this.insert(str);
-                    ele.focus();
-                });
+                }
+                ele.focus();
+            });
+            e.preventDefault();
+        }
+
+        window.addEventListener('paste', e => {
+            if(document.activeElement == document.body) {
+                handlePaste(e);
             }
-        })
+        });
+        this.inputElement.addEventListener('paste', handlePaste);
 
         window.addEventListener('keydown', e => {
             if (document.activeElement == document.body && !e.ctrlKey && !e.shiftKey && !e.altKey) {
@@ -455,6 +474,9 @@ export default class ChatInput extends LitElement {
                 display: block;
                 opacity: 0.5;
             }
+            @keyframes flyin {
+                from { opacity: 0; transform: translateX(-8px); }
+            }
             .text-input #chat-input[command]::before {
                 content: attr(command);
                 display: inline-block; 
@@ -462,6 +484,7 @@ export default class ChatInput extends LitElement {
                 padding: 4px 8px;
                 border-radius: 4px;
                 margin-right: 5px;
+                animation: flyin .15s ease;
             }
             .util {
                 position: absolute;
@@ -493,10 +516,15 @@ export default class ChatInput extends LitElement {
                 display: block;
             }
 
+            @keyframes flyout {
+                from { opacity: 0; transform: translateY(10px) scale(0.99) }
+            }
+
             .flyout {
                 display: none;
             }
             :host([command]) .flyout {
+                animation: flyout .2s ease;
                 display: block;
                 position: absolute;
                 bottom: calc(100% - 10px);
@@ -546,6 +574,9 @@ export default class ChatInput extends LitElement {
                 font-size: 12px;
                 grid-column: 1 / span 2;
             }
+            net-loader {
+                transform: scale(0.75);
+            }
         `;
     }
 
@@ -554,20 +585,27 @@ export default class ChatInput extends LitElement {
             this.value = cmd.command.replace(this.commandCharacter, "");
             this.setCursorPosition(1);
         }
+        const commandSugestiosn = this.commandCharacter == "/" || this.commandCharacter == "!";
         return html`
-            ${this.commandSugestionsList.length == 0 ? "" : html`
-                <div class="flyout">
-                    ${this.commandSugestionsList.map(cmd => {
-                        return html`
-                            <div class="command-sugestion" @mousedown="${e => insertCommand(cmd)}">
-                                <div class="command-name">${cmd.command}</div>
-                                <div class="command-service">${cmd.service}</div>
-                                <div class="command-description">${cmd.description}</div>
-                            </div>
-                        `;
-                    })}
-                </div>
-            `}
+            ${this.commandMode && commandSugestiosn ? html`
+                ${this.commandSugestionsList == null ? html`
+                    <div class="flyout">
+                        <net-loader></net-loader>
+                    </div>
+                ` : html`
+                    <div class="flyout">
+                        ${this.commandSugestionsList.map(cmd => {
+                            return html`
+                                <div class="command-sugestion" @mousedown="${e => insertCommand(cmd)}">
+                                    <div class="command-name">${cmd.command}</div>
+                                    <div class="command-service">${cmd.service}</div>
+                                    <div class="command-description">${cmd.description}</div>
+                                </div>
+                            `;
+                        })}
+                    </div>
+                `}
+            ` : ""}
 
             <div class="wrapper">
                 <div class="input-field">
@@ -578,7 +616,7 @@ export default class ChatInput extends LitElement {
                         <!-- <button name="create poll">Y</button>
                         <button name="create prediction">X</button> -->
                         <button name="Emotes" @click="${this.openEmotePicker}">
-                            <img src="./images/sentiment_satisfied_alt_white_24dp.svg" width="22px" height="22px"/>
+                            <img src="./images/sentiment_satisfied_alt_white_24dp.svg" width="20px" height="20px"/>
                         </button>
                     </div>
                 </div>

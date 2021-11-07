@@ -192,7 +192,7 @@ export default class MessageParser {
         let channel_badges = Badges.getChachedChannelBadges(channel_id);
         // get cached channel emotes
         let channel_emotes = Emotes.getChachedChannelEmotes(channel_id);
-
+        
         // collect emotes (url) for this message
         if (message.emotes) {
             for (let emote of message.emotes) {
@@ -217,7 +217,7 @@ export default class MessageParser {
             // find channel emote repalcement
             if(channel_emotes) {
                 for(let service in channel_emotes) {
-                    if(!channel_emotes[service] || service == "twitch") {
+                    if(!channel_emotes[service] || (service == "twitch" && message.user_name != user_login)) {
                         continue;
                     }
                     if (str in channel_emotes[service]) {

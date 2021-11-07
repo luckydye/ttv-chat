@@ -191,7 +191,9 @@ export default class Chat extends LitElement {
 
         // update scroll position
         if (this.scrollLock) {
-            this.scrollToLatest();
+            requestAnimationFrame(() => {
+                this.scrollToLatest();
+            })
         }
     }
 

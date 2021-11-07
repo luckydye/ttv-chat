@@ -120,6 +120,12 @@ const defaultCommandList = [
         syntax: '/commercial',
         userlevel: UserLevel.moderator,
         description: 'An Affiliate and Partner command that runs a commercial, for 30 seconds, for all of your viewers.'
+    },
+    {
+        command: 'poll',
+        syntax: '/poll',
+        userlevel: UserLevel.moderator,
+        description: 'Open create Poll dialog.'
     }
 ]
 

@@ -78,8 +78,8 @@ window.addEventListener('app-login', (e) => {
 })
 
 window.addEventListener(Events.ChatCommandEvent, e => {
-    if(e.data.message == "/yo") {
-        console.log('command event canceld');
+    if(e.data.message == "/poll") {
+        alert('create poll dialog');
         e.cancel();
     }
 })
