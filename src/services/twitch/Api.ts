@@ -103,4 +103,8 @@ export default class TwitchApi {
         return (await this.fetch('/channels/editors', 'broadcaster_id='+channel_id)).data;
     }
 
+    static createPoll() {
+        
+    }
+
 }

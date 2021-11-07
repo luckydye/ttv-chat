@@ -76,3 +76,10 @@ window.IRC = IRC;
 window.addEventListener('app-login', (e) => {
     onLogin(e.data.account);
 })
+
+window.addEventListener(Events.ChatCommandEvent, e => {
+    if(e.data.message == "/yo") {
+        console.log('command event canceld');
+        e.cancel();
+    }
+})

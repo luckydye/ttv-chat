@@ -4,6 +4,7 @@ import IRC from '../services/IRC';
 import Application from '../App';
 import EmotePicker from './EmotePicker';
 import Emotes from '../services/Emotes';
+import ChatCommandEvent from '../events/ChatCommand';
 
 // TODO: Emote Sugestions
 
@@ -60,7 +61,13 @@ export default class ChatInput extends LitElement {
             if(this.replyId) {
                 IRC.replyToMessage(channel.channel_login, channel.channel_id, this.value, this.replyId);
             } else {
-                IRC.sendMessage(channel.channel_login, channel.channel_id, this.value);
+                const ev = new ChatCommandEvent(this.value);
+                if(this.commandMode) {
+                    window.dispatchEvent(ev);
+                }
+                if(!ev.canceled) {
+                    IRC.sendMessage(channel.channel_login, channel.channel_id, this.value);
+                }
             }
         }
     }
