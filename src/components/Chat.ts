@@ -1,23 +1,40 @@
 import { css, html, LitElement, TemplateResult } from 'lit-element';
-import AnimatedScroll from './AnimatedScroll';
 import { ChatInfoMessage, ChatMessage } from '../MessageParser';
 import { ChatInfo, ChatNote } from './ChatLine';
 import { render } from 'lit-html';
+import AnimatedScroll from './AnimatedScroll';
 // Components
 import './FluidInput';
 import './Timer';
 import './UserList';
 
+// TODO: make custom scrollbar for scrolllock handling
+
 export default class Chat extends LitElement {
+
+    static get properties() {
+        return {
+            hidden: { type: Boolean }
+        }
+    }
 
     MAX_BUFFER_SIZE = 500;
 
-    scrollLock = true;
     channel: string = "";
-    scrollTarget: number = 0;
 
     bookmark: HTMLElement;
+
+    scrollLock = true;
     chatHeight: number = 0;
+    scrollElement: HTMLElement | null;
+
+    cancelLastScrollAnimation: Function | null = null;
+
+    cancelAnimation() {
+        if(this.cancelLastScrollAnimation) {
+            this.cancelLastScrollAnimation();
+        }
+    }
 
     appendMessage(msg: ChatMessage) {
         const line = document.createElement('chat-line');
@@ -63,29 +80,6 @@ export default class Chat extends LitElement {
         this.setAttribute('name', this.channel);
     }
 
-    constructor() {
-        super();
-
-        window.addEventListener('resize', e => {
-            this.chatHeight = this.clientHeight;
-        })
-
-        this.addEventListener('wheel', e => this.onWheel(e));
-    }
-
-    connectedCallback() {
-        super.connectedCallback();
-
-        const scrollEle = this.shadowRoot?.querySelector('.lines');
-        if (scrollEle) {
-            scrollEle.scrollTo(0, this.scrollTarget);
-        }
-
-        requestAnimationFrame(() => {
-            this.chatHeight = this.clientHeight;
-        });
-    }
-
     placeBookmarkLine() {
         if (this.bookmark) {
             this.removeBookmarkLine();
@@ -100,6 +94,123 @@ export default class Chat extends LitElement {
         if (this.bookmark) {
             this.bookmark.remove();
         }
+    }
+
+    constructor() {
+        super();
+
+        window.addEventListener('resize', e => {
+            this.chatHeight = this.clientHeight;
+        });
+
+        this.addEventListener('wheel', e => this.onWheel(e));
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+
+        this.chatHeight = this.clientHeight;
+        this.show();
+    }
+
+    async firstUpdated() {
+        if (this.shadowRoot) {
+            this.scrollElement = this.shadowRoot.querySelector('.lines');
+            this.scrollToLatest();
+        }
+    }
+
+    onScroll(e: any) {
+        if (!this.scrollLock) {
+            if (this.scrollElement.scrollTop >= this.lowestScrollX) {
+                this.lock();
+            }
+        }
+    }
+
+    onWheel(e: any) {
+        const dir = e.deltaY;
+        if (dir < 0) {
+            this.cancelAnimation();
+            this.unlock();
+        }
+    }
+
+    lock() {
+        this.scrollLock = true;
+        this.setAttribute('locked', '');
+    }
+
+    unlock() {
+        this.scrollLock = false;
+        this.removeAttribute('locked');
+    }
+
+    show() {
+        requestAnimationFrame(() => {
+            // anim frame to wait for the element to be drawn
+
+            this.chatHeight = this.clientHeight;
+            this.scrollElement = this.shadowRoot.querySelector('.lines');
+
+            this.scrollToLatest();
+            this.lock();
+        })
+    }
+
+    hide() {
+        this.setAttribute('hidden', '');
+    }
+
+    get lowestScrollX() {
+        return (this.scrollElement?.scrollHeight || 0) - this.chatHeight;
+    }
+
+    scrollToLatest() {
+        if (this.hasAttribute('hidden')) {
+            // dont animaate scroll if chat is not in view.
+            // if it tries to animate, it may block the active chat from correctly animate scrolling to the latest position.
+            return;
+        }
+        
+        if(this.scrollElement) {
+            AnimatedScroll.scrollTo(this.lowestScrollX, this.scrollElement);
+        }
+
+        this.lock();
+    }
+
+    afterAppend() {
+        // clean out buffer
+        if (this.children.length > this.MAX_BUFFER_SIZE + 20) {
+            const rest = (this.children.length - this.MAX_BUFFER_SIZE);
+            for (let i = 0; i < rest; i++) {
+                this.children[i].remove();
+            }
+        }
+
+        // update scroll position
+        if (this.scrollLock) {
+            this.scrollToLatest();
+        }
+    }
+
+    render() {
+        return html`
+            <div class="chat-actions">
+                <div></div>
+                <div class="chat-channel-name">
+                    ${this.channel}
+                </div>
+                <div class="chat-state-icons"></div>
+            </div>
+            <div class="scroll-to-bottom" @click="${() => this.scrollToLatest()}">
+                <span>Scroll to the bottom</span>
+            </div>
+            <div class="lines" @scroll="${(e) => this.onScroll(e)}">
+                <slot></slot>
+            </div>
+        `;
     }
 
     static get styles() {
@@ -249,98 +360,6 @@ export default class Chat extends LitElement {
             :host([modview]) .chat-channel-name {
                 display: none;
             }
-        `;
-    }
-
-    onScroll(e: any) {        
-        if(!this.scrollLock) {
-            const latest = e.target.scrollHeight - this.chatHeight;
-            this.scrollTarget = e.target.scrollTop;
-    
-            if (this.scrollTarget >= latest - 2) {
-                this.lock();
-            }
-        }
-    }
-
-    onWheel(e: any) {
-        const dir = e.deltaY;
-        if(dir < 0) {
-            this.unlock();            
-        }
-    }
-
-    lock() {
-        this.scrollLock = true;
-        this.setAttribute('locked', '');
-    }
-
-    unlock() {
-        if(this.cancelAnimate) {
-            this.cancelAnimate();
-        }
-        this.scrollLock = false;
-        this.removeAttribute('locked');
-    }
-
-    cancelAnimate: Function | undefined;
-
-    scrollToLatest() {
-        if(this.hasAttribute('hidden')) {
-            console.log("is hidden");
-            // dont animaate scroll if chat is not in view.
-            // if it tries to animate, it may block the active chat from correctly animate scrolling to the latest position.
-            return;
-        }
-        requestAnimationFrame(() => {
-            const scrollEle = this.shadowRoot?.querySelector('.lines');
-            if (!scrollEle) return;
-
-            this.scrollTarget = scrollEle.scrollHeight - this.chatHeight;
-
-            this.cancelAnimate = AnimatedScroll.scrollTo(this.scrollTarget, scrollEle);
-            this.lock();
-        });
-    }
-
-    toLatest() {
-        const scrollEle = this.shadowRoot?.querySelector('.lines');
-        if (!scrollEle) return;
-        this.scrollTarget = scrollEle.scrollHeight - this.chatHeight;
-        scrollEle.scrollTo(0, this.scrollTarget);
-        this.lock();
-    }
-
-    afterAppend() {
-        // clean out buffer
-        if (this.children.length > this.MAX_BUFFER_SIZE + 20) {
-            const rest = (this.children.length - this.MAX_BUFFER_SIZE);
-            for (let i = 0; i < rest; i++) {
-                this.children[i].remove();
-            }
-        }
-
-        // update scroll position
-        if (this.scrollLock) {
-            this.scrollToLatest();
-        }
-    }
-
-    render() {
-        return html`
-            <div class="chat-actions">
-                <div></div>
-                <div class="chat-channel-name">
-                    ${this.channel}
-                </div>
-                <div class="chat-state-icons"></div>
-            </div>
-            <div class="scroll-to-bottom" @click="${() => this.scrollToLatest()}">
-                <span>Scroll to the bottom</span>
-            </div>
-            <div class="lines" @scroll="${(e) => this.onScroll(e)}">
-                <slot></slot>
-            </div>
         `;
     }
 }

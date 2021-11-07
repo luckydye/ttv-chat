@@ -38,7 +38,6 @@ export default class AnimatedScroll {
             if(elapsed < 0.85 && Math.abs(target - current) > 3) {
                 currentAnimation = requestAnimationFrame(loop);
             } else {
-                // TODO: maybe instead of skipping ahead, make it cancelable to change the target to a new message
                 root.scrollTo(0, target);
             }
         }

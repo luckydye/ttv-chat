@@ -21,8 +21,10 @@ function renderSelecetdChat(channel: string) {
     const input = document.querySelector('chat-input');
     const container = document.querySelector('.chat');
     if (container) {
-        for (let child of container?.children) {
-            child.setAttribute('hidden', '');
+        for (let child of container.children) {
+            if(child.hide != undefined) {
+                child.hide();
+            }
         }
 
         const chat = Application.getChannel(channel);
@@ -39,9 +41,7 @@ function renderSelecetdChat(channel: string) {
                 input?.removeAttribute('disabled');
             }
     
-            requestAnimationFrame(() => {
-                chatEle.toLatest();
-            });
+            chatEle.show();
         }
     }
 }
