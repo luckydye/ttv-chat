@@ -295,6 +295,7 @@ export default class Channel {
         // move this into the chat element
         //   or maybe move all of this irc logic out of the chat *Element* and put it somwhere else?
         let lastMessage: ChatMessage | ChatInfoMessage | null = null;
+        let lastTimestamp: Date | null = null;
         IRC.listen(IRCEvents.ChatMessage, async (msg: UserMessage) => {
             if(this.channel_login !== msg.channel) return;
 
@@ -302,17 +303,24 @@ export default class Channel {
             
             for (let message of chatMessages) {
 
+                // Group timestamps. Make tiemstamp markers as chat lines grouping in like 10 minute intervals
+                //          - append a timestamp to chat if last message seen is more then 10 mintues old
+                //          - last timestamp is older then 1 hour
                 if(lastMessage) {
-                    // Group timestamps. Make tiemstamp markers as chat lines grouping in like 10 minute intervals
-                    //          - append a timestamp to chat if last message seen is more then 10 mintues old
-
                     const ts = new Date(message.timestamp);
                     if(ts.valueOf() - new Date(lastMessage.timestamp).valueOf() > 1000 * 60 * 10) {
                         // longer then 10 min since last message
-                        this.chat.appendNote(html`
-                            <div class="timestamp">${ts.toLocaleDateString()} ${ts.toLocaleTimeString()}</div>
-                        `);
+                        this.chat.appendTimestamp(ts);
+                        lastTimestamp = ts;
                     }
+                } else if(lastMessage == null) {
+                    const ts = new Date(message.timestamp);
+                    this.chat.appendTimestamp(ts);
+                    lastTimestamp = ts;
+                } else if(lastTimestamp && lastTimestamp.valueOf() - new Date(message.timestamp).valueOf() > 1000 * 60 * 60) {
+                    const ts = new Date(message.timestamp);
+                    this.chat.appendTimestamp(ts);
+                    lastTimestamp = ts;
                 }
                 lastMessage = message;
 

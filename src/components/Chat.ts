@@ -76,6 +76,12 @@ export default class Chat extends LitElement {
         this.afterAppend();
     }
 
+    appendTimestamp(ts: Date) {
+        this.appendNote(html`
+            <div class="timestamp">${ts.toLocaleDateString()} ${ts.toLocaleTimeString()}</div>
+        `);
+    }
+
     setRoom(channel: string) {
         this.channel = channel;
         this.update();
