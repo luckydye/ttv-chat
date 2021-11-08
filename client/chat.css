@@ -53,6 +53,8 @@ chat-line .emote img {
     object-fit: contain;
     margin-bottom: -16px;
     transform: translate(0, -6px);
+    -webkit-user-drag: none;
+    user-drag: none;
 }
 
 chat-line:hover {

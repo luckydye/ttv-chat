@@ -1,3 +1,4 @@
+import { html } from 'lit-element';
 import { CommandList } from './services/CommandList';
 import IRC, { IRCEvents, JoinMessage, PartMessage } from './services/IRC';
 import TwitchPubsub from './services/twitch/Pubsub';
@@ -293,12 +294,28 @@ export default class Channel {
         // IRC shit
         // move this into the chat element
         //   or maybe move all of this irc logic out of the chat *Element* and put it somwhere else?
+        let lastMessage: ChatMessage | ChatInfoMessage | null = null;
         IRC.listen(IRCEvents.ChatMessage, async (msg: UserMessage) => {
             if(this.channel_login !== msg.channel) return;
 
             const chatMessages: Array<ChatMessage | ChatInfoMessage> = this.messageParser.parse(msg);
-
+            
             for (let message of chatMessages) {
+
+                if(lastMessage) {
+                    // Group timestamps. Make tiemstamp markers as chat lines grouping in like 10 minute intervals
+                    //          - append a timestamp to chat if last message seen is more then 10 mintues old
+
+                    const ts = new Date(message.timestamp);
+                    if(ts.valueOf() - new Date(lastMessage.timestamp).valueOf() > 1000 * 60 * 10) {
+                        // longer then 10 min since last message
+                        this.chat.appendNote(html`
+                            <div class="timestamp">${ts.toLocaleDateString()} ${ts.toLocaleTimeString()}</div>
+                        `);
+                    }
+                }
+                lastMessage = message;
+
                 if (message.tagged) {
                     const mentionChannel = Application.getChannel("@");
                     mentionChannel.chat.appendMessage(message);
@@ -307,7 +324,7 @@ export default class Channel {
                 window.dispatchEvent(new ChatMessageEvent(msg.channel, message));
             }
         });
-
+        
         IRC.listen(IRCEvents.ChatInfo, (msg: EventMessage) => {
             if(this.channel_login !== msg.channel) return;
 
