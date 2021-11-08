@@ -28,6 +28,8 @@ export default class Chat extends LitElement {
     chatHeight: number = 0;
     scrollElement: HTMLElement | null;
 
+    init = false;
+
     cancelLastScrollAnimation: Function | null = null;
 
     cancelAnimation() {
@@ -102,8 +104,6 @@ export default class Chat extends LitElement {
         window.addEventListener('resize', e => {
             this.chatHeight = this.clientHeight;
         });
-
-        this.addEventListener('wheel', e => this.onWheel(e));
     }
 
     connectedCallback() {
@@ -111,13 +111,6 @@ export default class Chat extends LitElement {
 
         this.chatHeight = this.clientHeight;
         this.show();
-    }
-
-    async firstUpdated() {
-        if (this.shadowRoot) {
-            this.scrollElement = this.shadowRoot.querySelector('.lines');
-            this.scrollToLatest();
-        }
     }
 
     onScroll(e: any) {
@@ -130,7 +123,7 @@ export default class Chat extends LitElement {
 
     onWheel(e: any) {
         const dir = e.deltaY;
-        if (dir < 0) {
+        if (dir < 0 && this.scrollLock) {
             this.cancelAnimation();
             this.unlock();
         }
@@ -144,6 +137,7 @@ export default class Chat extends LitElement {
     unlock() {
         this.scrollLock = false;
         this.removeAttribute('locked');
+        this.placeBookmarkLine();
     }
 
     show() {
@@ -152,6 +146,10 @@ export default class Chat extends LitElement {
 
             this.chatHeight = this.clientHeight;
             this.scrollElement = this.shadowRoot.querySelector('.lines');
+            if(!this.init) {
+                this.scrollElement.addEventListener('wheel', e => this.onWheel(e));
+                this.init = true;
+            }
 
             this.scrollToLatest();
             this.lock();
@@ -239,6 +237,7 @@ export default class Chat extends LitElement {
             }
             
             .lines {
+                backface-visibility: hidden;  /* prevent repaint */
                 padding-top: 30px;
                 box-sizing: border-box;
                 position: absolute;

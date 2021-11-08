@@ -58,7 +58,9 @@ export default class TwitchApi {
 
     static async getUserInfo(user_login: string): Promise<UserInfo | undefined> {
         const userinfo = await this.fetch("/users", `login=${user_login}`);
-        return userinfo.data[0];
+        if (userinfo.data) {
+            return userinfo.data[0];
+        }
     }
 
     static async getCustomReward(user_id: string) {
@@ -100,11 +102,11 @@ export default class TwitchApi {
     }
 
     static async getChannelEditors(channel_id: string): Promise<Array<ChannelEditor>> {
-        return (await this.fetch('/channels/editors', 'broadcaster_id='+channel_id)).data;
+        return (await this.fetch('/channels/editors', 'broadcaster_id=' + channel_id)).data;
     }
 
     static createPoll() {
-        
+
     }
 
 }

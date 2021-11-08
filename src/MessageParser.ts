@@ -260,6 +260,10 @@ export default class MessageParser {
             }
         });
 
+        if(message.user_name.toLocaleLowerCase() == message.channel) {
+            highlighted = true;
+        }
+
         const getSubBadge = (version: number) => {
             if (channel_badges["subscriber"]) {
                 return channel_badges["subscriber"].versions[version].image_url_2x;
@@ -309,11 +313,13 @@ export default class MessageParser {
         }
 
         // render full message template
+        const ts = new Date(message.timestamp);
         const template = html`
             ${line_title ? html`
                 <div class="line-title">${line_title}</div>
             ` : ''}
             <div class="line" style="--color: ${color}" ?action="${message.is_action}">
+                <span class="timestamp">${ts.getHours()}:${ts.getMinutes()}</span>
                 ${message.user_name !== user_login && !message.badges.find(b => b.name == 'moderator' || b.name == 'broadcaster') ? html`
                     <span class="chat-line-tool mod-tool inline-tool" title="Timeout 10s" @click="${() => this.channel.timeout(message.channel, message.user_name, 10)}">
                         <img src="./images/block_white_24dp.svg" width="16px" height="16px" />

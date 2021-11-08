@@ -11,7 +11,13 @@ chat-line {
 }
 
 chat-line .line {
-    padding: 4px 0;
+    padding: 2px 0;
+}
+
+chat-line .timestamp {
+    opacity: 0.5;
+    margin-right: 2px;
+    font-size: 12px;
 }
 
 chat-line .username {

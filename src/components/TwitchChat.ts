@@ -126,14 +126,14 @@ export default class TwitchChat extends Chat {
                 transform: scale(0.95);
             }
 
-            .user-list-preview:focus-within,
-            .user-list-preview:hover,
-            .user-list-preview:focus,
-            .user-list-button:focus ~ .user-list-preview {
+            .dropdown-content:focus-within,
+            .dropdown-content:hover,
+            .dropdown-content:focus,
+            .dropdown-button:focus ~ .dropdown-content {
                 display: block;
             }
 
-            .user-list-preview {
+            .dropdown-content {
                 position: absolute;
                 top: calc(100% + 5px);
                 left: -10px;
@@ -217,6 +217,10 @@ export default class TwitchChat extends Chat {
     async openUserlist() {
         const listEle = this.shadowRoot.querySelector('chat-user-list');
         listEle.updateList();
+    }
+
+    async openVisPanel() {
+        
     }
 
     appendRedemtion(data: any) {
@@ -338,13 +342,23 @@ export default class TwitchChat extends Chat {
                             </button>
                         </div>
                         <div class="chat-action">
-                            <button class="user-list-button" title="Userlist" @click="${() => {
+                            <button class="dropdown-button" title="Userlist" @click="${() => {
                                 this.openUserlist();
                             }}">    
                                 <img src="./images/people.svg" width="16px" height="16px" />
                             </button>
-                            <div class="user-list-preview" tabindex="0">
+                            <div class="dropdown-content" tabindex="0">
                                 <chat-user-list channel="${channel.channel_login}"></chat-user-list>
+                            </div>
+                        </div>
+                        <div class="chat-action">
+                            <button class="dropdown-button" title="Show and Hide Elements" @click="${() => {
+                                this.openVisPanel();
+                            }}">    
+                                <img src="./images/visibility_white_24dp.svg" width="16px" height="16px" />
+                            </button>
+                            <div class="dropdown-content" tabindex="0">
+                                XXXX
                             </div>
                         </div>
                         <div class="chat-action">
