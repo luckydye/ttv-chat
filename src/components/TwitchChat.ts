@@ -12,6 +12,8 @@ import './UserList';
 
 export default class TwitchChat extends Chat {
 
+    MAX_BUFFER_SIZE = 500;
+
     channel: string | undefined;
 
     bio: any;
@@ -477,7 +479,7 @@ export default class TwitchChat extends Chat {
                         `}
                     </div>
                 ` : ""}
-                <slot></slot>
+                <slot class="lines-inner"></slot>
             </div>
         `;
     }

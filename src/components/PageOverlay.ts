@@ -23,6 +23,7 @@ export default class PageOverlay extends LitElement {
                 pointer-events: none;
 
                 transform: translate(5px, calc(-100% - 5px));
+                backface-visibility: hidden;  /* prevent repaint */
             }
         `;
     }

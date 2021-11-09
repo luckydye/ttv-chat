@@ -29,24 +29,20 @@
     <script type="module" src="./main.js"></script>
 </head>
 
-<body>
-    <div class="app">
+<body class="app">
+    <div class="sidebar">
+        <chat-rooms></chat-rooms>
+        <twitch-profile></twitch-profile>
+    </div>
 
-        <div class="sidebar">
-            <chat-rooms></chat-rooms>
-            <twitch-profile></twitch-profile>
+    <div class="body">
+        <div class="chat">
+            <!-- Chat element goes here -->
+            <twitch-login-panel></twitch-login-panel>
         </div>
-
-        <div class="body">
-            <div class="chat">
-                <!-- Chat element goes here -->
-                <twitch-login-panel></twitch-login-panel>
-            </div>
-            <div class="chat-input">
-                <chat-input></chat-input>
-            </div>
+        <div class="chat-input">
+            <chat-input></chat-input>
         </div>
-
     </div>
 </body>
 

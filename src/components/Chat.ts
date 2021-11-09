@@ -178,7 +178,7 @@ export default class Chat extends LitElement {
         }
         
         if(this.scrollElement) {
-            AnimatedScroll.scrollTo(this.lowestScrollX, this.scrollElement);
+            this.scrollElement.scrollTo(0, this.lowestScrollX);
         }
 
         this.lock();
@@ -254,6 +254,9 @@ export default class Chat extends LitElement {
                 overflow: auto;
                 overflow-y: scroll;
                 overflow-x: hidden;
+            }
+            .lines-inner {
+                display: block;
             }
             .line {
 
