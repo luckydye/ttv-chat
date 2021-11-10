@@ -4,7 +4,7 @@
 
 chat-line {
     display: block;
-    padding: 0 12px;
+    padding: 2px 12px;
     line-height: 150%;
     position: relative;
     box-sizing: border-box;
@@ -24,6 +24,7 @@ chat-line .username {
     color: var(--color);
     font-weight: 500;
     margin-right: 2px;
+    padding: 8px 0;
 }
 
 chat-line .username:hover {
@@ -68,10 +69,7 @@ chat-line .line-title {
     margin-left: -1px;
 }
 
-chat-line .tools {
-    display: grid;
-    grid-auto-flow: column;
-    grid-gap: 2px;
+chat-line .tool {
     position: absolute;
     right: 0;
     top: 3px;
@@ -106,7 +104,7 @@ chat-line .chat-line-tool:active {
     transform: scale(0.95);
 }
 
-chat-line:not([deleted]):hover .tools .chat-line-tool {
+chat-line:not([deleted]):hover .tool {
     display: inline-flex;
 }
 

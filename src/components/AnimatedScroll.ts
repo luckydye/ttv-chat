@@ -14,7 +14,7 @@ let currentAnimation: number = -1;
 export default class AnimatedScroll {
 
     static scrollTo(target: number, root: HTMLElement) {
-        cancelAnimationFrame(currentAnimation);
+        clearTimeout(currentAnimation);
 
         const start = root.scrollTop;
         const dist = target - start;
@@ -36,7 +36,7 @@ export default class AnimatedScroll {
             root.scrollTo(0, current);
 
             if(elapsed < 0.85 && Math.abs(target - current) > 3) {
-                currentAnimation = requestAnimationFrame(loop);
+                currentAnimation = setTimeout(loop, 1000 / 60);
             } else {
                 root.scrollTo(0, target);
             }
@@ -45,7 +45,7 @@ export default class AnimatedScroll {
         loop();
 
         return () => {
-            cancelAnimationFrame(currentAnimation)
+            clearTimeout(currentAnimation)
         }
     }
 

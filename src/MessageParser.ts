@@ -1,5 +1,6 @@
 // Parse incoming messages into html´´ templates.
 import { html, TemplateResult } from 'lit-element';
+import { render } from 'lit-html';
 import Badges from './services/Badges';
 import Emotes from './services/Emotes';
 import { TwitchEmote } from './services/emotes/TwitchEmotes';
@@ -312,15 +313,23 @@ export default class MessageParser {
             }
         }
 
-        // render full message template
-        const ts = new Date(message.timestamp);
-        const template = html`
-            ${line_title ? html`
-                <div class="line-title">${line_title}</div>
-            ` : ''}
-            <div class="line" style="--color: ${color}" ?action="${message.is_action}">
-                
-                ${message.user_name !== user_login && !message.badges.find(b => b.name == 'moderator' || b.name == 'broadcaster') ? html`
+        function createLine(mod = false) {
+            const lineEle = document.createElement('chat-line');
+
+            lineEle.style.setProperty("--color", color);
+            if(message.is_action) {
+                lineEle.setAttribute('action', '');
+            }
+
+            lineEle.className = "line";
+
+            // render full message template
+            const template = html`
+                ${line_title ? html`
+                    <div class="line-title">${line_title}</div>
+                ` : ''}
+                    
+                ${mod && (message.user_name !== user_login && !message.badges.find(b => b.name == 'moderator' || b.name == 'broadcaster')) ? html`
                     <span class="chat-line-tool mod-tool inline-tool" title="Timeout 10s" @click="${() => this.channel.timeout(message.channel, message.user_name, 10)}">
                         <img src="./images/block_white_24dp.svg" width="16px" height="16px" />
                     </span>
@@ -352,18 +361,34 @@ export default class MessageParser {
                 ` : ""}
                 <span class="message">${parsed_msg}</span>
                 
-                <div class="tools">
-                    <!-- //////// use PageOverlay for this? //////////-->
-                    ${message.user_name !== user_login ? html`
-                        <div class="chat-line-tool" title="Reply" @click="${() => this.channel.reply(message.channel, message)}">
-                            <img src="./images/reply_white_24dp.svg" height="18px" width="18px" />
-                        </div>
-                    ` : ""}
-                </div>
-            </div>
-        `;
+                ${message.user_name !== user_login ? html`
+                    <div class="tool chat-line-tool" title="Reply" @click="${() => this.channel.reply(message.channel, message)}">
+                        <img src="./images/reply_white_24dp.svg" height="18px" width="18px" />
+                    </div>
+                ` : ""}
+            `;
 
-        return {
+            lineEle.setAttribute('messageid', message.id);
+            lineEle.setAttribute('userid', message.user_id);
+
+            if (tagged) {
+                lineEle.setAttribute('tagged', '');
+            }
+            if (highlighted) {
+                lineEle.setAttribute('highlighted', '');
+            }
+            if (action) {
+                lineEle.setAttribute('action', '');
+            }
+
+            lineEle.message = messageData;
+
+            render(template, lineEle);
+
+            return lineEle;
+        }
+
+        const messageData: ChatMessage = {
             type: 'message',
             id: message.id,
             user_name: message.user_name,
@@ -374,8 +399,10 @@ export default class MessageParser {
             reply: isReply,
             timestamp: timestamp,
             text: message.text,
-            content: template,
+            content: createLine,
         };
+
+        return messageData;
     }
 
 }

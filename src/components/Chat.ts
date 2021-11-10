@@ -29,6 +29,7 @@ export default class Chat extends LitElement {
     scrollElement: HTMLElement | null;
 
     init = false;
+    moderator = false;
 
     cancelLastScrollAnimation: Function | null = null;
 
@@ -39,27 +40,7 @@ export default class Chat extends LitElement {
     }
 
     appendMessage(msg: ChatMessage) {
-        const line = document.createElement('chat-line');
-
-        line.setAttribute('messageid', msg.id);
-        line.setAttribute('userid', msg.user_id);
-        line.setAttribute('timestamp', msg.timestamp.valueOf());
-
-        if (msg.tagged) {
-            line.setAttribute('tagged', '');
-        }
-        if (msg.highlighted) {
-            line.setAttribute('highlighted', '');
-        }
-        if (msg.action) {
-            line.setAttribute('action', '');
-        }
-
-        line.message = msg;
-
-        render(msg.content, line);
-
-        this.appendChild(line);
+        const line = this.appendChild(msg.content(this.moderator));
         this.afterAppend();
         return line;
     }
@@ -178,7 +159,8 @@ export default class Chat extends LitElement {
         }
         
         if(this.scrollElement) {
-            this.scrollElement.scrollTo(0, this.lowestScrollX);
+            // this.scrollElement.scrollTo(0, this.lowestScrollX);
+            AnimatedScroll.scrollTo(this.lowestScrollX, this.scrollElement);
         }
 
         this.lock();

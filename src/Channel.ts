@@ -234,6 +234,8 @@ export default class Channel {
                 this.moderator = msg.badges.find(b => b.name == "moderator") !== undefined;
                 this.broadcaster = msg.badges.find(b => b.name == "broadcaster") !== undefined;
 
+                this.chat.moderator = this.moderator;
+
                 this.emoteSets = msg.emote_sets;
 
                 // PubSub for mod stuff
