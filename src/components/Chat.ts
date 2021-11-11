@@ -33,6 +33,8 @@ export default class Chat extends LitElement {
 
     cancelLastScrollAnimation: Function | null = null;
 
+    lastMessage: ChatMessage | null = null;
+
     cancelAnimation() {
         if(this.cancelLastScrollAnimation) {
             this.cancelLastScrollAnimation();
@@ -40,8 +42,18 @@ export default class Chat extends LitElement {
     }
 
     appendMessage(msg: ChatMessage) {
-        const line = this.appendChild(msg.content(this.moderator));
+        let followup = false;
+        if(this.lastMessage && this.lastMessage.user_name == msg.user_name) {
+            followup = true;
+        }
+
+        const ele = msg.content(this.moderator);
+        if(followup) {
+            ele.setAttribute("followup", '');
+        }
+        const line = this.appendChild(ele);
         this.afterAppend();
+        this.lastMessage = msg;
         return line;
     }
 

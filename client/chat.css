@@ -138,6 +138,11 @@ chat-line[tagged] {
     background: hsl(0deg 90% 70% / 22%);
 }
 
+chat-line[followup] .bages,
+chat-line[followup] .username {
+    display: none;
+}
+
 chat-line[highlighted] {
     background: rgb(148 74 255 / 25%);
     padding-top: 4px;

@@ -333,7 +333,7 @@ export default class MessageParser {
             }
         }
 
-        function createLine(mod = false) {
+        const createLine = (mod = false) => {
             const lineEle = document.createElement('chat-line');
 
             lineEle.style.setProperty("--color", color);
@@ -342,6 +342,8 @@ export default class MessageParser {
             }
 
             lineEle.className = "line";
+
+            // TODO: Move the markup into the Chat component. Only render the actual message into a html version
 
             // render full message template
             const template = html`
