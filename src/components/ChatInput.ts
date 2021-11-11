@@ -5,8 +5,9 @@ import Application from '../App';
 import EmotePicker from './EmotePicker';
 import Emotes from '../services/Emotes';
 import ChatCommandEvent from '../events/ChatCommand';
+import MessageParser from '../MessageParser';
 
-// TODO: Emote Sugestions
+const message_parser = new MessageParser();
 
 const MAX_HSITORY_LENGTH = 20;
 
@@ -217,6 +218,27 @@ export default class ChatInput extends LitElement {
             this.submit(e);
             this.resetInput();
             e.preventDefault();
+        }
+        if (e.key == " " && false) {
+            // TODO: parse the whole message not just the last word: Makes pasting messages and stuff possible
+            const words = this.value.split(" ");
+            const lastWord = words[words.length-1];
+            const channel = Application.getActiveChannel();
+            if(channel) {
+                const emote_map = message_parser.parseEmotes(lastWord, channel.channel_id, []);
+                const emote = emote_map[lastWord];
+                if(emote) {
+                    const emoteUrl = emote.emote.url_x2;
+                    const img = new Image();
+                    img.src = emoteUrl;
+                    img.width = 24;
+                    img.height = 24;
+                    img.setAttribute('emote', '');
+                    this.inputElement.innerText = words.slice(0, words.length-2).join(" ");
+                    this.inputElement.appendChild(img);
+                    this.setCursorPosition(1);
+                }
+            }
         }
         if (e.key == "ArrowUp") {
             if (this.commandMode) {

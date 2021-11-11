@@ -1,4 +1,4 @@
-# Better Twitch Chat (WIP)
+# Better Twitch Chat (Alpha)
 
 A new Twitch Chat Client with some third party things.
 
@@ -55,8 +55,6 @@ Run ```npm run tauri dev``` or hit F5 in VSCode to compile the app.
 
 ## Roadmap
 
-Next goal: Beta Release
-
 - [x] fix the scrolling when switching channels
 - [x] bookmark line
 - [x] show point redemtions in chat !important
@@ -85,7 +83,6 @@ Next goal: Beta Release
 - [x] (MessageParser) seperate out the message log part of the chat for seperate mention and whisper tab wihtout, chat-input, bio and room state stuff
 - [ ] Notifications
 - [ ] Reccomend channels from follow list
-- [ ] Cache profile pictures with service worker
 - [ ] UI for
     - Pols
     - Predictions
@@ -104,8 +101,7 @@ Next goal: Beta Release
     - find existing chat messages that match that id/hash
     - move message down to latest and add to a counter on the message
 - [ ] Hide messages from bots
-- [ ] Timestamps take to much space
-    - Colored dot indicating how long ago the message got posted?
+- [ ] Timestamps
 
 #### Chat
 - [x] emote and badge tool tips

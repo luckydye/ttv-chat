@@ -121,7 +121,7 @@ export default class MessageParser {
 
     channel: Channel;
 
-    constructor(channel: Channel) {
+    constructor(channel?: Channel) {
         this.channel = channel;
     }
 
@@ -161,46 +161,23 @@ export default class MessageParser {
         return user == null ? [event] : [user, event];
     }
 
-    parseChatTextMessage(message: UserMessage): ChatMessage {
-
+    parseEmotes(message_text: string, channel_id: string, sender_name: string, message_emtoes?: Array<Emote>): { [key: string]: { name: string, emote: any, service: string } } {
         const client_user = getLoggedInUser();
         const user_login = client_user?.user_login;
 
-        const channel_id = message.tags['room-id'];
-        const reward_id = message.tags['custom-reward-id'];
-
-        let redemtion_title = "custom reward";
-
-        if(reward_id) {
-            const redemtion = this.channel.findReward(reward_id);
-            if(redemtion) {
-                redemtion_title = redemtion.title;
-            }
-        }
-
-        let color = Color.rgbToHex(Color.limitColorContrast(...message.color));
-        let highlighted = message.tags['msg-id'] == "highlighted-message";
-        let action = message.is_action;
-        let timestamp = message.timestamp;
-        let isReply = message.tags['reply-parent-msg-id'] != null;
-        let tagged = false;
-                                                        // The services/emotes/Emote struct
+        // The services/emotes/Emote struct
         const wordEmoteMap: { [key: string]: { name: string, emote: any, service: string } } = {};
-        const wordLinkMap: { [key: string]: string } = {};
-        const wordMentionMap: { [key: string]: string } = {};
 
-        // get cached channel badges
-        let channel_badges = Badges.getChachedChannelBadges(channel_id);
         // get cached channel emotes
         let channel_emotes = Emotes.getChachedChannelEmotes(channel_id);
-        
+
         // collect emotes (url) for this message
-        if (message.emotes) {
-            for (let emote of message.emotes) {
+        if (message_emtoes) {
+            for (let emote of message_emtoes) {
                 const start = emote.char_range.start;
                 const end = emote.char_range.end;
 
-                const wordToReplace = message.text.slice(start, end);
+                const wordToReplace = message_text.slice(start, end);
 
                 wordEmoteMap[wordToReplace] = {
                     name: wordToReplace,
@@ -210,15 +187,15 @@ export default class MessageParser {
             }
         }
 
-        const msg_words = message.text.split(" ");
+        const msg_words = message_text.split(" ");
 
         // find words to replace with 
         //  (3rd party emtoes | global emtoes | links | metions | msg tagged)
         msg_words.forEach(str => {
             // find channel emote repalcement
-            if(channel_emotes) {
-                for(let service in channel_emotes) {
-                    if(!channel_emotes[service] || (service == "twitch" && message.user_name != user_login)) {
+            if (channel_emotes) {
+                for (let service in channel_emotes) {
+                    if (!channel_emotes[service] || (service == "twitch" && sender_name != user_login)) {
                         continue;
                     }
                     if (str in channel_emotes[service]) {
@@ -231,9 +208,9 @@ export default class MessageParser {
                 }
             }
             // global emotes repalcement
-            if(Emotes.global_emotes) {
-                for(let service in Emotes.global_emotes) {
-                    if(!Emotes.global_emotes[service]) {
+            if (Emotes.global_emotes) {
+                for (let service in Emotes.global_emotes) {
+                    if (!Emotes.global_emotes[service]) {
                         continue;
                     }
                     if (str in Emotes.global_emotes[service]) {
@@ -245,6 +222,49 @@ export default class MessageParser {
                     }
                 }
             }
+        });
+
+        return wordEmoteMap;
+    }
+
+    parseChatTextMessage(message: UserMessage): ChatMessage {
+
+        const client_user = getLoggedInUser();
+        const user_login = client_user?.user_login;
+
+        const channel_id = message.tags['room-id'];
+        const reward_id = message.tags['custom-reward-id'];
+
+        let redemtion_title = "custom reward";
+
+        if (reward_id) {
+            const redemtion = this.channel.findReward(reward_id);
+            if (redemtion) {
+                redemtion_title = redemtion.title;
+            }
+        }
+
+        let color = Color.rgbToHex(Color.limitColorContrast(...message.color));
+        let highlighted = message.tags['msg-id'] == "highlighted-message";
+        let action = message.is_action;
+        let timestamp = message.timestamp;
+        let isReply = message.tags['reply-parent-msg-id'] != null;
+        let tagged = false;
+        // The services/emotes/Emote struct
+        const wordLinkMap: { [key: string]: string } = {};
+        const wordMentionMap: { [key: string]: string } = {};
+
+        // get cached channel badges
+        let channel_badges = Badges.getChachedChannelBadges(channel_id);
+        // get cached channel emotes
+
+        const wordEmoteMap = this.parseEmotes(message.text, channel_id, message.user_name, message.emotes);
+
+        const msg_words = message.text.split(" ");
+
+        // find words to replace with 
+        //  (3rd party emtoes | global emtoes | links | metions | msg tagged)
+        msg_words.forEach(str => {
             // find link repalcement
             const urlMatch = Webbrowser.matchURL(str);
             if (urlMatch) {
@@ -261,7 +281,7 @@ export default class MessageParser {
             }
         });
 
-        if(message.user_name.toLocaleLowerCase() == message.channel) {
+        if (message.user_name.toLocaleLowerCase() == message.channel) {
             highlighted = true;
         }
 
@@ -306,9 +326,9 @@ export default class MessageParser {
 
         let line_title = reward_id ? `Redeemed ${redemtion_title}.` : null;
 
-        if(isReply) {
+        if (isReply) {
             const parent_message = this.channel.getMessageById(message.tags['reply-parent-msg-id']);
-            if(parent_message) {
+            if (parent_message) {
                 line_title = `${parent_message.user_name}: ${parent_message.text}`;
             }
         }
@@ -317,7 +337,7 @@ export default class MessageParser {
             const lineEle = document.createElement('chat-line');
 
             lineEle.style.setProperty("--color", color);
-            if(message.is_action) {
+            if (message.is_action) {
                 lineEle.setAttribute('action', '');
             }
 
@@ -342,16 +362,16 @@ export default class MessageParser {
                 ` : ""}
                 <span class="bages">
                     ${message.badges.map(badge => {
-                        let badge_url = "";
+                let badge_url = "";
 
-                        if (badge.name == "subscriber") {
-                            badge_url = getSubBadge(badge.version) || Badges.getBadgeByName(badge.name, badge.version);
-                            return html`<img class="badge" alt="${badge.name} (${badge.description})" src="${badge_url}" width="18" height="18">`;
-                        }
-                        
-                        badge_url = Badges.getBadgeByName(badge.name, badge.version);
-                        return html`<img class="badge" alt="${badge.name}" src="${badge_url}" width="18" height="18">`;
-                    })}
+                if (badge.name == "subscriber") {
+                    badge_url = getSubBadge(badge.version) || Badges.getBadgeByName(badge.name, badge.version);
+                    return html`<img class="badge" alt="${badge.name} (${badge.description})" src="${badge_url}" width="18" height="18">`;
+                }
+
+                badge_url = Badges.getBadgeByName(badge.name, badge.version);
+                return html`<img class="badge" alt="${badge.name}" src="${badge_url}" width="18" height="18">`;
+            })}
                 </span>
                 <span class="username" @click="${() => this.channel.openUserCard(message.user_name)}">${message.user_name}:</span>
                 ${isReply && false ? html`

@@ -353,7 +353,7 @@ export default class TwitchChat extends Chat {
                                 <chat-user-list channel="${channel.channel_login}"></chat-user-list>
                             </div>
                         </div>
-                        <div class="chat-action">
+                        <!-- <div class="chat-action">
                             <button class="dropdown-button" title="Show and Hide Elements" @click="${() => {
                                 this.openVisPanel();
                             }}">    
@@ -362,7 +362,7 @@ export default class TwitchChat extends Chat {
                             <div class="dropdown-content" tabindex="0">
                                 XXXX
                             </div>
-                        </div>
+                        </div> -->
                         <div class="chat-action">
                             <button title="Open Stream" @click="${() => {
                                 Webbrowser.openInBrowwser(`https://www.twitch.tv/${channel.channel_login}`);
