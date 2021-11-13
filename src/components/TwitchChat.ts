@@ -12,8 +12,6 @@ import './UserList';
 
 export default class TwitchChat extends Chat {
 
-    MAX_BUFFER_SIZE = 500;
-
     channel: string | undefined;
 
     bio: any;
@@ -360,7 +358,7 @@ export default class TwitchChat extends Chat {
                                 <img src="./images/visibility_white_24dp.svg" width="16px" height="16px" />
                             </button>
                             <div class="dropdown-content" tabindex="0">
-                                XXXX
+                                
                             </div>
                         </div> -->
                         <div class="chat-action">

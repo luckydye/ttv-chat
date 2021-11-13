@@ -17,7 +17,7 @@ import IRC from './services/IRC';
 import Notifications from './util/Notifications';
 
 
-// TODO: get a better method to switch between views
+// TODO: find a better method to switch between views
 function renderSelecetdChat(channel: string) {
     const input = document.querySelector('chat-input');
     const container = document.querySelector('.chat');

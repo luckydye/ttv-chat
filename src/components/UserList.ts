@@ -21,7 +21,6 @@ export default class ChatUserList extends LitElement {
     }
 
     async request() {
-        // TODO: I should reate limit this request, since its not gonna change every minute anyway
         const list = await IRC.getUserlist(this.channel);
         this.list = list.chatters;
 

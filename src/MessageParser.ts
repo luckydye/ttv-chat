@@ -275,7 +275,9 @@ export default class MessageParser {
                 wordMentionMap[str] = str;
             }
             // find highlight mentions
-            if (user_login && str.toLocaleLowerCase().match(user_login.toLocaleLowerCase())) {
+            if (user_login && (str.toLocaleLowerCase() == user_login.toLocaleLowerCase() ||
+                str.toLocaleLowerCase() == "@" + user_login.toLocaleLowerCase())) {
+
                 wordMentionMap[str] = str;
                 tagged = true;
             }
@@ -336,17 +338,21 @@ export default class MessageParser {
         const createLine = (mod = false) => {
             const lineEle = document.createElement('chat-line');
 
-            lineEle.style.setProperty("--color", color);
             if (message.is_action) {
                 lineEle.setAttribute('action', '');
             }
-
-            lineEle.className = "line";
 
             // TODO: Move the markup into the Chat component. Only render the actual message into a html version
 
             // render full message template
             const template = html`
+
+                <style>
+                    [userid="${message.user_id}"] {
+                        --color: ${color};
+                    }
+                </style>
+
                 ${line_title ? html`
                     <div class="line-title">${line_title}</div>
                 ` : ''}

@@ -10,10 +10,6 @@ chat-line {
     box-sizing: border-box;
 }
 
-chat-line .line {
-    padding: 2px 0;
-}
-
 chat-line .timestamp {
     opacity: 0.5;
     margin-right: 2px;

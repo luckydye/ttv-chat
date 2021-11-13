@@ -13,6 +13,8 @@ import './UserList';
 // TODO: potential performance moon shot: Virtualize message history and dynamicly render the messages that will be visible soon.
 //          Will require virtual scrolling mechanism (at least the scrollbar)
 
+//          Batch render the messages that could be visible in a single scroll.
+
 export default class Chat extends LitElement {
 
     static get properties() {
@@ -21,7 +23,7 @@ export default class Chat extends LitElement {
         }
     }
 
-    MAX_BUFFER_SIZE = 500;
+    MAX_BUFFER_SIZE = 50;
 
     channel: string = "";
 
