@@ -48,9 +48,7 @@ pub fn handle_server_message(message: ServerMessage, app_handle: &tauri::AppHand
     }
     ServerMessage::ClearMsg(msg) => {
       // message deletes
-      app_handle
-        .emit_all("chat.delete.message", msg)
-        .unwrap();
+      app_handle.emit_all("chat.delete.message", msg).unwrap();
     }
     ServerMessage::ClearChat(msg) => {
       // message deletes
@@ -103,7 +101,7 @@ async fn connect_to_chat(app_handle: tauri::AppHandle, username: String, token: 
 }
 
 #[command]
-async fn chat_join_room(app_handle: tauri::AppHandle ,channel: String) {
+async fn chat_join_room(app_handle: tauri::AppHandle, channel: String) {
   unsafe {
     APP_CHAT.join_room(&channel).await;
 
@@ -136,9 +134,16 @@ async fn chat_send_message(channel: String, message: String) {
 }
 
 #[command]
-async fn chat_delete_message(channel_name: String, message_id: String, message: String, user: String) {
+async fn chat_delete_message(
+  channel_name: String,
+  message_id: String,
+  message: String,
+  user: String,
+) {
   unsafe {
-    APP_CHAT.delete_message(channel_name, message_id, message, user).await;
+    APP_CHAT
+      .delete_message(channel_name, message_id, message, user)
+      .await;
   }
 }
 

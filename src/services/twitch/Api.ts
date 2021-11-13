@@ -109,4 +109,17 @@ export default class TwitchApi {
 
     }
 
+    static async getModdedChannels(channel_login: string) {
+        // https://modlookup.3v.fi/api/user-v3/luckydye
+        return fetch(`https://modlookup.3v.fi/api/user-v3/${channel_login}`, {
+            headers: {
+                "User-Agent": "https://github.com/luckydye/better-twitch-chat"
+            }
+        })
+            .then(res => res.json())
+            .then(json => {
+                return json.channels;
+            })
+    }
+
 }

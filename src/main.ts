@@ -14,6 +14,7 @@ import Account from './Account';
 import Badges from './services/Badges';
 import Emotes from './services/Emotes';
 import IRC from './services/IRC';
+import Notifications from './util/Notifications';
 
 
 // TODO: get a better method to switch between views
@@ -68,6 +69,8 @@ async function onLogin(account: Account) {
     });
 
     renderSelecetdChat(Application.getSelectedChannel());
+
+    Notifications.initialize();
 }
 
 window.Events = Events;

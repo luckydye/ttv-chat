@@ -1,4 +1,3 @@
-import { html } from 'lit-element';
 import { CommandList } from './services/CommandList';
 import IRC, { IRCEvents, JoinMessage, PartMessage } from './services/IRC';
 import TwitchPubsub from './services/twitch/Pubsub';
@@ -17,6 +16,7 @@ import Format from './util/Format';
 import StreamElementsApi from './services/StreamElements';
 import NightbotApi from './services/Nightbot';
 import { TwitchCommands } from './services/twitch/TwichCommands';
+import Notifications from './util/Notifications';
 
 const COMMAND_CACHE_LIFETIME = 1000 * 60;
 
@@ -152,6 +152,9 @@ export default class Channel {
         const stream = await TwitchApi.getStreams(this.channel_id);
 
         if (stream[0]) {
+            if(this.is_live === false) {
+                Notifications.send(`${this.channel_login} is live!`);
+            }
             this.is_live = true;
 
             // const {
@@ -308,19 +311,21 @@ export default class Channel {
                 // Group timestamps. Make tiemstamp markers as chat lines grouping in like 10 minute intervals
                 //          - append a timestamp to chat if last message seen is more then 10 mintues old
                 //          - last timestamp is older then 1 hour
-                if(lastMessage) {
-                    const ts = new Date(message.timestamp);
+                const ts = new Date(message.timestamp);
+                if(lastMessage && lastTimestamp) {
                     if(ts.valueOf() - new Date(lastMessage.timestamp).valueOf() > 1000 * 60 * 10) {
                         // longer then 10 min since last message
                         this.chat.appendTimestamp(ts);
                         lastTimestamp = ts;
+                    } else {
+                        if(ts.valueOf() - lastTimestamp.valueOf() > 1000 * 60 * 10) {
+                            // last timestamp is > 10 minutes old
+                            this.chat.appendTimestamp(ts);
+                            lastTimestamp = ts;
+                        }
                     }
                 } else if(lastMessage == null) {
-                    const ts = new Date(message.timestamp);
-                    this.chat.appendTimestamp(ts);
-                    lastTimestamp = ts;
-                } else if(lastTimestamp && lastTimestamp.valueOf() - new Date(message.timestamp).valueOf() > 1000 * 60 * 60) {
-                    const ts = new Date(message.timestamp);
+                    // first message in history
                     this.chat.appendTimestamp(ts);
                     lastTimestamp = ts;
                 }
