@@ -6,7 +6,7 @@ export default [
         input: 'src/main.ts',
         output: {
             file: 'client/main.js',
-            format: 'esm'
+            format: 'es'
         },
         plugins: [
             node_resolve(),

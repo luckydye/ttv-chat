@@ -370,16 +370,16 @@ export default class MessageParser {
                 ` : ""}
                 <span class="bages">
                     ${message.badges.map(badge => {
-                let badge_url = "";
+                        let badge_url = "";
 
-                if (badge.name == "subscriber") {
-                    badge_url = getSubBadge(badge.version) || Badges.getBadgeByName(badge.name, badge.version);
-                    return html`<img class="badge" alt="${badge.name} (${badge.description})" src="${badge_url}" width="18" height="18">`;
-                }
+                        if (badge.name == "subscriber") {
+                            badge_url = getSubBadge(badge.version) || Badges.getBadgeByName(badge.name, badge.version);
+                            return html`<img class="badge" alt="${badge.name} (${badge.description})" src="${badge_url}" width="18" height="18">`;
+                        }
 
-                badge_url = Badges.getBadgeByName(badge.name, badge.version);
-                return html`<img class="badge" alt="${badge.name}" src="${badge_url}" width="18" height="18">`;
-            })}
+                        badge_url = Badges.getBadgeByName(badge.name, badge.version);
+                        return html`<img class="badge" alt="${badge.name}" src="${badge_url}" width="18" height="18">`;
+                    })}
                 </span>
                 <span class="username" @click="${() => this.channel.openUserCard(message.user_name)}">${message.user_name}:</span>
                 ${isReply && false ? html`

@@ -56,7 +56,7 @@ export default class Chat extends LitElement {
         if(followup) {
             ele.setAttribute("followup", '');
         }
-        const line = this.appendChild(ele);
+        const line = this.insertAdjacentElement('beforeend', ele);
         this.afterAppend();
         this.lastMessage = msg;
         return line;
@@ -64,13 +64,13 @@ export default class Chat extends LitElement {
 
     appendInfo(msg: ChatInfoMessage) {
         const line = new ChatInfo(msg);
-        this.appendChild(line);
+        this.insertAdjacentElement('beforeend', line);
         this.afterAppend();
     }
 
     appendNote(text: string | TemplateResult) {
         const line = new ChatNote(text);
-        this.appendChild(line);
+        this.insertAdjacentElement('beforeend', line);
         this.afterAppend();
     }
 
