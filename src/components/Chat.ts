@@ -10,6 +10,9 @@ import './UserList';
 
 // TODO: make custom scrollbar for scrolllock handling
 
+// TODO: potential performance moon shot: Virtualize message history and dynamicly render the messages that will be visible soon.
+//          Will require virtual scrolling mechanism (at least the scrollbar)
+
 export default class Chat extends LitElement {
 
     static get properties() {
