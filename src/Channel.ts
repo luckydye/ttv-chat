@@ -5,7 +5,7 @@ import TwitchApi, { UserInfo } from './services/twitch/Api';
 import Application from './App';
 import Account from './Account';
 import Focus from './util/Focus';
-import MessageParser, { ChatMessage, EventMessage, UserMessage, ChatInfoMessage } from './MessageParser';
+import MessageParser, { ChatMessage, EventMessage, UserMessage, ChatInfoMessage } from './components/MessageParser';
 import TwitchChat from './components/TwitchChat';
 import ChannelStateChanged from './events/ChannelStateChanged';
 import ChannelInfoChanged from './events/ChannelInfoChanged';

@@ -1,12 +1,12 @@
 // Parse incoming messages into html´´ templates.
 import { html, TemplateResult } from 'lit-element';
 import { render } from 'lit-html';
-import Badges from './services/Badges';
-import Emotes from './services/Emotes';
-import { TwitchEmote } from './services/emotes/TwitchEmotes';
-import { getLoggedInUser } from './services/Auth';
-import Webbrowser from './util/Webbrowser';
-import Color from './util/Color';
+import Badges from '../services/Badges';
+import Emotes from '../services/Emotes';
+import { TwitchEmote } from '../services/emotes/TwitchEmotes';
+import { getLoggedInUser } from '../services/Auth';
+import Webbrowser from '../util/Webbrowser';
+import Color from '../util/Color';
 
 const Default_EventMessage_Color = "rgb(12, 12, 12)";
 const ColorEventTypeMap = {
@@ -113,6 +113,9 @@ export interface ChatInfoMessage {
 
 //
 //////
+
+const messageCache: Array<any> = [];
+const footprintMap: Array<Array<string>> = [];
 
 export default class MessageParser {
 
@@ -335,6 +338,35 @@ export default class MessageParser {
             }
         }
 
+        // message footprint
+        const msgFootprint = messageFootprint(message.text);
+
+        const similarMessages = [];
+        for(let [channel, id, footprint] of footprintMap) {
+            if(footprint == msgFootprint && channel == message.channel) {
+                similarMessages.push(id);
+            }
+        }
+        
+        messageCache.unshift([message.channel, message.id, message]);
+        if(messageCache.length > 100) {
+            messageCache.pop();
+        }
+        footprintMap.unshift([message.channel, message.id, msgFootprint]);
+        if(footprintMap.length > 100) {
+            footprintMap.pop();
+        }
+
+        let latestSimilarMessage: null | string = null;
+
+        if(similarMessages.length > 0) {
+            for(let messageId of similarMessages) {
+                const [c, id, msg] = messageCache.find(([channel, id, _]) => id == messageId && channel == message.channel);
+                latestSimilarMessage = id;
+            }
+        }
+
+        // message html content
         const createLine = (mod = false) => {
             const lineEle = document.createElement('chat-line');
 
@@ -343,6 +375,7 @@ export default class MessageParser {
             }
 
             // TODO: Move the markup into the Chat component. Only render the actual message into a html version
+            // TODO: Collpage exesively long messages, especially with emotes
 
             // render full message template
             const template = html`
@@ -413,6 +446,11 @@ export default class MessageParser {
 
             render(template, lineEle);
 
+            if(latestSimilarMessage != null) {
+                // TODO: append this new message to the old one, dont add it to the chat
+                lineEle.setAttribute('compact', '');
+            }
+
             return lineEle;
         }
 
@@ -435,3 +473,19 @@ export default class MessageParser {
 
 }
 
+function messageFootprint(msgString: string) {
+
+    const words = new Set([...msgString.split(" ")]);
+    // const words = new Set([...msgString.split(" ").filter(w => w.length > 1)]);
+    const str = [...words].join("");
+
+    let footprint = "XXXXXXXXXXXXXXXXXXXXXXXX";
+
+    for(let i = 0; i < footprint.length; i++) {
+        const charIndex = Math.floor((i / footprint.length) * str.length);
+        const char = str[charIndex];
+        footprint = footprint.substring(0, i) + char + footprint.substring(i + 1);
+    }
+
+    return footprint;
+}

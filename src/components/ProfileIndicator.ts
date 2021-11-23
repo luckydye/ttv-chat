@@ -1,8 +1,8 @@
 import { css, html, LitElement } from 'lit-element';
 import IRC, { IRCEvents } from '../services/IRC';
 import Application from '../App';
-import { UserMessage } from '../MessageParser';
-import Events, { on } from '../events/Events';
+import { UserMessage } from './MessageParser';
+import Events from '../events/Events';
 
 export default class ProfileIndicator extends LitElement {
 
@@ -32,7 +32,7 @@ export default class ProfileIndicator extends LitElement {
                 }
             });
 
-            on(Events.ChatMessageEvent, e => {
+            Application.on(Events.ChatMessageEvent, e => {
                 if (e.data.channel === this.channel && Application.getSelectedChannel() !== this.channel &&
                     Application.getChannel(this.channel)?.chat_connected) {
                     this.new_message = true;
@@ -45,7 +45,7 @@ export default class ProfileIndicator extends LitElement {
                 }
             });
 
-            on(Events.ChannelSelected, e => {
+            Application.on(Events.ChannelSelected, e => {
                 if (e.data.channel === this.channel) {
                     this.new_message = false;
                     this.tagged = false;
@@ -53,7 +53,7 @@ export default class ProfileIndicator extends LitElement {
                 }
             });
 
-            on(Events.ChannelInfoChanged, async e => {
+            Application.on(Events.ChannelInfoChanged, async e => {
                 const channel = e.data.channel;
                 if (channel.channel_login === this.channel) {
 

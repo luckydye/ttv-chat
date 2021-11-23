@@ -4,7 +4,7 @@ import Webbrowser from '../util/Webbrowser';
 import Chat from './Chat';
 import ContextMenu from './ContextMenu';
 import Format from '../util/Format';
-import Events, { on } from '../events/Events';
+import Events from '../events/Events';
 // Components
 import './FluidInput';
 import './Timer';
@@ -259,10 +259,6 @@ export default class TwitchChat extends Chat {
         menu.append(input);
     }
 
-    setRoom(channel_login: string) {
-        this.channel = channel_login;
-    }
-
     stream_title: string = "";
     game: string = "";
     viewer_count: number = 0;
@@ -298,14 +294,14 @@ export default class TwitchChat extends Chat {
     constructor() {
         super();
 
-        on(Events.ChannelInfoChanged, async e => {
+        Application.on(Events.ChannelInfoChanged, async e => {
             const channel = e.data.channel;
             if(channel.channel_login === this.channel) {
                 this.update();
             }
         });
 
-        on(Events.ChannelStateChanged, async e => {
+        Application.on(Events.ChannelStateChanged, async e => {
             const channel = e.data.channel;
             if(channel.channel_login === this.channel) {
                 this.update();
@@ -321,13 +317,10 @@ export default class TwitchChat extends Chat {
     }
 
     render() {
-        if (!this.channel) {
-            return html``;
-        }
-        const channel = Application.getChannel(this.channel);
+        let channel = Application.getChannel(this.channel);
 
         if (!channel) {
-            return html``;
+            channel = {};
         }
 
         return html`
@@ -376,7 +369,7 @@ export default class TwitchChat extends Chat {
                     </div>
                     <div class="chat-state-icons">
                         <div class="chat-action">
-                            <div class="room-state-icon" title="Slow mode for ${channel.slow_mode}s" ?active="${channel.slow_mode !== 0}" @click="${channel.toggleSlowMode.bind(channel)}">
+                            <div class="room-state-icon" title="Slow mode for ${channel.slow_mode}s" ?active="${channel.slow_mode !== 0}" @click="${() => channel.toggleSlowMode(channel)}">
                                 <img src="./images/slowmode.svg" width="18px" height="18px"/>
                             </div>
                             <div class="room-state-icon action-expand" title="Slowmode time" @click="${this.openSlowModeSettins}">
@@ -384,7 +377,7 @@ export default class TwitchChat extends Chat {
                             </div>
                         </div>
                         <div class="chat-action">
-                            <div class="room-state-icon" title="Follow mode for ${channel.follwers_only}s" ?active="${channel.follwers_only >= 0}" @click="${channel.toggleFollowerMode.bind(channel)}">
+                            <div class="room-state-icon" title="Follow mode for ${channel.follwers_only}s" ?active="${channel.follwers_only >= 0}" @click="${() => channel.toggleFollowerMode(channel)}">
                                 <img src="./images/follower.svg" width="18px" height="18px"/>
                             </div>
                             <div class="room-state-icon action-expand" title="Follower time" @click="${this.openFollowerModeSettings}">
@@ -392,17 +385,17 @@ export default class TwitchChat extends Chat {
                             </div>
                         </div>
                         <div class="chat-action">
-                            <div class="room-state-icon" title="Emote only mode" ?active="${channel.emote_only}" @click="${channel.toggleEmoteOnlyMode.bind(channel)}">
+                            <div class="room-state-icon" title="Emote only mode" ?active="${channel.emote_only}" @click="${() => channel.toggleEmoteOnlyMode(channel)}">
                                 <img src="./images/emote.svg" width="18px" height="18px"/>
                             </div>
                         </div>
                         <div class="chat-action">
-                            <div class="room-state-icon" title="Sub only mode" ?active="${channel.subscribers_only}" @click="${channel.toggleSubOnlyMode.bind(channel)}">
+                            <div class="room-state-icon" title="Sub only mode" ?active="${channel.subscribers_only}" @click="${() => channel.toggleSubOnlyMode(channel)}">
                                 <img src="./images/subscriber.svg" width="18px" height="18px"/>
                             </div>
                         </div>
                         <div class="chat-action">
-                            <div class="room-state-icon" title="r9k mode" ?active="${channel.r9k}" @click="${channel.toggleR9kMode.bind(channel)}">r9k</div>
+                            <div class="room-state-icon" title="r9k mode" ?active="${channel.r9k}" @click="${() => channel.toggleR9kMode(channel)}">r9k</div>
                         </div>
                         <div class="chat-action">
                             <div class="user-state-icon" title="Moderator" ?active="${channel.moderator}">

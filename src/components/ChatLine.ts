@@ -1,5 +1,5 @@
 import { css, html, LitElement } from 'lit-element';
-import { ChatInfoMessage } from '../MessageParser';
+import { ChatInfoMessage } from './MessageParser';
 
 export class ChatInfo extends LitElement {
 

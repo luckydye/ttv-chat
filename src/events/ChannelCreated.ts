@@ -1,7 +1,11 @@
-import Events from './Events';
 import Channel from '../Channel';
+import AppEvent from './AppEvent';
 
-export default class ChannelCreatedEvent extends Event {
+export default class ChannelCreatedEvent extends AppEvent {
+
+    static get type() {
+        return "app-channel-created";
+    }
 
     data: {
         id: string,
@@ -9,7 +13,7 @@ export default class ChannelCreatedEvent extends Event {
     };
 
     constructor(channel: Channel) {
-        super(Events.ChannelCreated);
+        super(ChannelCreatedEvent.type);
         this.data = {
             id: channel.channel_id,
             channel

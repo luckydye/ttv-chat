@@ -8,44 +8,32 @@ import './components/TwitchChat';
 import './components/ProfileIndicator';
 import './components/Tooltip';
 //
-import Events, { on } from './events/Events';
+import Events from './events/Events';
+
+import AppEvent from './events/AppEvent';
+
 import Application from './App';
 import Account from './Account';
+
+import { createApp } from 'vue';
+import AppComponent from './vue/App.vue';
 import Badges from './services/Badges';
 import Emotes from './services/Emotes';
-import IRC from './services/IRC';
 import Notifications from './util/Notifications';
 
+// TODO: Move this stuff to VUE component
+// async function onLogin(account: Account) {
+//     createApp({
+//         components: {
+//             'App': AppComponent,
+//         }
+//     }).mount('#app');
 
-// TODO: find a better method to switch between views
-function renderSelecetdChat(channel: string) {
-    const input = document.querySelector('chat-input');
-    const container = document.querySelector('.chat');
-    if (container) {
-        for (let child of container.children) {
-            if(child.hide != undefined) {
-                child.hide();
-            }
-        }
-
-        const chat = Application.getChannel(channel);
-        const chatEle = chat?.chat;
-
-        if(chatEle) {
-            chatEle.removeAttribute('hidden');
-            if (!chatEle.parentNode) {
-                container.append(chatEle);
-            }
-            if (channel === "@") {
-                input?.setAttribute('disabled', '');
-            } else {
-                input?.removeAttribute('disabled');
-            }
-    
-            chatEle.show();
-        }
-    }
-}
+//     Application.on(Events.ChannelSelected, (e: AppEvent) => {
+//         console.log(e);
+//         console.log('Logged in');
+//     });
+// }
 
 async function onLogin(account: Account) {
     console.log('Logged in', account);
@@ -62,8 +50,8 @@ async function onLogin(account: Account) {
     console.log('Initialized');
 
     window.dispatchEvent(new Event(Events.Initialize));
-    
-    on(Events.ChannelSelected, e => {
+
+    Application.on(Events.ChannelSelected, e => {
         const channel = e.data.channel;
         renderSelecetdChat(channel);
     });
@@ -73,15 +61,41 @@ async function onLogin(account: Account) {
     Notifications.initialize();
 }
 
-window.Events = Events;
-window.IRC = IRC;
+// TODO: find a better method to switch between views = use vue
+function renderSelecetdChat(channel: string) {
+    const input = document.querySelector('chat-input');
+    const container = document.querySelector('.chat');
+    if (container) {
+        for (let child of container.children) {
+            if (child.hide != undefined) {
+                child.hide();
+            }
+        }
 
-window.addEventListener('app-login', (e) => {
+        const chat = Application.getChannel(channel);
+        const chatEle = chat?.chat;
+
+        if (chatEle) {
+            if (!chatEle.parentNode) {
+                container.append(chatEle);
+            }
+            if (channel === "@") {
+                input?.setAttribute('disabled', '');
+            } else {
+                input?.removeAttribute('disabled');
+            }
+
+            chatEle.show();
+        }
+    }
+}
+
+window.addEventListener('app-login', (e: LoginEvent) => {
     onLogin(e.data.account);
-})
+});
 
 window.addEventListener(Events.ChatCommandEvent, e => {
-    if(e.data.message == "/poll") {
+    if (e.data.message == "/poll") {
         alert('create poll dialog');
         e.cancel();
     }

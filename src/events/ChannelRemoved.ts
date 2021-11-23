@@ -1,11 +1,11 @@
-import Events from './Events';
+import AppEvent from './AppEvent';
 
-export default class ChannelRemovedEvent extends Event {
+export default class ChannelRemovedEvent extends AppEvent {
 
     data: { name: string };
 
     constructor(channel_name: string) {
-        super(Events.ChannelRemoved);
+        super("app-channel-removed");
         this.data = {
             name: channel_name
         }

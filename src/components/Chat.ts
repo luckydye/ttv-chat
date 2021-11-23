@@ -1,5 +1,5 @@
 import { css, html, LitElement, TemplateResult } from 'lit-element';
-import { ChatInfoMessage, ChatMessage } from '../MessageParser';
+import { ChatInfoMessage, ChatMessage } from './MessageParser';
 import { ChatInfo, ChatNote } from './ChatLine';
 import { render } from 'lit-html';
 import AnimatedScroll from './AnimatedScroll';
@@ -53,13 +53,15 @@ export default class Chat extends LitElement {
         }
 
         const ele = msg.content(this.moderator);
-        if(followup) {
-            ele.setAttribute("followup", '');
+        if(ele) {
+            if(followup) {
+                ele.setAttribute("followup", '');
+            }
+            const line = this.insertAdjacentElement('beforeend', ele);
+            this.afterAppend();
+            this.lastMessage = msg;
+            return line;
         }
-        const line = this.insertAdjacentElement('beforeend', ele);
-        this.afterAppend();
-        this.lastMessage = msg;
-        return line;
     }
 
     appendInfo(msg: ChatInfoMessage) {
@@ -145,6 +147,8 @@ export default class Chat extends LitElement {
     }
 
     show() {
+        this.removeAttribute('hidden');
+
         requestAnimationFrame(() => {
             // anim frame to wait for the element to be drawn
 

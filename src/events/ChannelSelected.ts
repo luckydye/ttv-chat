@@ -1,11 +1,11 @@
-import Events from "./Events";
+import AppEvent from './AppEvent';
 
-export default class ChannelSelecteddEvent extends Event {
+export default class ChannelSelecteddEvent extends AppEvent {
 
     data: { channel: string };
 
     constructor(channel_name: string) {
-        super(Events.ChannelSelected);
+        super("app-channel-selected");
         this.data = {
             channel: channel_name
         }

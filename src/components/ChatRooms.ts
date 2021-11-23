@@ -1,8 +1,8 @@
-import { css, html, LitElement } from 'lit-element';
+import { html, LitElement } from 'lit-element';
 import Application from '../App';
 import ProfileIndicator from './ProfileIndicator';
 import AddChannelDialog from './AddChannelDialog';
-import Events, { on } from '../events/Events';
+import Events from '../events/Events';
 
 // TODO: Fix drag sorting
 
@@ -13,16 +13,16 @@ export default class ChatRooms extends LitElement {
     constructor() {
         super();
 
-        on(Events.ChannelSelected, e => {
+        Application.on(Events.ChannelSelected, e => {
             this.update();
         });
-        on(Events.ChannelRemoved, e => {
+        Application.on(Events.ChannelRemoved, e => {
             this.update();
         });
-        on(Events.Initialize, e => {
+        Application.on(Events.Initialize, e => {
             this.update();
         });
-        on(Events.ChannelCreated, e => {
+        Application.on(Events.ChannelCreated, e => {
             this.update();
         });
     }

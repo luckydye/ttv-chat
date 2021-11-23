@@ -57,6 +57,10 @@ export default class TwitchApi {
     }
 
     static async getUserInfo(user_login: string): Promise<UserInfo | undefined> {
+        if(user_login.length <= 2) {
+            return undefined;
+        }
+
         const userinfo = await this.fetch("/users", `login=${user_login}`);
         if (userinfo.data) {
             return userinfo.data[0];

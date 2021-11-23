@@ -130,6 +130,22 @@ chat-line[deleted] {
     opacity: 0.33;
 }
 
+chat-line[compact] .emote img {
+    height: 18px;
+    margin-bottom: -9px;
+}
+
+chat-line[compact] {
+    opacity: 0.5;
+    font-size: 12px;
+    /* padding-top: 0;
+    padding-bottom: 0; */
+}
+
+chat-line[compact] .emote {
+    line-height: 18px;
+}
+
 chat-line[tagged] {
     background: hsl(0deg 90% 70% / 22%);
 }

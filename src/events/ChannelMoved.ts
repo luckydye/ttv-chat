@@ -1,6 +1,6 @@
-import Events from './Events';
+import AppEvent from './AppEvent';
 
-export default class ChannelMovedEvent extends Event {
+export default class ChannelMovedEvent extends AppEvent {
 
     data: {
         from_index: number,
@@ -8,7 +8,7 @@ export default class ChannelMovedEvent extends Event {
     };
 
     constructor(to_index: number, from_index: number) {
-        super(Events.ChannelMoved);
+        super("app-channel-moved");
         this.data = {
             from_index: from_index,
             to_index: to_index,

@@ -1,7 +1,7 @@
-import Events from "./Events";
-import { ChatMessage, ChatInfoMessage } from "../MessageParser";
+import AppEvent from "./AppEvent";
+import { ChatMessage, ChatInfoMessage } from "../components/MessageParser";
 
-export default class ChatMessageEvent extends Event {
+export default class ChatMessageEvent extends AppEvent {
 
     data: {
         channel: string,
@@ -9,7 +9,7 @@ export default class ChatMessageEvent extends Event {
     };
 
     constructor(channel: string, message: ChatMessage | ChatInfoMessage) {
-        super(Events.ChatMessageEvent);
+        super("app-chat-message");
         this.data = {
             channel,
             message

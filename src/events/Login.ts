@@ -1,12 +1,14 @@
+import AppEvent from './AppEvent';
 import Account from '../Account';
-import Events from './Events';
 
-export default class LoginEvent extends Event {
+// TODO: extend all these events from AppEvent
+
+export default class LoginEvent extends AppEvent {
 
     data: { account: Account };
 
     constructor(account: Account) {
-        super(Events.Login);
+        super("app-login");
         this.data = {
             account: account
         }

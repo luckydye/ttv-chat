@@ -1,12 +1,12 @@
-import Events from "./Events";
 import Channel from '../Channel';
+import AppEvent from './AppEvent';
 
-export default class ChannelStateChanged extends Event {
+export default class ChannelStateChanged extends AppEvent {
 
     data: { channel: Channel };
 
     constructor(channel: Channel) {
-        super(Events.ChannelStateChanged);
+        super("app-channel-state-changed");
         this.data = {
             channel: channel,
         }

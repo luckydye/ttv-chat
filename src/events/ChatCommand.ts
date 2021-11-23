@@ -1,6 +1,6 @@
-import Events from "./Events";
+import AppEvent from "./AppEvent";
 
-export default class ChatCommandEvent extends Event {
+export default class ChatCommandEvent extends AppEvent {
 
     data: {
         message: string
@@ -9,7 +9,7 @@ export default class ChatCommandEvent extends Event {
     canceled = false;
 
     constructor(message: string) {
-        super(Events.ChatCommandEvent);
+        super("app-chat-command");
         this.data = {
             message
         }

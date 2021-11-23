@@ -5,7 +5,7 @@ import Application from '../App';
 import EmotePicker from './EmotePicker';
 import Emotes from '../services/Emotes';
 import ChatCommandEvent from '../events/ChatCommand';
-import MessageParser from '../MessageParser';
+import MessageParser from './MessageParser';
 
 const message_parser = new MessageParser();
 

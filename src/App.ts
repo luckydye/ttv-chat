@@ -4,6 +4,7 @@ import ChannelMovedEvent from './events/ChannelMoved';
 import ChannelSelecteddEvent from './events/ChannelSelected';
 import Channel from './Channel';
 import Account from './Account';
+import AppEvent from './events/AppEvent';
 
 interface ApplicationState {
     selectedChannel: string,
@@ -20,6 +21,16 @@ let currentAccoumt: Account;
 
 export default class Application {
 
+    static on(eventOrEventArray: any | Array<any>, callback: (ev: AppEvent) => void) {
+        if (eventOrEventArray instanceof Array) {
+            for (let event of eventOrEventArray) {
+                addEventListener(event, callback as EventListener);
+            }
+        } else {
+            addEventListener(eventOrEventArray, callback as EventListener);
+        }
+    }
+
     static getCurrentAccount(): Account {
         return currentAccoumt;
     }
@@ -31,10 +42,10 @@ export default class Application {
     static saveState() {
         localStorage.setItem('save-state', JSON.stringify(applicationState));
     }
-    
+
     static async init() {
         const state = localStorage.getItem('save-state');
-        if(state) {
+        if (state) {
             const json = JSON.parse(state);
             applicationState = Object.assign(applicationState, json);
         }
@@ -42,7 +53,7 @@ export default class Application {
         const mentionChannel = new Channel("@");
         channels.add(mentionChannel);
 
-        for(let channel of applicationState.channels) {
+        for (let channel of applicationState.channels) {
             this.createChannel(channel);
         }
     }
@@ -73,14 +84,14 @@ export default class Application {
         const part1 = rooms.slice(0, newIndex);
         const part2 = rooms.slice(newIndex);
 
-        applicationState.channels = [...part1, channel,...part2];
+        applicationState.channels = [...part1, channel, ...part2];
 
         window.dispatchEvent(new ChannelMovedEvent(newIndex, currIndex));
         this.saveState();
     }
 
     static createChannel(channel_name: string) {
-        if(applicationState.channels.indexOf(channel_name) === -1) {
+        if (applicationState.channels.indexOf(channel_name) === -1) {
             applicationState.channels.push(channel_name);
         }
         const channel = new Channel(channel_name);
@@ -105,8 +116,8 @@ export default class Application {
     }
 
     static getChannel(channel_name: string) {
-        for(let channel of channels) {
-            if(channel.channel_login === channel_name) {
+        for (let channel of channels) {
+            if (channel.channel_login === channel_name) {
                 return channel;
             }
         }

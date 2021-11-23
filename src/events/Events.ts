@@ -11,13 +11,3 @@ export default {
     Logout: "app-logout",
     Initialize: "app-initialize",
 }
-
-export function on(eventOrEventArray: string | Array<string>, callback: EventListenerOrEventListenerObject) {
-    if(eventOrEventArray instanceof Array) {
-        for(let event of eventOrEventArray) {
-            window.addEventListener(event, callback);
-        }
-    } else {
-        window.addEventListener(eventOrEventArray, callback);
-    }
-}
