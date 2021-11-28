@@ -86,6 +86,7 @@ Run ```npm run tauri dev``` or hit F5 in VSCode to compile the app.
 - [ ] UI for
     - Pols
     - Predictions
+- [ ] Redo the chat renderer component. Only render messages to doc that are visible. Then scroll that buffer up and down by line.
 
 #### Visibility panel
 - [ ] Show/Hide deleted messages
