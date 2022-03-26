@@ -1,0 +1,9 @@
+{
+	"name": "twitch",
+	"version": "1.0.0",
+	"description": "twitch api adpater",
+	"main": "./index.ts",
+	"types": "./index.ts",
+	"author": "",
+	"license": "ISC"
+}

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Better Twitch Chat</title>
+
+    <link rel="manifest" href="manifest.json">
+
+    <link rel="stylesheet" href="./window.css">
+    <link rel="stylesheet" href="./chat.css">
+    <link rel="stylesheet" href="./rooms.css">
+
+    <script>
+        async function regSW() {
+            if ('serviceWorker' in navigator) {
+                try {
+                    const reg = await navigator.serviceWorker.register("./sw.js?v=6");
+                    console.log('Service worker registered!', reg);
+                } catch (err) {
+                    console.log('Service worker registration failed: ', err);
+                }
+            }
+        }
+        regSW();
+    </script>
+
+    <script type="module" src="./main.js"></script>
+</head>
+
+<body class="app">
+
+    <div class="sidebar">
+        <chat-rooms></chat-rooms>
+        <twitch-profile></twitch-profile>
+    </div>
+
+    <div class="body">
+        <div class="chat">
+            <!-- Chat element goes here -->
+            <twitch-login-panel></twitch-login-panel>
+        </div>
+        <div class="chat-input">
+            <chat-input></chat-input>
+        </div>
+    </div>
+
+    <div id="app">
+        <App></App>
+    </div>
+    
+</body>
+
+</html>

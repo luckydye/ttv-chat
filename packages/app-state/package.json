@@ -1,0 +1,15 @@
+{
+  "name": "app-state",
+  "version": "1.1.0",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "license": "MIT",
+  "dependencies": {
+    "lit": "latest"
+  },
+  "devDependencies": {
+    "ts-loader": "^9.2.6",
+    "webpack": "^5.66.0",
+    "webpack-cli": "^4.9.1"
+  }
+}
