@@ -23,7 +23,7 @@ export default class Chat extends LitElement {
         }
     }
 
-    MAX_BUFFER_SIZE = 50;
+    MAX_BUFFER_SIZE = 200;
 
     channel: string = "";
 
