@@ -1,44 +1,43 @@
-import { css, html, LitElement } from 'lit-element';
+import { css, html, LitElement } from "lit";
 
 export default class Tiemr extends LitElement {
+  static get properties() {
+    return {
+      starttime: Number,
+      updateRate: Number,
+    };
+  }
 
-    static get properties() {
-        return {
-            starttime: Number,
-            updateRate: Number
-        };
-    }
+  starttime: number;
+  updateRate: number = 1;
 
-    starttime: number;
-    updateRate: number = 1;
+  constructor() {
+    super();
 
-    constructor() {
-        super();
+    setInterval(() => {
+      this.requestUpdate();
+    }, 1000 * this.updateRate);
+  }
 
-        setInterval(() => {
-            this.update();
-        }, 1000 * this.updateRate);
-    }
+  static get styles() {
+    return css`
+      :host {
+        display: inline-block;
+      }
+    `;
+  }
 
-    static get styles() {
-        return css`
-            :host {
-                display: inline-block;
-            }
-        `;
-    }
-
-    render() {
-        const uptimems = Date.now() - new Date(this.starttime).valueOf();
-        const uptime = {
-            hours: Math.floor(uptimems / 1000 / 60 / 60),
-            minutes: Math.floor((uptimems / 1000 / 60) % 60),
-            seconds: Math.floor((uptimems / 1000) % 60),
-        }
-        return html`
-            <span>${`${uptime.hours}h ${uptime.minutes}m ${uptime.seconds}s`}</span>
-        `;
-    }
+  render() {
+    const uptimems = Date.now() - new Date(this.starttime).valueOf();
+    const uptime = {
+      hours: Math.floor(uptimems / 1000 / 60 / 60),
+      minutes: Math.floor((uptimems / 1000 / 60) % 60),
+      seconds: Math.floor((uptimems / 1000) % 60),
+    };
+    return html`
+      <span>${`${uptime.hours}h ${uptime.minutes}m ${uptime.seconds}s`}</span>
+    `;
+  }
 }
 
-customElements.define('stream-timer', Tiemr);
+customElements.define("stream-timer", Tiemr);
