@@ -1,5 +1,6 @@
 export class TwitchChat {
 	authenticated: boolean = false;
+
 	ws!: WebSocket;
 
 	async connect(login: string, token: string): Promise<void> {
@@ -7,7 +8,7 @@ export class TwitchChat {
 			this.ws = new WebSocket('wss://irc-ws.chat.twitch.tv/');
 
 			this.ws.onerror = (err) => {
-				console.error(err);
+				console.error('Chat Service Error', err);
 				reject();
 			};
 
@@ -26,15 +27,14 @@ export class TwitchChat {
 				const ircMessage = msg.data;
 				const parts = ircMessage.split(':');
 				const text = parts[parts.length - 1];
-				console.log('Chat Message:', text);
 
-				window.dispatchEvent(new CustomEvent('twitch-chat-message', { detail: { parts, text } }));
+				globalThis.dispatchEvent(new CustomEvent('twitch-chat-message', { detail: { parts, text } }));
 			};
 		});
 	}
 
 	onMessage(callback: (msg: Event) => void) {
-		window.addEventListener('twitch-chat-message', callback);
+		globalThis.addEventListener('twitch-chat-message', callback);
 	}
 
 	join(channel: string): void {

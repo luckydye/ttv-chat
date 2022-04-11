@@ -1,86 +1,86 @@
 // Parse incoming messages into html´´ templates.
-import { html, TemplateResult } from "lit";
-import { render } from "lit-html";
-import Badges from "../services/Badges";
-import Emotes from "../services/Emotes";
-import { TwitchEmote } from "../services/emotes/TwitchEmotes";
-import { getLoggedInUser } from "../services/Auth";
-import Webbrowser from "../util/Webbrowser";
-import Color from "../util/Color";
+import { html, TemplateResult } from 'lit';
+import { render } from 'lit-html';
+import Badges from '../services/Badges';
+import Emotes from '../services/Emotes';
+import { TwitchEmote } from '../services/emotes/TwitchEmotes';
+import { getLoggedInUser } from '../services/Auth';
+import Webbrowser from '../util/Webbrowser';
+import Color from '../util/Color';
 
-const Default_EventMessage_Color = "rgb(12, 12, 12)";
+const Default_EventMessage_Color = 'rgb(12, 12, 12)';
 const ColorEventTypeMap = {
-  SubOrResub: "rgb(33, 27, 37)",
-  Raid: "rgb(33, 27, 37)",
-  SubGift: "rgb(33, 27, 37)",
-  SubMysteryGift: "rgb(33, 27, 37)",
-  AnonSubMysteryGift: "rgb(33, 27, 37)",
-  GiftPaidUpgrade: "rgb(33, 27, 37)",
-  AnonGiftPaidUpgrade: "rgb(33, 27, 37)",
-  Ritual: "rgb(33, 27, 37)",
-  BitsBadgeTier: "rgb(33, 27, 37)",
+	SubOrResub: 'rgb(33, 27, 37)',
+	Raid: 'rgb(33, 27, 37)',
+	SubGift: 'rgb(33, 27, 37)',
+	SubMysteryGift: 'rgb(33, 27, 37)',
+	AnonSubMysteryGift: 'rgb(33, 27, 37)',
+	GiftPaidUpgrade: 'rgb(33, 27, 37)',
+	AnonGiftPaidUpgrade: 'rgb(33, 27, 37)',
+	Ritual: 'rgb(33, 27, 37)',
+	BitsBadgeTier: 'rgb(33, 27, 37)'
 };
 
 ///////////////
 // types going into the parser
 
 interface CharRange {
-  start: number;
-  end: number;
+	start: number;
+	end: number;
 }
 
 interface Emote {
-  id: string; // emote id
-  char_range: CharRange; // chat range of emote word
-  name: string; // emote name
+	id: string; // emote id
+	char_range: CharRange; // chat range of emote word
+	name: string; // emote name
 }
 
 interface Badge {
-  id: string; // badge id
-  name: string; // badge name
-  version: number; // badge version
-  description: string; // badge description (like 5 months sub)
+	id: string; // badge id
+	name: string; // badge name
+	version: number; // badge version
+	description: string; // badge description (like 5 months sub)
 }
 
 interface Event {
-  id: string;
-  data: object;
-  type:
-    | "SubOrResub"
-    | "Raid"
-    | "SubGift"
-    | "SubMysteryGift"
-    | "AnonSubMysteryGift"
-    | "GiftPaidUpgrade"
-    | "AnonGiftPaidUpgrade"
-    | "Ritual"
-    | "BitsBadgeTier";
+	id: string;
+	data: object;
+	type:
+		| 'SubOrResub'
+		| 'Raid'
+		| 'SubGift'
+		| 'SubMysteryGift'
+		| 'AnonSubMysteryGift'
+		| 'GiftPaidUpgrade'
+		| 'AnonGiftPaidUpgrade'
+		| 'Ritual'
+		| 'BitsBadgeTier';
 }
 
 export interface UserMessage {
-  message_type: "user";
-  id: string; // message id
-  text: string; // user message
-  channel: string; // channel
-  user_name: string; // username
-  user_id: string; // user id
-  color: Array<number>; // username color
-  emotes: Array<Emote>; // emotes
-  badges: Array<Badge>; // badges + badge_info
-  timestamp: Date; // tmi server timestamp
-  is_action: boolean; // is /me message
-  bits: number; // amounts of bits attached to this message
-  tags: { [key: string]: any }; // hgihlighted messages etc.
+	message_type: 'user';
+	id: string; // message id
+	text: string; // user message
+	channel: string; // channel
+	user_name: string; // username
+	user_id: string; // user id
+	color: Array<number>; // username color
+	emotes: Array<Emote>; // emotes
+	badges: Array<Badge>; // badges + badge_info
+	timestamp: Date; // tmi server timestamp
+	is_action: boolean; // is /me message
+	bits: number; // amounts of bits attached to this message
+	tags: { [key: string]: any }; // hgihlighted messages etc.
 }
 
 export interface EventMessage {
-  message_type: "event";
-  id: string; // message id
-  text: string; // system text
-  message: UserMessage | null; // attatched user message
-  channel: string; // channel
-  timestamp: Date; // tmi server timestamp
-  event: Event | null; // event causing this message
+	message_type: 'event';
+	id: string; // message id
+	text: string; // system text
+	message: UserMessage | null; // attatched user message
+	channel: string; // channel
+	timestamp: Date; // tmi server timestamp
+	event: Event | null; // event causing this message
 }
 
 //
@@ -90,25 +90,25 @@ export interface EventMessage {
 // types coming out of the parser
 
 export interface ChatMessage {
-  type: "message";
-  id: string; // message id
-  user_name: string;
-  user_id: string;
-  highlighted: boolean; // has hgihlighted tag
-  tagged: boolean; // the authenticated user got tagged
-  action: boolean; // is a /me message
-  reply: boolean; // is a reply
-  timestamp: Date;
-  text: string;
-  content: TemplateResult; // parsed message
+	type: 'message';
+	id: string; // message id
+	user_name: string;
+	user_id: string;
+	highlighted: boolean; // has hgihlighted tag
+	tagged: boolean; // the authenticated user got tagged
+	action: boolean; // is a /me message
+	reply: boolean; // is a reply
+	timestamp: Date;
+	text: string;
+	content: TemplateResult; // parsed message
 }
 
 export interface ChatInfoMessage {
-  type: "info";
-  id: string; // message id
-  background_color: string; // custom msg background color for info type (sub, notice, etc.)
-  timestamp: Date;
-  content: TemplateResult; // parsed message
+	type: 'info';
+	id: string; // message id
+	background_color: string; // custom msg background color for info type (sub, notice, etc.)
+	timestamp: Date;
+	content: TemplateResult; // parsed message
 }
 
 //
@@ -118,472 +118,417 @@ const messageCache: Array<any> = [];
 const footprintMap: Array<Array<string>> = [];
 
 export default class MessageParser {
-  // in short. recieve the network message and form into a client side representation.
-  // like if its highligted, tagged or a reply...
+	// in short. recieve the network message and form into a client side representation.
+	// like if its highligted, tagged or a reply...
 
-  channel: Channel;
+	channel: Channel;
 
-  constructor(channel?: Channel) {
-    this.channel = channel;
-  }
+	constructor(channel?: Channel) {
+		this.channel = channel;
+	}
 
-  parse(
-    message: UserMessage | EventMessage
-  ): Array<ChatMessage | ChatInfoMessage> {
-    if (message.message_type == "user") {
-      return this.parseUserMessage(message);
-    }
-    if (message.message_type == "event") {
-      return this.parseEventMessage(message);
-    }
-    return [];
-  }
+	parse(message: UserMessage | EventMessage): Array<ChatMessage | ChatInfoMessage> {
+		if (message.message_type == 'user') {
+			return this.parseUserMessage(message);
+		}
+		if (message.message_type == 'event') {
+			return this.parseEventMessage(message);
+		}
+		return [];
+	}
 
-  parseUserMessage(message: UserMessage): Array<ChatMessage> {
-    return [this.parseChatTextMessage(message)];
-  }
+	parseUserMessage(message: UserMessage): Array<ChatMessage> {
+		return [this.parseChatTextMessage(message)];
+	}
 
-  parseEventMessage(
-    message: EventMessage
-  ): Array<ChatMessage | ChatInfoMessage> {
-    // null if no user message included
-    const user = message.message
-      ? this.parseChatTextMessage(message.message)
-      : null;
+	parseEventMessage(message: EventMessage): Array<ChatMessage | ChatInfoMessage> {
+		// null if no user message included
+		const user = message.message ? this.parseChatTextMessage(message.message) : null;
 
-    const event: ChatInfoMessage = {
-      type: "info",
-      id: message.id,
-      background_color: message.event
-        ? ColorEventTypeMap[message.event.type]
-        : Default_EventMessage_Color,
-      timestamp: message.timestamp,
-      content: html`
-        <div class="line">
-          <div class="message">${message.text}</div>
-        </div>
-      `,
-    };
+		const event: ChatInfoMessage = {
+			type: 'info',
+			id: message.id,
+			background_color: message.event ? ColorEventTypeMap[message.event.type] : Default_EventMessage_Color,
+			timestamp: message.timestamp,
+			content: html`
+				<div class="line">
+					<div class="message">${message.text}</div>
+				</div>
+			`
+		};
 
-    return user == null ? [event] : [user, event];
-  }
+		return user == null ? [event] : [user, event];
+	}
 
-  parseEmotes(
-    message_text: string,
-    channel_id: string,
-    sender_name: string,
-    message_emtoes?: Array<Emote>
-  ): { [key: string]: { name: string; emote: any; service: string } } {
-    const client_user = getLoggedInUser();
-    const user_login = client_user?.user_login;
+	parseEmotes(
+		message_text: string,
+		channel_id: string,
+		sender_name: string,
+		message_emtoes?: Array<Emote>
+	): { [key: string]: { name: string; emote: any; service: string } } {
+		const client_user = getLoggedInUser();
+		const user_login = client_user?.user_login;
 
-    // The services/emotes/Emote struct
-    const wordEmoteMap: {
-      [key: string]: { name: string; emote: any; service: string };
-    } = {};
+		// The services/emotes/Emote struct
+		const wordEmoteMap: {
+			[key: string]: { name: string; emote: any; service: string };
+		} = {};
 
-    // get cached channel emotes
-    let channel_emotes = Emotes.getChachedChannelEmotes(channel_id);
+		// get cached channel emotes
+		let channel_emotes = Emotes.getChachedChannelEmotes(channel_id);
 
-    // collect emotes (url) for this message
-    if (message_emtoes) {
-      for (let emote of message_emtoes) {
-        const start = emote.char_range.start;
-        const end = emote.char_range.end;
+		// collect emotes (url) for this message
+		if (message_emtoes) {
+			for (let emote of message_emtoes) {
+				const start = emote.char_range.start;
+				const end = emote.char_range.end;
 
-        const wordToReplace = message_text.slice(start, end);
+				const wordToReplace = message_text.slice(start, end);
 
-        wordEmoteMap[wordToReplace] = {
-          name: wordToReplace,
-          service: "twitch",
-          emote: new TwitchEmote(emote),
-        };
-      }
-    }
+				wordEmoteMap[wordToReplace] = {
+					name: wordToReplace,
+					service: 'twitch',
+					emote: new TwitchEmote(emote)
+				};
+			}
+		}
 
-    const msg_words = message_text.split(" ");
+		const msg_words = message_text.split(' ');
 
-    // find words to replace with
-    //  (3rd party emtoes | global emtoes | links | metions | msg tagged)
-    msg_words.forEach((str) => {
-      // find channel emote repalcement
-      if (channel_emotes) {
-        for (let service in channel_emotes) {
-          if (
-            !channel_emotes[service] ||
-            (service == "twitch" && sender_name != user_login)
-          ) {
-            continue;
-          }
-          if (str in channel_emotes[service]) {
-            wordEmoteMap[str] = {
-              name: str,
-              service: service,
-              emote: channel_emotes[service][str],
-            };
-          }
-        }
-      }
-      // global emotes repalcement
-      if (Emotes.global_emotes) {
-        for (let service in Emotes.global_emotes) {
-          if (!Emotes.global_emotes[service]) {
-            continue;
-          }
-          if (str in Emotes.global_emotes[service]) {
-            wordEmoteMap[str] = {
-              name: str,
-              service: service,
-              emote: Emotes.global_emotes[service][str],
-            };
-          }
-        }
-      }
-    });
+		// find words to replace with
+		//  (3rd party emtoes | global emtoes | links | metions | msg tagged)
+		msg_words.forEach((str) => {
+			// find channel emote repalcement
+			if (channel_emotes) {
+				for (let service in channel_emotes) {
+					if (!channel_emotes[service] || (service == 'twitch' && sender_name != user_login)) {
+						continue;
+					}
+					if (str in channel_emotes[service]) {
+						wordEmoteMap[str] = {
+							name: str,
+							service: service,
+							emote: channel_emotes[service][str]
+						};
+					}
+				}
+			}
+			// global emotes repalcement
+			if (Emotes.global_emotes) {
+				for (let service in Emotes.global_emotes) {
+					if (!Emotes.global_emotes[service]) {
+						continue;
+					}
+					if (str in Emotes.global_emotes[service]) {
+						wordEmoteMap[str] = {
+							name: str,
+							service: service,
+							emote: Emotes.global_emotes[service][str]
+						};
+					}
+				}
+			}
+		});
 
-    return wordEmoteMap;
-  }
+		return wordEmoteMap;
+	}
 
-  parseChatTextMessage(message: UserMessage): ChatMessage {
-    const client_user = getLoggedInUser();
-    const user_login = client_user?.user_login;
+	parseChatTextMessage(message: UserMessage): ChatMessage {
+		const client_user = getLoggedInUser();
+		const user_login = client_user?.user_login;
 
-    const channel_id = message.tags["room-id"];
-    const reward_id = message.tags["custom-reward-id"];
+		const channel_id = message.tags['room-id'];
+		const reward_id = message.tags['custom-reward-id'];
 
-    let redemtion_title = "custom reward";
+		let redemtion_title = 'custom reward';
 
-    if (reward_id) {
-      const redemtion = this.channel.findReward(reward_id);
-      if (redemtion) {
-        redemtion_title = redemtion.title;
-      }
-    }
+		if (reward_id) {
+			const redemtion = this.channel.findReward(reward_id);
+			if (redemtion) {
+				redemtion_title = redemtion.title;
+			}
+		}
 
-    let color = Color.rgbToHex(Color.limitColorContrast(...message.color));
-    let highlighted = message.tags["msg-id"] == "highlighted-message";
-    let action = message.is_action;
-    let timestamp = message.timestamp;
-    let isReply = message.tags["reply-parent-msg-id"] != null;
-    let tagged = false;
-    // The services/emotes/Emote struct
-    const wordLinkMap: { [key: string]: string } = {};
-    const wordMentionMap: { [key: string]: string } = {};
+		let color = Color.rgbToHex(Color.limitColorContrast(...message.color));
+		let highlighted = message.tags['msg-id'] == 'highlighted-message';
+		let action = message.is_action;
+		let timestamp = message.timestamp;
+		let isReply = message.tags['reply-parent-msg-id'] != null;
+		let tagged = false;
+		// The services/emotes/Emote struct
+		const wordLinkMap: { [key: string]: string } = {};
+		const wordMentionMap: { [key: string]: string } = {};
 
-    // get cached channel badges
-    let channel_badges = Badges.getChachedChannelBadges(channel_id);
-    // get cached channel emotes
+		// get cached channel badges
+		let channel_badges = Badges.getChachedChannelBadges(channel_id);
+		// get cached channel emotes
 
-    const wordEmoteMap = this.parseEmotes(
-      message.text,
-      channel_id,
-      message.user_name,
-      message.emotes
-    );
+		const wordEmoteMap = this.parseEmotes(message.text, channel_id, message.user_name, message.emotes);
 
-    const msg_words = message.text.split(" ");
+		const msg_words = message.text.split(' ');
 
-    // find words to replace with
-    //  (3rd party emtoes | global emtoes | links | metions | msg tagged)
-    msg_words.forEach((str) => {
-      // find link repalcement
-      const urlMatch = Webbrowser.matchURL(str);
-      if (urlMatch) {
-        wordLinkMap[urlMatch[0]] = urlMatch[0];
-      }
-      // find mention repalcement
-      if (str.match(/\@[a-zA-Z0-9]+/g)) {
-        wordMentionMap[str] = str;
-      }
-      // find highlight mentions
-      if (
-        user_login &&
-        (str.toLocaleLowerCase() == user_login.toLocaleLowerCase() ||
-          str.toLocaleLowerCase() == "@" + user_login.toLocaleLowerCase())
-      ) {
-        wordMentionMap[str] = str;
-        tagged = true;
-      }
-    });
+		// find words to replace with
+		//  (3rd party emtoes | global emtoes | links | metions | msg tagged)
+		msg_words.forEach((str) => {
+			// find link repalcement
+			const urlMatch = Webbrowser.matchURL(str);
+			if (urlMatch) {
+				wordLinkMap[urlMatch[0]] = urlMatch[0];
+			}
+			// find mention repalcement
+			if (str.match(/\@[a-zA-Z0-9]+/g)) {
+				wordMentionMap[str] = str;
+			}
+			// find highlight mentions
+			if (
+				user_login &&
+				(str.toLocaleLowerCase() == user_login.toLocaleLowerCase() ||
+					str.toLocaleLowerCase() == '@' + user_login.toLocaleLowerCase())
+			) {
+				wordMentionMap[str] = str;
+				tagged = true;
+			}
+		});
 
-    if (message.user_name.toLocaleLowerCase() == message.channel) {
-      highlighted = true;
-    }
+		if (message.user_name.toLocaleLowerCase() == message.channel) {
+			highlighted = true;
+		}
 
-    const getSubBadge = (version: number) => {
-      if (channel_badges["subscriber"]) {
-        return channel_badges["subscriber"].versions[version].image_url_2x;
-      }
-    };
+		const getSubBadge = (version: number) => {
+			if (channel_badges['subscriber']) {
+				return channel_badges['subscriber'].versions[version].image_url_2x;
+			}
+		};
 
-    const renderEmote = (emoteInfo: any) => {
-      return html`
-        <span class="emote"
-          ><img
-            emote
-            service="${emoteInfo.service}"
-            name="${emoteInfo.name}"
-            alt="${emoteInfo.name}"
-            src="${emoteInfo.emote.url_x2}"
-            height="32"
-        /></span>
-      `;
-    };
+		const renderEmote = (emoteInfo: any) => {
+			return html`
+				<span class="emote"
+					><img
+						emote
+						service="${emoteInfo.service}"
+						name="${emoteInfo.name}"
+						alt="${emoteInfo.name}"
+						src="${emoteInfo.emote.url_x2}"
+						height="32"
+				/></span>
+			`;
+		};
 
-    const renderLink = (linkInfo: string) => {
-      return html`<a
-        class="inline-link"
-        href="javascript:()"
-        @click="${() => {
-          Webbrowser.openInBrowwser(linkInfo);
-        }}"
-        >${linkInfo}</a
-      > `;
-    };
+		const renderLink = (linkInfo: string) => {
+			return html`<a
+				class="inline-link"
+				href="javascript:()"
+				@click="${() => {
+					Webbrowser.openInBrowwser(linkInfo);
+				}}"
+				>${linkInfo}</a
+			> `;
+		};
 
-    const renderMention = (name: string) => {
-      return html`<span class="mention">${name}</span> `;
-    };
+		const renderMention = (name: string) => {
+			return html`<span class="mention">${name}</span> `;
+		};
 
-    // actually replace everything collected at once
-    let parsed_msg = msg_words.map((word) => {
-      // replace emotes
-      if (wordEmoteMap[word]) {
-        return renderEmote(wordEmoteMap[word]);
-      }
-      // replace links
-      if (wordLinkMap[word]) {
-        return renderLink(wordLinkMap[word]);
-      }
-      // replace mentions
-      if (wordMentionMap[word]) {
-        return renderMention(wordMentionMap[word]);
-      }
-      return word + " ";
-    });
+		// actually replace everything collected at once
+		let parsed_msg = msg_words.map((word) => {
+			// replace emotes
+			if (wordEmoteMap[word]) {
+				return renderEmote(wordEmoteMap[word]);
+			}
+			// replace links
+			if (wordLinkMap[word]) {
+				return renderLink(wordLinkMap[word]);
+			}
+			// replace mentions
+			if (wordMentionMap[word]) {
+				return renderMention(wordMentionMap[word]);
+			}
+			return word + ' ';
+		});
 
-    let line_title = reward_id ? `Redeemed ${redemtion_title}.` : null;
+		let line_title = reward_id ? `Redeemed ${redemtion_title}.` : null;
 
-    if (isReply) {
-      const parent_message = this.channel.getMessageById(
-        message.tags["reply-parent-msg-id"]
-      );
-      if (parent_message) {
-        line_title = `${parent_message.user_name}: ${parent_message.text}`;
-      }
-    }
+		if (isReply) {
+			const parent_message = this.channel.getMessageById(message.tags['reply-parent-msg-id']);
+			if (parent_message) {
+				line_title = `${parent_message.user_name}: ${parent_message.text}`;
+			}
+		}
 
-    // message footprint
-    const msgFootprint = messageFootprint(message.text);
+		// message footprint
+		const msgFootprint = messageFootprint(message.text);
 
-    const similarMessages = [];
-    for (let [channel, id, footprint] of footprintMap) {
-      if (footprint == msgFootprint && channel == message.channel) {
-        similarMessages.push(id);
-      }
-    }
+		const similarMessages = [];
+		for (let [channel, id, footprint] of footprintMap) {
+			if (footprint == msgFootprint && channel == message.channel) {
+				similarMessages.push(id);
+			}
+		}
 
-    messageCache.unshift([message.channel, message.id, message]);
-    if (messageCache.length > 100) {
-      messageCache.pop();
-    }
-    footprintMap.unshift([message.channel, message.id, msgFootprint]);
-    if (footprintMap.length > 100) {
-      footprintMap.pop();
-    }
+		messageCache.unshift([message.channel, message.id, message]);
+		if (messageCache.length > 100) {
+			messageCache.pop();
+		}
+		footprintMap.unshift([message.channel, message.id, msgFootprint]);
+		if (footprintMap.length > 100) {
+			footprintMap.pop();
+		}
 
-    let latestSimilarMessage: null | string = null;
+		let latestSimilarMessage: null | string = null;
 
-    if (similarMessages.length > 0) {
-      for (let messageId of similarMessages) {
-        const [c, id, msg] = messageCache.find(
-          ([channel, id, _]) => id == messageId && channel == message.channel
-        );
-        latestSimilarMessage = id;
-      }
-    }
+		if (similarMessages.length > 0) {
+			for (let messageId of similarMessages) {
+				const [c, id, msg] = messageCache.find(([channel, id, _]) => id == messageId && channel == message.channel);
+				latestSimilarMessage = id;
+			}
+		}
 
-    // message html content
-    const createLine = (mod = false) => {
-      const lineEle = document.createElement("chat-line");
+		// message html content
+		const createLine = (mod = false) => {
+			const lineEle = document.createElement('chat-line');
 
-      if (message.is_action) {
-        lineEle.setAttribute("action", "");
-      }
+			if (message.is_action) {
+				lineEle.setAttribute('action', '');
+			}
 
-      // TODO: Move the markup into the Chat component. Only render the actual message into a html version
-      // TODO: Collpage exesively long messages, especially with emotes
+			// TODO: Move the markup into the Chat component. Only render the actual message into a html version
+			// TODO: Collpage exesively long messages, especially with emotes
 
-      // render full message template
-      const template = html`
-        <style>
-          [userid="${message.user_id}"] {
-            --color: ${color};
-          }
-        </style>
+			// render full message template
+			const template = html`
+				<style>
+					[userid='${message.user_id}'] {
+						--color: ${color};
+					}
+				</style>
 
-        ${line_title ? html` <div class="line-title">${line_title}</div> ` : ""}
-        ${mod &&
-        message.user_name !== user_login &&
-        !message.badges.find(
-          (b) => b.name == "moderator" || b.name == "broadcaster"
-        )
-          ? html`
-              <span
-                class="chat-line-tool mod-tool inline-tool"
-                title="Timeout 10s"
-                @click="${() =>
-                  this.channel.timeout(message.channel, message.user_name, 10)}"
-              >
-                <img
-                  src="./images/block_white_24dp.svg"
-                  width="16px"
-                  height="16px"
-                />
-              </span>
-              <span
-                class="chat-line-tool mod-tool inline-tool delete-tool"
-                title="Delete Message"
-                @click="${() =>
-                  this.channel.deleteMessage(message.channel, message.id)}"
-              >
-                <img
-                  src="./images/delete_white_24dp.svg"
-                  width="16px"
-                  height="16px"
-                />
-              </span>
-              <span
-                class="chat-line-tool inline-tool mod-tool-deleted"
-                title="Unban"
-                @click="${() =>
-                  this.channel.unban(message.channel, message.user_name)}"
-              >
-                <img
-                  src="./images/done_white_24dp.svg"
-                  width="16px"
-                  height="16px"
-                />
-              </span>
-            `
-          : ""}
-        <span class="bages">
-          ${message.badges.map((badge) => {
-            let badge_url = "";
+				${line_title ? html` <div class="line-title">${line_title}</div> ` : ''}
+				${mod &&
+				message.user_name !== user_login &&
+				!message.badges.find((b) => b.name == 'moderator' || b.name == 'broadcaster')
+					? html`
+							<span
+								class="chat-line-tool mod-tool inline-tool"
+								title="Timeout 10s"
+								@click="${() => this.channel.timeout(message.channel, message.user_name, 10)}"
+							>
+								<img src="./images/block_white_24dp.svg" width="16px" height="16px" />
+							</span>
+							<span
+								class="chat-line-tool mod-tool inline-tool delete-tool"
+								title="Delete Message"
+								@click="${() => this.channel.deleteMessage(message.channel, message.id)}"
+							>
+								<img src="./images/delete_white_24dp.svg" width="16px" height="16px" />
+							</span>
+							<span
+								class="chat-line-tool inline-tool mod-tool-deleted"
+								title="Unban"
+								@click="${() => this.channel.unban(message.channel, message.user_name)}"
+							>
+								<img src="./images/done_white_24dp.svg" width="16px" height="16px" />
+							</span>
+					  `
+					: ''}
+				<span class="bages">
+					${message.badges.map((badge) => {
+						let badge_url = '';
 
-            if (badge.name == "subscriber") {
-              badge_url =
-                getSubBadge(badge.version) ||
-                Badges.getBadgeByName(badge.name, badge.version);
-              return html`<img
-                class="badge"
-                alt="${badge.name} (${badge.description})"
-                src="${badge_url}"
-                width="18"
-                height="18"
-              />`;
-            }
+						if (badge.name == 'subscriber') {
+							badge_url = getSubBadge(badge.version) || Badges.getBadgeByName(badge.name, badge.version);
+							return html`<img
+								class="badge"
+								alt="${badge.name} (${badge.description})"
+								src="${badge_url}"
+								width="18"
+								height="18"
+							/>`;
+						}
 
-            badge_url = Badges.getBadgeByName(badge.name, badge.version);
-            return html`<img
-              class="badge"
-              alt="${badge.name}"
-              src="${badge_url}"
-              width="18"
-              height="18"
-            />`;
-          })}
-        </span>
-        <span
-          class="username"
-          @click="${() => this.channel.openUserCard(message.user_name)}"
-          >${message.user_name}:</span
-        >
-        ${isReply && false
-          ? html`
-              <button class="reply-icon" title="Reply">
-                <img
-                  src="./images/question_answer_white_24dp.svg"
-                  height="18px"
-                  width="18px"
-                />
-              </button>
-            `
-          : ""}
-        <span class="message">${parsed_msg}</span>
+						badge_url = Badges.getBadgeByName(badge.name, badge.version);
+						return html`<img class="badge" alt="${badge.name}" src="${badge_url}" width="18" height="18" />`;
+					})}
+				</span>
+				<span class="username" @click="${() => this.channel.openUserCard(message.user_name)}"
+					>${message.user_name}:</span
+				>
+				${isReply && false
+					? html`
+							<button class="reply-icon" title="Reply">
+								<img src="./images/question_answer_white_24dp.svg" height="18px" width="18px" />
+							</button>
+					  `
+					: ''}
+				<span class="message">${parsed_msg}</span>
 
-        ${message.user_name !== user_login
-          ? html`
-              <div
-                class="tool chat-line-tool"
-                title="Reply"
-                @click="${() => this.channel.reply(message.channel, message)}"
-              >
-                <img
-                  src="./images/reply_white_24dp.svg"
-                  height="18px"
-                  width="18px"
-                />
-              </div>
-            `
-          : ""}
-      `;
+				${message.user_name !== user_login
+					? html`
+							<div
+								class="tool chat-line-tool"
+								title="Reply"
+								@click="${() => this.channel.reply(message.channel, message)}"
+							>
+								<img src="./images/reply_white_24dp.svg" height="18px" width="18px" />
+							</div>
+					  `
+					: ''}
+			`;
 
-      lineEle.setAttribute("messageid", message.id);
-      lineEle.setAttribute("userid", message.user_id);
+			lineEle.setAttribute('messageid', message.id);
+			lineEle.setAttribute('userid', message.user_id);
 
-      if (tagged) {
-        lineEle.setAttribute("tagged", "");
-      }
-      if (highlighted) {
-        lineEle.setAttribute("highlighted", "");
-      }
-      if (action) {
-        lineEle.setAttribute("action", "");
-      }
+			if (tagged) {
+				lineEle.setAttribute('tagged', '');
+			}
+			if (highlighted) {
+				lineEle.setAttribute('highlighted', '');
+			}
+			if (action) {
+				lineEle.setAttribute('action', '');
+			}
 
-      lineEle.message = messageData;
+			lineEle.message = messageData;
 
-      render(template, lineEle);
+			render(template, lineEle);
 
-      if (latestSimilarMessage != null) {
-        // TODO: append this new message to the old one, dont add it to the chat
-        lineEle.setAttribute("compact", "");
-      }
+			if (latestSimilarMessage != null) {
+				// TODO: append this new message to the old one, dont add it to the chat
+				lineEle.setAttribute('compact', '');
+			}
 
-      return lineEle;
-    };
+			return lineEle;
+		};
 
-    const messageData: ChatMessage = {
-      type: "message",
-      id: message.id,
-      user_name: message.user_name,
-      user_id: message.user_id,
-      highlighted: highlighted,
-      tagged: tagged,
-      action: action,
-      reply: isReply,
-      timestamp: timestamp,
-      text: message.text,
-      content: createLine,
-    };
+		const messageData: ChatMessage = {
+			type: 'message',
+			id: message.id,
+			user_name: message.user_name,
+			user_id: message.user_id,
+			highlighted: highlighted,
+			tagged: tagged,
+			action: action,
+			reply: isReply,
+			timestamp: timestamp,
+			text: message.text,
+			content: createLine
+		};
 
-    return messageData;
-  }
+		return messageData;
+	}
 }
 
 function messageFootprint(msgString: string) {
-  const words = new Set([...msgString.split(" ")]);
-  // const words = new Set([...msgString.split(" ").filter(w => w.length > 1)]);
-  const str = [...words].join("");
+	const words = new Set([...msgString.split(' ')]);
+	// const words = new Set([...msgString.split(" ").filter(w => w.length > 1)]);
+	const str = [...words].join('');
 
-  let footprint = "XXXXXXXXXXXXXXXXXXXXXXXX";
+	let footprint = 'XXXXXXXXXXXXXXXXXXXXXXXX';
 
-  for (let i = 0; i < footprint.length; i++) {
-    const charIndex = Math.floor((i / footprint.length) * str.length);
-    const char = str[charIndex];
-    footprint = footprint.substring(0, i) + char + footprint.substring(i + 1);
-  }
+	for (let i = 0; i < footprint.length; i++) {
+		const charIndex = Math.floor((i / footprint.length) * str.length);
+		const char = str[charIndex];
+		footprint = footprint.substring(0, i) + char + footprint.substring(i + 1);
+	}
 
-  return footprint;
+	return footprint;
 }

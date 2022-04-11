@@ -1,19 +1,17 @@
 import AppEvent from './AppEvent';
-import Channel from '../Channel';
+import Channel from '../app/Channel';
 
 export default class ChannelInfoChanged extends AppEvent {
+	static get type() {
+		return 'app-channel-changed';
+	}
 
-    static get type() {
-        return "app-channel-changed";
-    }
+	data: { channel: Channel };
 
-    data: { channel: Channel };
-
-    constructor(channel: Channel) {
-        super(ChannelInfoChanged.type);
-        this.data = {
-            channel: channel,
-        }
-    }
-
+	constructor(channel: Channel) {
+		super(ChannelInfoChanged.type);
+		this.data = {
+			channel: channel
+		};
+	}
 }

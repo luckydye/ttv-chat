@@ -1,22 +1,20 @@
-import AppEvent from "./AppEvent";
+import AppEvent from './AppEvent';
 
 export default class ChatCommandEvent extends AppEvent {
+	data: {
+		message: string;
+	};
 
-    data: {
-        message: string
-    };
+	canceled = false;
 
-    canceled = false;
+	constructor(message: string) {
+		super('app-chat-command');
+		this.data = {
+			message
+		};
+	}
 
-    constructor(message: string) {
-        super("app-chat-command");
-        this.data = {
-            message
-        }
-    }
-
-    cancel() {
-        this.canceled = true;
-    }
-
+	cancel() {
+		this.canceled = true;
+	}
 }

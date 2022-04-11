@@ -12,7 +12,8 @@
   "scripts": {
     "start": "turbo run start",
     "build": "turbo run build --force --no-cache",
-    "dev": "turbo run dev --parallel"
+    "dev": "turbo run dev --parallel",
+		"format": "prettier --write **/*.ts"
   },
   "repository": {
     "type": "git",
