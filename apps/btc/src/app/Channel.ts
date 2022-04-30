@@ -6,7 +6,7 @@ import Application from './App';
 import Account from './Account';
 import Focus from '../util/Focus';
 import MessageParser, { ChatMessage, EventMessage, UserMessage, ChatInfoMessage } from '../components/MessageParser';
-import TwitchChat from '../components/TwitchChat';
+import TwitchChatComponent from '../components/TwitchChat';
 import ChannelStateChanged from '../events/ChannelStateChanged';
 import ChannelInfoChanged from '../events/ChannelInfoChanged';
 import ChatMessageEvent from '../events/ChatMessage';
@@ -18,7 +18,7 @@ import NightbotApi from '../services/Nightbot';
 import { TwitchCommands } from '../services/twitch/TwichCommands';
 import Notifications from '../util/Notifications';
 import { ServiceWorkerAdapter } from './../adapter/ServiceWorkerAdapter';
-import { html } from 'lit';
+import { TwitchChat } from 'twitch';
 
 const COMMAND_CACHE_LIFETIME = 1000 * 60;
 
@@ -79,7 +79,7 @@ export default class Channel {
 	mod_pubsub: TwitchPubsub;
 	account: Account;
 
-	chat: TwitchChat;
+	chat: TwitchChatComponent;
 	emoteSets: Array<number> = [];
 
 	commandListCache: Array<CommandList> = [];
@@ -89,7 +89,7 @@ export default class Channel {
 		this.channel_login = channel_name;
 		this.messageParser = new MessageParser(this);
 
-		this.chat = document.createElement('twitch-chat') as TwitchChat;
+		this.chat = document.createElement('twitch-chat') as TwitchChatComponent;
 		this.chat.setRoom(this.channel_login);
 
 		// bookmark placements
@@ -166,7 +166,7 @@ export default class Channel {
 			this.chat.setTitle(null);
 		}
 
-		await IRC.getUserlist(this.channel_login).then((chatters) => {
+		await TwitchChat.getUserlist(this.channel_login).then((chatters) => {
 			this.chatters = [
 				...chatters.chatters.broadcaster,
 				...chatters.chatters.vips,

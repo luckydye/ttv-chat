@@ -10,7 +10,7 @@ import './FluidInput';
 import './Timer';
 import './UserList';
 
-export default class TwitchChat extends Chat {
+export default class TwitchChatComponent extends Chat {
 	channel: string | undefined;
 
 	bio: any;
@@ -523,4 +523,4 @@ export default class TwitchChat extends Chat {
 	}
 }
 
-customElements.define('twitch-chat', TwitchChat);
+customElements.define('twitch-chat', TwitchChatComponent);
