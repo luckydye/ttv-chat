@@ -126,20 +126,6 @@ export default class EmotePicker extends ContextMenu {
 	connectedCallback() {
 		super.connectedCallback();
 
-		const channel = Application.getActiveChannel();
-		TwitchEmotes.getEmoteSets(channel.emoteSets).then((sets) => {
-			this.twitch_user_emotes = sets;
-			this.requestUpdate();
-		});
-	}
-
-	currentEmote: HTMLImageElement | null = null;
-
-	constructor(...args) {
-		super(...args);
-
-		this.currentEmote = null;
-
 		this.shadowRoot.addEventListener('pointermove', (e) => {
 			let newTarget = null;
 			if (e.target.hasAttribute('emote')) {
@@ -153,6 +139,20 @@ export default class EmotePicker extends ContextMenu {
 				this.requestUpdate();
 			}
 		});
+
+		const channel = Application.getActiveChannel();
+		TwitchEmotes.getEmoteSets(channel.emoteSets).then((sets) => {
+			this.twitch_user_emotes = sets;
+			this.requestUpdate();
+		});
+	}
+
+	currentEmote: HTMLImageElement | null = null;
+
+	constructor(...args) {
+		super(...args);
+
+		this.currentEmote = null;
 	}
 
 	tabSelected = 'twitch';

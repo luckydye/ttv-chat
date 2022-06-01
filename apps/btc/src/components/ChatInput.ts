@@ -1,3 +1,4 @@
+import { ServiceWorkerAdapter } from './../adapter/ServiceWorkerAdapter';
 import { CommandList, UserLevel } from './../services/CommandList';
 import { css, html, LitElement } from 'lit';
 import IRC from '../services/IRC';
@@ -10,6 +11,8 @@ import MessageParser from './MessageParser';
 const message_parser = new MessageParser();
 
 const MAX_HSITORY_LENGTH = 20;
+
+const adapter = new ServiceWorkerAdapter();
 
 export default class ChatInput extends LitElement {
 	inputElement: HTMLElement;
@@ -66,7 +69,7 @@ export default class ChatInput extends LitElement {
 					window.dispatchEvent(ev);
 				}
 				if (!ev.canceled) {
-					IRC.sendMessage(channel.channel_login, channel.channel_id, this.value);
+					adapter.sendMessage(channel.channel_login.toLocaleLowerCase(), this.value);
 				}
 			}
 		}

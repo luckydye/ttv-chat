@@ -11,6 +11,14 @@ export class ServiceWorkerAdapter {
 		});
 	}
 
+	sendMessage(channel: string, message: string) {
+		this.worker?.postMessage({
+			type: 'irc.send',
+			channel,
+			message
+		});
+	}
+
 	onMessage(callback: (msg) => void) {
 		navigator.serviceWorker.addEventListener('message', (msg) => {
 			callback(msg.data);

@@ -21,6 +21,6 @@ export default class Webbrowser {
 	}
 
 	static openInBrowwser(url: string) {
-		invoke('open_link', { url });
+		window.open(url);
 	}
 }

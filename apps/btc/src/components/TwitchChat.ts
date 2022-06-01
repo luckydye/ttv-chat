@@ -30,13 +30,18 @@ export default class TwitchChatComponent extends Chat {
 					opacity: 0;
 				}
 			}
+			.bio-container {
+				position: relative;
+			}
 			.bio {
 				animation: bio-slidein 0.2s ease;
 				display: grid;
 				grid-template-columns: auto 1fr;
-				padding: 60px 30px 40px 30px;
+				padding: 90px 30px 40px;
 				margin-bottom: 10px;
-				background: #0c0c0c;
+				background: linear-gradient(45deg, rgb(12, 12, 12), transparent);
+				z-index: 10;
+				position: relative;
 			}
 			.profile-image {
 				border-radius: 50%;
@@ -44,6 +49,16 @@ export default class TwitchChatComponent extends Chat {
 				width: 112px;
 				height: 112px;
 				border: 3px solid rgb(148, 74, 255);
+			}
+			.thumbnail {
+				position: absolute;
+				height: 100%;
+				width: auto;
+				right: 0;
+				z-index: 1;
+			}
+			.thumbnail img {
+				max-height: 100%;
 			}
 			.profile-image img {
 				width: 100%;
@@ -266,11 +281,15 @@ export default class TwitchChatComponent extends Chat {
 	game: string = '';
 	viewer_count: number = 0;
 	status: string = '';
+	thumbnail_url?: string;
 	stream_start: number = 0;
 
 	setTitle(options: any | null) {
 		if (options) {
-			const { viewer_count = 0, started_at = 0, game_name = '', title = '' } = options;
+			const { thumbnail_url, viewer_count = 0, started_at = 0, game_name = '', title = '' } = options;
+
+			this.thumbnail_url = thumbnail_url.replace('{width}', '853').replace('{height}', '480');
+
 			this.game = game_name;
 			this.stream_start = started_at;
 			this.stream_title = title;
@@ -496,24 +515,29 @@ export default class TwitchChatComponent extends Chat {
 			<div class="lines" @scroll="${(e) => this.onScroll(e)}">
 				${this.bio
 					? html`
-							<div class="bio">
-								<div class="profile-image">
-									<img src="${channel.profile_image_url || ''}" width="125px" />
+							<div class="bio-container">
+								<div class="thumbnail">
+									<img src="${this.thumbnail_url}" />
 								</div>
-								<div class="pin">
-									<div class="profile-name">
-										${this.bio.broadcaster_name}
-										${this.bio.broadcaster_type == 'partner'
-											? html` <img src="./images/verified.svg" alt="verified" /> `
-											: ''}
+								<div class="bio">
+									<div class="profile-image">
+										<img src="${channel.profile_image_url || ''}" width="125px" />
 									</div>
-									<div class="game">${this.bio.game_name}</div>
-									<div class="language">${Format.lang(this.bio.broadcaster_language)}</div>
-									<div class="viewcount">${Format.number(channel.channel_view_count)} views</div>
+									<div class="pin">
+										<div class="profile-name">
+											${this.bio.broadcaster_name}
+											${this.bio.broadcaster_type == 'partner'
+												? html` <img src="./images/verified.svg" alt="verified" /> `
+												: ''}
+										</div>
+										<div class="game">${this.bio.game_name}</div>
+										<div class="language">${Format.lang(this.bio.broadcaster_language)}</div>
+										<div class="viewcount">${Format.number(channel.channel_view_count)} views</div>
+									</div>
+									${channel.channel_description == ''
+										? ''
+										: html` <div class="profile-desc">${channel.channel_description}</div> `}
 								</div>
-								${channel.channel_description == ''
-									? ''
-									: html` <div class="profile-desc">${channel.channel_description}</div> `}
 							</div>
 					  `
 					: ''}

@@ -21,6 +21,12 @@ chat.onMessage(async (evnt) => {
 const channels: string[] = [];
 
 const eventhandlers = {
+	'irc.send'({ channel, message }) {
+		console.log('Send message!', channel, message);
+		if (logged_in) {
+			chat.send(channel, message);
+		}
+	},
 	'irc.join'({ channel }) {
 		if (!logged_in) {
 			channels.push(channel);
