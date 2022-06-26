@@ -18,5 +18,5 @@ export default defineConfig({
 		outDir: "../../dist",
 		target: "es2018",
 	},
-	base: "./",
+	base: "/",
 });

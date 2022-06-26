@@ -7,7 +7,7 @@
 
 		<title>Better Twitch Chat</title>
 
-		<link rel="manifest" href="./static/manifest.json" />
+		<link rel="manifest" href="./manifest.json" />
 
 		<link rel="stylesheet" href="./static/window.css" />
 		<link rel="stylesheet" href="./static/chat.css" />
@@ -16,7 +16,7 @@
 		<script>
 			if ("serviceWorker" in navigator) {
 				navigator.serviceWorker
-					.register("./static/service.js")
+					.register("./service.js")
 					.then(() => {
 						console.log("Service worker registered!");
 					})
