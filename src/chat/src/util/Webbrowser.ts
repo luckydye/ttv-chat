@@ -2,7 +2,7 @@ interface SearchParams {
 	[key: string]: string;
 }
 
-export class URI {
+export default class Webbrowser {
 	static parseSearch(str: string = "", res: SearchParams = {}) {
 		str
 			.substring(1)
@@ -18,5 +18,9 @@ export class URI {
 		return str.match(
 			/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&\/\/=]*)/g
 		);
+	}
+
+	static openInBrowwser(url: string) {
+		window.open(url);
 	}
 }

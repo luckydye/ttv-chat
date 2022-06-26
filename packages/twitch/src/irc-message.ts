@@ -14,7 +14,7 @@ export function parse(data: string): Message | null {
 		tags: {},
 		prefix: null,
 		command: null,
-		params: []
+		params: [],
 	};
 
 	// position and nextspace are used by the parser as a reference.
@@ -25,7 +25,7 @@ export function parse(data: string): Message | null {
 	// http://ircv3.atheme.org/specification/message-tags-3.2
 
 	if (data.charCodeAt(0) === 64) {
-		let nextspace = data.indexOf(' ');
+		let nextspace = data.indexOf(" ");
 
 		if (nextspace === -1) {
 			// Malformed IRC message.
@@ -33,13 +33,13 @@ export function parse(data: string): Message | null {
 		}
 
 		// Tags are split by a semi colon.
-		let rawTags = data.slice(1, nextspace).split(';');
+		let rawTags = data.slice(1, nextspace).split(";");
 
 		for (let i = 0; i < rawTags.length; i++) {
 			// Tags delimited by an equals sign are key=value tags.
 			// If there's no equals, we assign the tag a value of true.
 			let tag = rawTags[i];
-			let pair = tag.split('=');
+			let pair = tag.split("=");
 			message.tags[pair[0]] = pair[1] || true;
 		}
 
@@ -55,7 +55,7 @@ export function parse(data: string): Message | null {
 	// with a colon.
 
 	if (data.charCodeAt(position) === 58) {
-		nextspace = data.indexOf(' ', position);
+		nextspace = data.indexOf(" ", position);
 
 		// If there's nothing after the prefix, deem this message to be
 		// malformed.
@@ -73,7 +73,7 @@ export function parse(data: string): Message | null {
 		}
 	}
 
-	nextspace = data.indexOf(' ', position);
+	nextspace = data.indexOf(" ", position);
 
 	// If there's no more whitespace left, extract everything from the
 	// current position to the end of the string as the command.
@@ -98,7 +98,7 @@ export function parse(data: string): Message | null {
 	}
 
 	while (position < data.length) {
-		nextspace = data.indexOf(' ', position);
+		nextspace = data.indexOf(" ", position);
 
 		// If the character is a colon, we've got a trailing parameter.
 		// At this point, there are no extra params, so we push everything

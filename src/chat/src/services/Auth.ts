@@ -1,18 +1,11 @@
-import { TwitchApi } from "./Api";
-import { URI } from "./Utils";
+// import jwt from 'jsonwebtoken';
+import Webbrowser from "../util/Webbrowser";
+import Account from "../app/Account";
+import LoginEvent from "../events/Login";
+import TwitchApi from "./twitch/Api";
 
-let logged_in_user: any | null;
+let logged_in_user: Account | null;
 let logged_in = false;
-
-class LoginEvent extends Event {
-	data: any;
-
-	constructor(token) {
-		super("twitch-login-success");
-
-		this.data = { token };
-	}
-}
 
 export async function handleAuthenticatedUser(token: string): Promise<boolean> {
 	const userinfo = await fetchTwitchAuthApi("/oauth2/userinfo", token);
@@ -31,10 +24,11 @@ export async function handleAuthenticatedUser(token: string): Promise<boolean> {
 	const user_data = await TwitchApi.getUserInfo(username);
 
 	if (user_data) {
-		console.log(user_data, token);
-		logged_in_user = user_data;
-
-		window.dispatchEvent(new LoginEvent(token));
+		if (!logged_in_user) {
+			const account = new Account(user_data, token);
+			logged_in_user = account;
+			window.dispatchEvent(new LoginEvent(account));
+		}
 
 		return true;
 	}
@@ -125,16 +119,21 @@ export async function authClientUser() {
 		`&scope=${scopes.join("%20")}` +
 		`&claims=${JSON.stringify(claims)}`;
 
-	const bc = new BroadcastChannel("obs-tools-auth-com");
+	const win = open(url);
 
-	bc.onmessage = (msg) => {
-		const data = msg.data;
+	if (win) {
+		win.addEventListener("load", (e) => {
+			console.log("win load event", win);
 
-		if (data.access_token) {
-			const access_token = data.access_token;
+			const params = win.location.hash;
+			const parsed = Webbrowser.parseSearch(params);
+
+			const access_token = parsed.access_token;
 			handleAuthenticatedUser(access_token);
-		}
-	};
 
-	const win = window.open(url);
+			win.close();
+		});
+	} else {
+		throw new Error("could not open authentication window");
+	}
 }

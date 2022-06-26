@@ -1,4 +1,4 @@
-import Format from "./Format";
+import Format from "../../util/Format";
 
 export function generateNonce(length = 30) {
 	var text = "";
@@ -14,7 +14,6 @@ const reward_listeners: Set<Function> = new Set();
 const mod_action_listeners: Set<Function> = new Set();
 const poll_listeners: Set<Function> = new Set();
 const hype_train_listeners: Set<Function> = new Set();
-const unhandled_listeners: Set<Function> = new Set();
 
 interface Reward {
 	reward_id: string;
@@ -40,7 +39,8 @@ export default class TwitchPubsub {
 	constructor(oauth_token: string) {
 		this.access_token = oauth_token;
 
-		if (!oauth_token) {
+		const token = localStorage.getItem("user-token");
+		if (!token) {
 			throw new Error("not logged in, can not connect to pubsub.");
 		}
 	}
@@ -152,11 +152,6 @@ export default class TwitchPubsub {
 		return () => hype_train_listeners.delete(callback);
 	}
 
-	onUnhandled(callback: Function) {
-		unhandled_listeners.add(callback);
-		return () => unhandled_listeners.delete(callback);
-	}
-
 	handlePubsubMessage(message: any) {
 		switch (message.type) {
 			case "reward-redeemed":
@@ -177,16 +172,6 @@ export default class TwitchPubsub {
 				console.log("Uunhandled pubsub message", message.type);
 				console.log(message);
 		}
-
-		if (message.type) {
-			this.handleUnhandledMessage(message);
-		}
-	}
-
-	handleUnhandledMessage(message: any): void {
-		this.emitForListeners(unhandled_listeners, {
-			message,
-		});
 	}
 
 	handleHypeTrainMessage(message: any) {

@@ -1,8 +1,8 @@
+import TwichCommands from "./TwichCommands";
 import TwitchPubsub from "./Pubsub";
 
 const CLIENT_ID = "8gwe8mu523g9cstukr8rnnwspqjykf";
-const REDIRECT_URI =
-	"https://stadium-dev.github.io/obs-tools-widget/dock/public/";
+const REDIRECT_URI = "https://best-twitch-chat.web.app/auth";
 
 // "/users" reference from twitch api
 export interface UserInfo {
@@ -31,7 +31,7 @@ interface ChannelEditor {
 	created_at: string;
 }
 
-export class TwitchApi {
+export default class TwitchApi {
 	static get CLIENT_ID() {
 		return CLIENT_ID;
 	}
@@ -74,9 +74,10 @@ export class TwitchApi {
 		return userinfo;
 	}
 
-	static async connectToPubSub(authToken: string): Promise<TwitchPubsub> {
-		if (authToken) {
-			const pubsub = new TwitchPubsub(authToken);
+	static async connectToPubSub(): Promise<TwitchPubsub> {
+		const token = localStorage.getItem("user-token");
+		if (token) {
+			const pubsub = new TwitchPubsub(token);
 			return pubsub.connect().then(() => pubsub);
 		} else {
 			throw new Error("not logged in, can not connect to pubsub.");
@@ -89,6 +90,10 @@ export class TwitchApi {
 
 	static async getChannel(user_id: string) {
 		return (await this.fetch("/channels", "broadcaster_id=" + user_id)).data;
+	}
+
+	static getAvailableCommands() {
+		return TwichCommands;
 	}
 
 	static async getClip(clip_id: string) {

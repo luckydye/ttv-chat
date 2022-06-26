@@ -1,5 +1,5 @@
-import { generateNonce } from './nonce';
-import { parse } from './irc-message';
+import { generateNonce } from "./nonce";
+import { parse } from "./irc-message";
 
 type TwitchMessage = {
 	author: string;
@@ -17,10 +17,10 @@ export class TwitchChat {
 
 	connect(login: string, token: string): Promise<void> {
 		return new Promise((resolve) => {
-			this.ws = new WebSocket('wss://irc-ws.chat.twitch.tv/');
+			this.ws = new WebSocket("wss://irc-ws.chat.twitch.tv/");
 
 			this.ws.onerror = (err) => {
-				console.error('Chat Service Error', err);
+				console.error("Chat Service Error", err);
 
 				setTimeout(() => {
 					this.connect(login, token);
@@ -31,7 +31,7 @@ export class TwitchChat {
 			};
 
 			this.ws.onopen = () => {
-				console.log('Chat Connection Open');
+				console.log("Chat Connection Open");
 
 				if (!this.authenticated) {
 					this.ws.send(`PASS oauth:${token}`);
@@ -42,23 +42,25 @@ export class TwitchChat {
 			};
 
 			this.ws.onmessage = (msg) => {
-				globalThis.dispatchEvent(new CustomEvent('twitch-chat-message', { detail: msg.data }));
+				globalThis.dispatchEvent(
+					new CustomEvent("twitch-chat-message", { detail: msg.data })
+				);
 			};
 		});
 	}
 
 	onMessage(callback: (msg: TwitchMessage) => void) {
-		globalThis.addEventListener('twitch-chat-message', ((ev: CustomEvent) => {
+		globalThis.addEventListener("twitch-chat-message", ((ev: CustomEvent) => {
 			const msg = parse(ev.detail as string);
 
 			if (msg && msg.prefix) {
 				switch (msg.command) {
-					case 'PRIVMSG':
+					case "PRIVMSG":
 						callback({
-							author: msg.prefix.split('!')[0],
+							author: msg.prefix.split("!")[0],
 							tags: msg.tags,
 							command: msg.command,
-							message: msg.params[1].replace(/\r\n?/g, '')
+							message: msg.params[1].replace(/\r\n?/g, ""),
 						});
 						break;
 				}
@@ -67,7 +69,9 @@ export class TwitchChat {
 	}
 
 	send(channel: string, text: string) {
-		this.ws.send(`@client-nonce=${generateNonce()} PRIVMSG #${channel} :${text}`);
+		this.ws.send(
+			`@client-nonce=${generateNonce()} PRIVMSG #${channel} :${text}`
+		);
 	}
 
 	async join(channel: string): Promise<void> {

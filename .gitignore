@@ -3,3 +3,4 @@ build
 **/*.bundle.js
 .firebase
 examples
+dist
