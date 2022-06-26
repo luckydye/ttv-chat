@@ -1,5 +1,5 @@
 {
-  "name": "better-twitch-chat",
+  "name": "ttv-chat",
   "version": "1.0.1",
   "description": "A lightweight Twitch Chat App with all the Twitch Chat features.",
   "main": "index.js",
@@ -13,7 +13,7 @@
     "start": "turbo run start",
     "build": "turbo run build --force --no-cache",
     "dev": "turbo run dev --parallel",
-		"format": "prettier --write **/*.ts"
+    "format": "prettier --write **/*.ts"
   },
   "repository": {
     "type": "git",
@@ -26,6 +26,7 @@
   },
   "homepage": "https://github.com/luckydye/e2e-dashboard#readme",
   "dependencies": {
+    "firebase": "^9.8.4",
     "turbo": "^1.0.28"
   },
   "engines": {
