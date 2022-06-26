@@ -6,6 +6,9 @@ A new Twitch Chat Client with some third party things.
 
 ## Features
 
+#### Config cloud
+
+Settings and joined channels will be synced across devices.
 
 #### Emotes
 - [x] Twitch
