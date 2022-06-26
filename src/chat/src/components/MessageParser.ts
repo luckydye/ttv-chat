@@ -100,7 +100,7 @@ export interface ChatMessage {
 	reply: boolean; // is a reply
 	timestamp: Date;
 	text: string;
-	content: TemplateResult; // parsed message
+	content: () => any; // parsed message
 }
 
 export interface ChatInfoMessage {

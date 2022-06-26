@@ -172,18 +172,18 @@ export default class Channel {
 			this.chat.setTitle(null);
 		}
 
-		await TwitchChat.getUserlist(this.channel_login).then((chatters) => {
-			this.chatters = [
-				...chatters.chatters.broadcaster,
-				...chatters.chatters.vips,
-				...chatters.chatters.moderators,
-				...chatters.chatters.staff,
-				...chatters.chatters.admins,
-				...chatters.chatters.global_mods,
-				...chatters.chatters.viewers,
-			];
-			this.chatter_count = chatters.chatter_count;
-		});
+		// await TwitchChat.getUserlist(this.channel_login).then((chatters) => {
+		// 	this.chatters = [
+		// 		...chatters.chatters.broadcaster,
+		// 		...chatters.chatters.vips,
+		// 		...chatters.chatters.moderators,
+		// 		...chatters.chatters.staff,
+		// 		...chatters.chatters.admins,
+		// 		...chatters.chatters.global_mods,
+		// 		...chatters.chatters.viewers,
+		// 	];
+		// 	this.chatter_count = chatters.chatter_count;
+		// });
 
 		window.dispatchEvent(new ChannelInfoChanged(this));
 	}
@@ -421,9 +421,9 @@ export default class Channel {
 		const adapter = new ServiceWorkerAdapter();
 		adapter.joinChannel(this.channel_login.toLocaleLowerCase());
 
-		adapter.onMessage((msg) => {
+		adapter.onMessage(({ message }) => {
 			const ele = document.createElement("div");
-			ele.innerHTML = msg.message.text;
+			ele.innerHTML = `${message.author}: ${message.message}`;
 
 			this.chat.appendMessage({
 				type: "message",
@@ -435,7 +435,8 @@ export default class Channel {
 				action: false, // is a /me message
 				reply: false, // is a reply
 				timestamp: new Date(),
-				text: msg.message.text,
+				text: message.raw,
+				// text: msg.message.text,
 				content: () => ele, // parsed message
 			});
 		});

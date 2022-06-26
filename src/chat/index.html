@@ -13,6 +13,19 @@
 		<link rel="stylesheet" href="./static/chat.css" />
 		<link rel="stylesheet" href="./static/rooms.css" />
 
+		<script>
+			if ("serviceWorker" in navigator) {
+				navigator.serviceWorker
+					.register("./static/service.js")
+					.then(() => {
+						console.log("Service worker registered!");
+					})
+					.catch((err) => {
+						console.log("Service worker registration failed: ", err);
+					});
+			}
+		</script>
+
 		<script type="module" src="./src/main.ts"></script>
 	</head>
 

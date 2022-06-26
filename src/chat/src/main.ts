@@ -90,14 +90,3 @@ window.addEventListener(Events.ChatCommandEvent, (e) => {
 
 window.invoke = async () => {};
 window.listen = async () => {};
-
-if ("serviceWorker" in navigator) {
-	navigator.serviceWorker
-		.register(new URL("./service.ts", import.meta.url), { type: "module" })
-		.then(() => {
-			console.log("Service worker registered!");
-		})
-		.catch((err) => {
-			console.log("Service worker registration failed: ", err);
-		});
-}

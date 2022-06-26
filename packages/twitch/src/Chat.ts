@@ -2,10 +2,11 @@ import { generateNonce } from "./nonce";
 import { parse } from "./irc-message";
 
 type TwitchMessage = {
-	author: string;
-	tags: Record<string, string | true>;
-	command: string;
-	message: string;
+	author?: string;
+	tags?: Record<string, string | true>;
+	command?: string;
+	message?: string;
+	raw: string;
 };
 
 export class TwitchChat {
@@ -53,14 +54,20 @@ export class TwitchChat {
 		globalThis.addEventListener("twitch-chat-message", ((ev: CustomEvent) => {
 			const msg = parse(ev.detail as string);
 
-			if (msg && msg.prefix) {
+			if (msg) {
 				switch (msg.command) {
 					case "PRIVMSG":
 						callback({
-							author: msg.prefix.split("!")[0],
+							author: msg.prefix?.split("!")[0],
 							tags: msg.tags,
 							command: msg.command,
 							message: msg.params[1].replace(/\r\n?/g, ""),
+							raw: msg.raw,
+						});
+						break;
+					default:
+						callback({
+							raw: msg.raw,
 						});
 						break;
 				}
