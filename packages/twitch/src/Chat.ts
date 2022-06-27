@@ -1,13 +1,5 @@
+import { IRC } from "irc";
 import { generateNonce } from "./nonce";
-import { parse } from "./irc-message";
-
-type TwitchMessage = {
-	author?: string;
-	tags?: Record<string, string | true>;
-	command?: string;
-	message?: string;
-	raw: string;
-};
 
 export class TwitchChat {
 	authenticated = false;
@@ -35,7 +27,9 @@ export class TwitchChat {
 				console.log("Chat Connection Open");
 
 				if (!this.authenticated) {
+					this.ws.send(`CAP REQ :twitch.tv/tags twitch.tv/commands`);
 					this.ws.send(`PASS oauth:${token}`);
+					this.ws.send(`USER ${login} 8 * :${login}`);
 					this.ws.send(`NICK ${login}`);
 				}
 
@@ -50,28 +44,9 @@ export class TwitchChat {
 		});
 	}
 
-	onMessage(callback: (msg: TwitchMessage) => void) {
+	onMessage(callback: (msg: string) => void) {
 		globalThis.addEventListener("twitch-chat-message", ((ev: CustomEvent) => {
-			const msg = parse(ev.detail as string);
-
-			if (msg) {
-				switch (msg.command) {
-					case "PRIVMSG":
-						callback({
-							author: msg.prefix?.split("!")[0],
-							tags: msg.tags,
-							command: msg.command,
-							message: msg.params[1].replace(/\r\n?/g, ""),
-							raw: msg.raw,
-						});
-						break;
-					default:
-						callback({
-							raw: msg.raw,
-						});
-						break;
-				}
-			}
+			callback(ev.detail as string);
 		}) as EventListener);
 	}
 

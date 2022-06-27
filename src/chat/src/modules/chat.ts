@@ -1,3 +1,5 @@
+import { TwitchMessage } from "./../app/TwitchMessage";
+import { IRC } from "irc";
 import { TwitchChat } from "twitch";
 
 let chat = new TwitchChat();
@@ -13,7 +15,10 @@ function initPort(port) {
 			}
 		}
 
-		port.postMessage({ type: "irc.message", message: data });
+		const msg = IRC.parse(data);
+		const twtichMessage = new TwitchMessage(msg);
+
+		port.postMessage({ type: "irc.message", message: twtichMessage });
 	});
 
 	const channels: string[] = [];
@@ -51,12 +56,4 @@ function initPort(port) {
 	});
 }
 
-self.onconnect = function (e) {
-	const port = e.ports[0];
-
-	console.log("new connection");
-
-	initPort(port);
-
-	port.start();
-};
+initPort(self);

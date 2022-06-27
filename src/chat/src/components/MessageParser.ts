@@ -1,3 +1,4 @@
+import { TwitchMessage } from "./../app/TwitchMessage";
 // Parse incoming messages into html´´ templates.
 import { html, TemplateResult } from "lit";
 import { render } from "lit-html";
@@ -24,15 +25,11 @@ const ColorEventTypeMap = {
 ///////////////
 // types going into the parser
 
-interface CharRange {
-	start: number;
-	end: number;
-}
+type CharRange = [number, number];
 
 interface Emote {
 	id: string; // emote id
-	char_range: CharRange; // chat range of emote word
-	name: string; // emote name
+	ranges: CharRange[]; // chat range of emote word
 }
 
 interface Badge {
@@ -127,20 +124,23 @@ export default class MessageParser {
 		this.channel = channel;
 	}
 
-	parse(
-		message: UserMessage | EventMessage
-	): Array<ChatMessage | ChatInfoMessage> {
-		if (message.message_type == "user") {
+	parse(message: TwitchMessage): Array<ChatMessage | ChatInfoMessage> {
+		if (message.type == "user") {
 			return this.parseUserMessage(message);
 		}
-		if (message.message_type == "event") {
+		if (message.type == "system") {
 			return this.parseEventMessage(message);
 		}
 		return [];
 	}
 
-	parseUserMessage(message: UserMessage): Array<ChatMessage> {
-		return [this.parseChatTextMessage(message)];
+	parseUserMessage(message: TwitchMessage): Array<ChatMessage> {
+		const mm: Array<ChatMessage> = [];
+		const m = this.parseChatTextMessage(message);
+		if (m) {
+			mm.push(m);
+		}
+		return mm;
 	}
 
 	parseEventMessage(
@@ -188,16 +188,18 @@ export default class MessageParser {
 		// collect emotes (url) for this message
 		if (message_emtoes) {
 			for (let emote of message_emtoes) {
-				const start = emote.char_range.start;
-				const end = emote.char_range.end;
+				for (let range of emote.ranges) {
+					const start = range[0];
+					const end = range[1];
 
-				const wordToReplace = message_text.slice(start, end);
+					const wordToReplace = message_text.slice(start, end + 1);
 
-				wordEmoteMap[wordToReplace] = {
-					name: wordToReplace,
-					service: "twitch",
-					emote: new TwitchEmote(emote),
-				};
+					wordEmoteMap[wordToReplace] = {
+						name: wordToReplace,
+						service: "twitch",
+						emote: new TwitchEmote(emote),
+					};
+				}
 			}
 		}
 
@@ -244,12 +246,18 @@ export default class MessageParser {
 		return wordEmoteMap;
 	}
 
-	parseChatTextMessage(message: UserMessage): ChatMessage {
+	parseChatTextMessage(message: TwitchMessage): ChatMessage | undefined {
 		const client_user = getLoggedInUser();
 		const user_login = client_user?.user_login;
 
-		const channel_id = message.tags["room-id"];
+		if (!message.message) return;
+
+		const channel_id = message.roomId;
 		const reward_id = message.tags["custom-reward-id"];
+		const user_id = message.tags["user-id"];
+		const message_id = message.tags["id"];
+		const user_name = message.tags["display-name"];
+		let timestamp = message.tags["tmi-sent-ts"];
 
 		let redemtion_title = "custom reward";
 
@@ -260,10 +268,9 @@ export default class MessageParser {
 			}
 		}
 
-		let color = Color.rgbToHex(Color.limitColorContrast(...message.color));
+		let color = message.tags["color"];
 		let highlighted = message.tags["msg-id"] == "highlighted-message";
-		let action = message.is_action;
-		let timestamp = message.timestamp;
+		let action = false;
 		let isReply = message.tags["reply-parent-msg-id"] != null;
 		let tagged = false;
 		// The services/emotes/Emote struct
@@ -275,13 +282,13 @@ export default class MessageParser {
 		// get cached channel emotes
 
 		const wordEmoteMap = this.parseEmotes(
-			message.text,
+			message.message,
 			channel_id,
-			message.user_name,
+			message.name,
 			message.emotes
 		);
 
-		const msg_words = message.text.split(" ");
+		const msg_words = message.message.split(" ");
 
 		// find words to replace with
 		//  (3rd party emtoes | global emtoes | links | metions | msg tagged)
@@ -306,7 +313,7 @@ export default class MessageParser {
 			}
 		});
 
-		if (message.user_name.toLocaleLowerCase() == message.channel) {
+		if (user_name.toLocaleLowerCase() == message.channel) {
 			highlighted = true;
 		}
 
@@ -374,7 +381,7 @@ export default class MessageParser {
 		}
 
 		// message footprint
-		const msgFootprint = messageFootprint(message.text);
+		const msgFootprint = messageFootprint(message.message);
 
 		const similarMessages = [];
 		for (let [channel, id, footprint] of footprintMap) {
@@ -383,11 +390,11 @@ export default class MessageParser {
 			}
 		}
 
-		messageCache.unshift([message.channel, message.id, message]);
+		messageCache.unshift([message.channel, message_id, message]);
 		if (messageCache.length > 100) {
 			messageCache.pop();
 		}
-		footprintMap.unshift([message.channel, message.id, msgFootprint]);
+		footprintMap.unshift([message.channel, message_id, msgFootprint]);
 		if (footprintMap.length > 100) {
 			footprintMap.pop();
 		}
@@ -407,7 +414,7 @@ export default class MessageParser {
 		const createLine = (mod = false) => {
 			const lineEle = document.createElement("chat-line");
 
-			if (message.is_action) {
+			if (action) {
 				lineEle.setAttribute("action", "");
 			}
 
@@ -417,23 +424,23 @@ export default class MessageParser {
 			// render full message template
 			const template = html`
 				<style>
-					[userid="${message.user_id}"] {
+					[userid="${user_id}"] {
 						--color: ${color};
 					}
 				</style>
 
 				${line_title ? html` <div class="line-title">${line_title}</div> ` : ""}
 				${mod &&
-				message.user_name !== user_login &&
+				user_name !== user_login &&
 				!message.badges.find(
-					(b) => b.name == "moderator" || b.name == "broadcaster"
+					(b) => b.id == "moderator" || b.id == "broadcaster"
 				)
 					? html`
 							<span
 								class="chat-line-tool mod-tool inline-tool"
 								title="Timeout 10s"
 								@click="${() =>
-									this.channel.timeout(message.channel, message.user_name, 10)}"
+									this.channel.timeout(message.channel, message.name, 10)}"
 							>
 								<img
 									src="./images/block_white_24dp.svg"
@@ -457,7 +464,7 @@ export default class MessageParser {
 								class="chat-line-tool inline-tool mod-tool-deleted"
 								title="Unban"
 								@click="${() =>
-									this.channel.unban(message.channel, message.user_name)}"
+									this.channel.unban(message.channel, message.name)}"
 							>
 								<img
 									src="./images/done_white_24dp.svg"
@@ -471,23 +478,23 @@ export default class MessageParser {
 					${message.badges.map((badge) => {
 						let badge_url = "";
 
-						if (badge.name == "subscriber") {
+						if (badge.id == "subscriber") {
 							badge_url =
 								getSubBadge(badge.version) ||
-								Badges.getBadgeByName(badge.name, badge.version);
+								Badges.getBadgeByName(badge.id, badge.version);
 							return html`<img
 								class="badge"
-								alt="${badge.name} (${badge.description})"
+								alt="${badge.id} (${message.badgeInfo})"
 								src="${badge_url}"
 								width="18"
 								height="18"
 							/>`;
 						}
 
-						badge_url = Badges.getBadgeByName(badge.name, badge.version);
+						badge_url = Badges.getBadgeByName(badge.id, badge.version);
 						return html`<img
 							class="badge"
-							alt="${badge.name}"
+							alt="${badge.id}"
 							src="${badge_url}"
 							width="18"
 							height="18"
@@ -496,8 +503,8 @@ export default class MessageParser {
 				</span>
 				<span
 					class="username"
-					@click="${() => this.channel.openUserCard(message.user_name)}"
-					>${message.user_name}:</span
+					@click="${() => this.channel.openUserCard(message.name)}"
+					>${message.name}:</span
 				>
 				${isReply && false
 					? html`
@@ -512,7 +519,7 @@ export default class MessageParser {
 					: ""}
 				<span class="message">${parsed_msg}</span>
 
-				${message.user_name !== user_login
+				${message.name !== user_login
 					? html`
 							<div
 								class="tool chat-line-tool"
@@ -530,7 +537,7 @@ export default class MessageParser {
 			`;
 
 			lineEle.setAttribute("messageid", message.id);
-			lineEle.setAttribute("userid", message.user_id);
+			lineEle.setAttribute("userid", message.userId);
 
 			if (tagged) {
 				lineEle.setAttribute("tagged", "");
@@ -557,14 +564,14 @@ export default class MessageParser {
 		const messageData: ChatMessage = {
 			type: "message",
 			id: message.id,
-			user_name: message.user_name,
-			user_id: message.user_id,
+			user_name: message.name,
+			user_id: message.userId,
 			highlighted: highlighted,
 			tagged: tagged,
 			action: action,
 			reply: isReply,
 			timestamp: timestamp,
-			text: message.text,
+			text: message.message,
 			content: createLine,
 		};
 

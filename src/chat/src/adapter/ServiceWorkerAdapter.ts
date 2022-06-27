@@ -1,12 +1,8 @@
-const worker = new SharedWorker(
-	new URL("./../service/irc.ts", import.meta.url),
-	{
-		type: "module",
-	}
-);
+const worker = new Worker(new URL("./../modules/chat.ts", import.meta.url), {
+	type: "module",
+});
 
 worker.onerror = console.error;
-worker.port.start();
 
 export class ServiceWorkerAdapter {
 	get worker() {
@@ -15,14 +11,14 @@ export class ServiceWorkerAdapter {
 	}
 
 	joinChannel(channel: string) {
-		this.worker?.port.postMessage({
+		this.worker?.postMessage({
 			type: "irc.join",
 			channel,
 		});
 	}
 
 	sendMessage(channel: string, message: string) {
-		this.worker?.port.postMessage({
+		this.worker?.postMessage({
 			type: "irc.send",
 			channel,
 			message,
@@ -30,13 +26,13 @@ export class ServiceWorkerAdapter {
 	}
 
 	onMessage(callback: (msg) => void) {
-		this.worker?.port.addEventListener("message", (msg) => {
+		this.worker?.addEventListener("message", (msg) => {
 			callback(msg.data);
 		});
 	}
 
 	login(login: string, token: string) {
-		this.worker?.port.postMessage({
+		this.worker?.postMessage({
 			type: "irc.login",
 			login,
 			token,

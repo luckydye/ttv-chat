@@ -19,14 +19,8 @@ export class TwitchEmote extends Emote {
 		};
 	}
 
-	type: string;
-	owner_id: string;
-
-	constructor(emote: { id: string; emote_type: string; owner_id: string }) {
+	constructor(emote: { id: string }) {
 		super(emote);
-
-		this.owner_id = emote.owner_id;
-		this.type = emote.emote_type;
 	}
 }
 

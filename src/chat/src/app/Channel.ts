@@ -1,3 +1,4 @@
+import { TwitchMessage } from "./TwitchMessage";
 import { CommandList } from "../services/CommandList";
 import IRC, { IRCEvents, JoinMessage, PartMessage } from "../services/IRC";
 import TwitchPubsub from "../services/twitch/Pubsub";
@@ -422,23 +423,44 @@ export default class Channel {
 		adapter.joinChannel(this.channel_login.toLocaleLowerCase());
 
 		adapter.onMessage(({ message }) => {
-			const ele = document.createElement("div");
-			ele.innerHTML = `${message.author}: ${message.message}`;
+			const msg = message as TwitchMessage;
 
-			this.chat.appendMessage({
-				type: "message",
-				id: Math.random().toString(), // message id
-				user_name: "idk",
-				user_id: "idk",
-				highlighted: false, // has hgihlighted tag
-				tagged: false, // the authenticated user got tagged
-				action: false, // is a /me message
-				reply: false, // is a reply
-				timestamp: new Date(),
-				text: message.raw,
-				// text: msg.message.text,
-				content: () => ele, // parsed message
-			});
+			const chatMessages: Array<ChatMessage | ChatInfoMessage> =
+				this.messageParser.parse(msg);
+
+			for (let message of chatMessages) {
+				// Group timestamps. Make tiemstamp markers as chat lines grouping in like 10 minute intervals
+				//          - append a timestamp to chat if last message seen is more then 10 mintues old
+				//          - last timestamp is older then 1 hour
+				const ts = new Date(message.timestamp);
+				if (lastMessage && lastTimestamp) {
+					if (
+						ts.valueOf() - new Date(lastMessage.timestamp).valueOf() >
+						1000 * 60 * 10
+					) {
+						// longer then 10 min since last message
+						this.chat.appendTimestamp(ts);
+						lastTimestamp = ts;
+					} else {
+						if (ts.valueOf() - lastTimestamp.valueOf() > 1000 * 60 * 10) {
+							// last timestamp is > 10 minutes old
+							this.chat.appendTimestamp(ts);
+							lastTimestamp = ts;
+						}
+					}
+				} else if (lastMessage == null) {
+					// first message in history
+					this.chat.appendTimestamp(ts);
+					lastTimestamp = ts;
+				}
+				lastMessage = message;
+
+				this.chat.appendMessage(message);
+
+				if (msg.channel) {
+					window.dispatchEvent(new ChatMessageEvent(msg.channel, message));
+				}
+			}
 		});
 	}
 
