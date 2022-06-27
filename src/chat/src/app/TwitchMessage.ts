@@ -69,24 +69,31 @@ export class TwitchMessage {
 		this.message = message.message;
 		this.channel = message.channel;
 
-		this.emotes = message.tags["emotes"]?.split("/").map((idRange) => {
-			const id = idRange.split(":")[0];
-			const ranges: EmoteRange[] = idRange
-				.split(":")[1]
-				.split(",")
-				.map((range) => {
-					const r = range.split("-");
-					return [+r[0], +r[1]];
-				});
+		this.emotes = message.tags["emotes"]
+			?.split("/")
+			.map((idRange) => {
+				if (idRange) {
+					const id = idRange.split(":")[0];
+					const ranges: EmoteRange[] = idRange
+						.split(":")[1]
+						.split(",")
+						.map((range) => {
+							const r = range.split("-");
+							return [+r[0], +r[1]];
+						});
 
-			const emote: Emote = {
-				id: id,
-				ranges: ranges,
-			};
-			return emote;
-		});
-
-		console.log(message.tags["emotes"]);
+					const emote: Emote = {
+						id: id,
+						ranges: ranges,
+					};
+					return emote;
+				}
+				return {
+					id: "",
+					ranges: [],
+				};
+			})
+			.filter((e) => e.id != "");
 
 		this.badges = message.tags["badges"]?.split(",").map((idSlot) => {
 			const badge: Badge = {
