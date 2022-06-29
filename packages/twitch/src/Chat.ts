@@ -1,7 +1,12 @@
-import { IRC } from "irc";
 import { generateNonce } from "./nonce";
 
 export class TwitchChat {
+	static async requestHistory(channel) {
+		return await fetch(`https://twitch-chat-history.deno.dev/${channel}`).then(
+			(res) => res.json()
+		);
+	}
+
 	authenticated = false;
 
 	ws!: WebSocket;
@@ -58,7 +63,17 @@ export class TwitchChat {
 
 	async join(channel: string): Promise<void> {
 		await this.ws.send(`JOIN #${channel}`);
+
 		console.log(`Joined channel ${channel}`);
 		this.channels.add(channel);
+
+		const history = await TwitchChat.requestHistory(channel);
+		if (history.messages) {
+			for (let msg of history.messages) {
+				globalThis.dispatchEvent(
+					new CustomEvent("twitch-chat-message", { detail: msg })
+				);
+			}
+		}
 	}
 }
