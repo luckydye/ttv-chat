@@ -10,11 +10,15 @@ export class ServiceWorkerAdapter {
 		return worker;
 	}
 
+	channels: Set<string> = new Set();
+
 	joinChannel(channel: string) {
 		this.worker?.postMessage({
 			type: "irc.join",
 			channel,
 		});
+
+		this.channels.add(`#${channel}`);
 	}
 
 	sendMessage(channel: string, message: string) {
@@ -27,7 +31,9 @@ export class ServiceWorkerAdapter {
 
 	onMessage(callback: (msg) => void) {
 		this.worker?.addEventListener("message", (msg) => {
-			callback(msg.data);
+			if (this.channels.has(msg.data.message.channel)) {
+				callback(msg.data);
+			}
 		});
 	}
 

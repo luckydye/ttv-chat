@@ -407,6 +407,7 @@ export default class Channel {
 				}
 			}
 		});
+
 		IRC.listen(IRCEvents.ChatDeleteMessage, (msg) => {
 			if (this.channel_login === msg.channel_login) {
 				const line = this.chat.querySelector(`[messageid="${msg.message_id}"]`);
