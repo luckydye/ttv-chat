@@ -136,5 +136,5 @@ export async function authClientUser() {
 		}
 	};
 
-	const win = window.open(url);
+	const win = window.open(url, undefined);
 }

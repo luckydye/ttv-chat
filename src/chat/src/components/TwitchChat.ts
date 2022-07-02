@@ -191,7 +191,8 @@ export default class TwitchChatComponent extends Chat {
 				color: #ababab;
 				display: flex;
 				flex-wrap: wrap;
-				background: linear-gradient(180deg, rgb(0 0 0 / 15%), transparent);
+				background: linear-gradient(rgba(0, 0, 0, 0.33) 20%, transparent);
+				padding-bottom: 30px;
 			}
 
 			.chat-title > div {

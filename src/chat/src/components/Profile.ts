@@ -11,7 +11,6 @@ export default class TwitchAuthComp extends LitElement {
 				display: flex;
 				justify-content: center;
 				align-items: center;
-				height: 45px;
 			}
 
 			.user-icon {

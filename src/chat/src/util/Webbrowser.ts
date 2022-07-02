@@ -20,7 +20,7 @@ export default class Webbrowser {
 		);
 	}
 
-	static openInBrowwser(url: string) {
-		window.open(url);
+	static openInBrowwser(url: string, params = "width=400,height=800") {
+		window.open(url, undefined, params);
 	}
 }

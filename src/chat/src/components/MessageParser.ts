@@ -474,50 +474,56 @@ export default class MessageParser {
 							</span>
 					  `
 					: ""}
-				<span class="bages">
-					${message.badges.map((badge) => {
-						let badge_url = "";
+				<div class="message-prefix">
+					<span class="bages">
+						${message.badges.map((badge, i) => {
+							let badge_url = "";
 
-						if (badge.id == "subscriber") {
-							badge_url =
-								getSubBadge(badge.version) ||
-								Badges.getBadgeByName(badge.id, badge.version);
+							// if (i >= 2) return;
+
+							if (badge.id == "subscriber") {
+								badge_url =
+									getSubBadge(badge.version) ||
+									Badges.getBadgeByName(badge.id, badge.version);
+								return html`<img
+									class="badge"
+									alt="${badge.id} (${message.badgeInfo})"
+									src="${badge_url}"
+									width="18"
+									height="18"
+								/>`;
+							}
+
+							badge_url = Badges.getBadgeByName(badge.id, badge.version);
 							return html`<img
 								class="badge"
-								alt="${badge.id} (${message.badgeInfo})"
+								alt="${badge.id}"
 								src="${badge_url}"
 								width="18"
 								height="18"
 							/>`;
-						}
-
-						badge_url = Badges.getBadgeByName(badge.id, badge.version);
-						return html`<img
-							class="badge"
-							alt="${badge.id}"
-							src="${badge_url}"
-							width="18"
-							height="18"
-						/>`;
-					})}
-				</span>
-				<span
-					class="username"
-					@click="${() => this.channel.openUserCard(message.name)}"
-					>${message.name}:</span
-				>
-				${isReply && false
-					? html`
-							<button class="reply-icon" title="Reply">
-								<img
-									src="./images/question_answer_white_24dp.svg"
-									height="18px"
-									width="18px"
-								/>
-							</button>
-					  `
-					: ""}
-				<span class="message">${parsed_msg}</span>
+						})}
+					</span>
+				</div>
+				<div>
+					<span
+						class="username"
+						@click="${() => this.channel.openUserCard(message.name)}"
+						>${message.name}:</span
+					>
+					${isReply && false
+						? html`
+								<button class="reply-icon" title="Reply">
+									<img
+										src="./images/question_answer_white_24dp.svg"
+										height="18px"
+										width="18px"
+									/>
+								</button>
+						  `
+						: ""}
+					<span class="message">${parsed_msg}</span>
+				</div>
 
 				${message.name !== user_login
 					? html`

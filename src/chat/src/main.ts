@@ -62,6 +62,8 @@ function renderSelecetdChat(channel: string) {
 		const chat = Application.getChannel(channel);
 		const chatEle = chat?.chat;
 
+		document.title = channel;
+
 		if (chatEle) {
 			if (!chatEle.parentNode) {
 				container.append(chatEle);
