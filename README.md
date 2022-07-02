@@ -58,6 +58,9 @@ Run ```npm run tauri dev``` or hit F5 in VSCode to compile the app.
 
 ## Roadmap
 
+- manage predictions and polls through twitch.tv/popout/*/predictions
+- custom commands: define custom / commands, for less "!command" spam.
+
 - [x] fix the scrolling when switching channels
 - [x] bookmark line
 - [x] show point redemtions in chat !important
