@@ -21,9 +21,8 @@ export default class Loader extends LitElement {
 					transform: rotate(-360deg);
 				}
 			}
-			.loader img {
-				width: 32px;
-				height: 32px;
+			.loader svg-icon {
+				--size: 32px;
 				animation: rotate 1s linear infinite;
 			}
 		`;
@@ -32,7 +31,7 @@ export default class Loader extends LitElement {
 	render() {
 		return html`
 			<div class="loader">
-				<sv-icon icon="loader"></sv-icon>
+				<svg-icon icon="loader"></svg-icon>
 			</div>
 		`;
 	}

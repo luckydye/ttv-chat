@@ -11,13 +11,14 @@ export class SVGIcon extends LitElement {
 	static get styles() {
 		return css`
 			:host {
-				display: contents;
+				display: inline-block;
+				vertical-align: bottom;
+
 				font-size: var(--size, 1rem);
 			}
 
 			svg {
-				display: inline-block;
-				vertical-align: middle;
+				display: block;
 				width: 1em;
 				height: 1em;
 			}
