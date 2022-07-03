@@ -36,21 +36,21 @@ export default class ChatUserList extends LitElement {
 		const counts = this.shadowRoot.querySelector(".user-list-counts");
 		counts.innerHTML = "";
 		if (staffCount > 0) {
-			counts.innerHTML += `<img height="16px" width="16px" src="./images/Staff.svg"/> ${Format.number(
+			counts.innerHTML += `<svg-icon height="16px" width="16px" icon="Staff"></svg-icon> ${Format.number(
 				staffCount
 			)}  `;
 		}
 		if (modCount > 0) {
-			counts.innerHTML += `<img height="16px" width="16px" src="./images/Mod.svg"/> ${Format.number(
+			counts.innerHTML += `<svg-icon height="16px" width="16px" icon="Mod"></svg-icon> ${Format.number(
 				modCount
 			)}  `;
 		}
 		if (vipCount > 0) {
-			counts.innerHTML += `<img height="16px" width="16px" src="./images/VIP.svg"/> ${Format.number(
+			counts.innerHTML += `<svg-icon height="16px" width="16px" icon="VIP"></svg-icon> ${Format.number(
 				vipCount
 			)}  `;
 		}
-		counts.innerHTML += `<img height="16px" width="16px" src="./images/Viewer.svg"/> ${Format.number(
+		counts.innerHTML += `<svg-icon height="16px" width="16px" icon="Viewer"></svg-icon> ${Format.number(
 			viewerCount
 		)}`;
 

@@ -1,13 +1,5 @@
 //
-import "./components/Chat";
-import "./components/ChatInput";
-import "./components/ChatRooms";
-import "./components/Login";
-import "./components/Profile";
-import "./components/TwitchChat";
-import "./components/ProfileIndicator";
-import "./components/Tooltip";
-import "./components/AsyncImage";
+import "./components";
 //
 import Events from "./events/Events";
 
@@ -18,9 +10,7 @@ import Badges from "./services/Badges";
 import Emotes from "./services/Emotes";
 import Notifications from "./util/Notifications";
 
-import { TwitchChat } from "twitch";
-
-TwitchChat;
+import "twitch";
 
 async function onLogin(account: Account) {
 	console.log("Logged in", account);

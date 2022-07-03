@@ -104,7 +104,7 @@ export default class ChatRooms extends LitElement {
 						Application.selectChannel("@");
 					}}"
 				>
-					<img src="./images/Mention.svg" width="18px" height="18px" />
+					<svg-icon icon="Mention"></svg-icon>
 				</div>
 
 				${rooms.map((room) => {

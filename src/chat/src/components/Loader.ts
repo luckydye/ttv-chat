@@ -32,7 +32,7 @@ export default class Loader extends LitElement {
 	render() {
 		return html`
 			<div class="loader">
-				<img src="./images/loader.svg" />
+				<sv-icon icon="loader"></sv-icon>
 			</div>
 		`;
 	}

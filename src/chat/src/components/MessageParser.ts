@@ -442,11 +442,7 @@ export default class MessageParser {
 								@click="${() =>
 									this.channel.timeout(message.channel, message.name, 10)}"
 							>
-								<img
-									src="./images/block_white_24dp.svg"
-									width="16px"
-									height="16px"
-								/>
+								<svg-icon icon="block_white_24dp"></svg-icon>
 							</span>
 							<span
 								class="chat-line-tool mod-tool inline-tool delete-tool"
@@ -454,11 +450,7 @@ export default class MessageParser {
 								@click="${() =>
 									this.channel.deleteMessage(message.channel, message.id)}"
 							>
-								<img
-									src="./images/delete_white_24dp.svg"
-									width="16px"
-									height="16px"
-								/>
+								<svg-icon icon="delete_white_24dp"></svg-icon>
 							</span>
 							<span
 								class="chat-line-tool inline-tool mod-tool-deleted"
@@ -466,11 +458,7 @@ export default class MessageParser {
 								@click="${() =>
 									this.channel.unban(message.channel, message.name)}"
 							>
-								<img
-									src="./images/done_white_24dp.svg"
-									width="16px"
-									height="16px"
-								/>
+								<svg-icon icon="done_white_24dp"></svg-icon>
 							</span>
 					  `
 					: ""}
@@ -514,11 +502,7 @@ export default class MessageParser {
 					${isReply && false
 						? html`
 								<button class="reply-icon" title="Reply">
-									<img
-										src="./images/question_answer_white_24dp.svg"
-										height="18px"
-										width="18px"
-									/>
+									<svg-icon icon="question_answer_white_24dp"></svg-icon>
 								</button>
 						  `
 						: ""}
@@ -532,11 +516,7 @@ export default class MessageParser {
 								title="Reply"
 								@click="${() => this.channel.reply(message.channel, message)}"
 							>
-								<img
-									src="./images/reply_white_24dp.svg"
-									height="18px"
-									width="18px"
-								/>
+								<svg-icon icon="reply_white_24dp"></svg-icon>
 							</div>
 					  `
 					: ""}

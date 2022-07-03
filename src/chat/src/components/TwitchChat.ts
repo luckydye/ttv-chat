@@ -361,7 +361,7 @@ export default class TwitchChatComponent extends Chat {
 									Application.removeChannel(channel.channel_login);
 								}}"
 							>
-								<img src="./images/close.svg" width="16px" height="16px" />
+								<svg-icon icon="close"></svg-icon>
 							</button>
 						</div>
 						<div class="chat-action">
@@ -372,7 +372,7 @@ export default class TwitchChatComponent extends Chat {
 									this.openUserlist();
 								}}"
 							>
-								<img src="./images/people.svg" width="16px" height="16px" />
+								<svg-icon icon="people"></svg-icon>
 							</button>
 							<div class="dropdown-content" tabindex="0">
 								<chat-user-list
@@ -399,7 +399,7 @@ export default class TwitchChatComponent extends Chat {
 									);
 								}}"
 							>
-								<img src="./images/open.svg" width="16px" height="16px" />
+								<svg-icon icon="open"></svg-icon>
 							</button>
 						</div>
 					</div>
@@ -421,18 +421,14 @@ export default class TwitchChatComponent extends Chat {
 								?active="${channel.slow_mode !== 0}"
 								@click="${() => channel.toggleSlowMode(channel)}"
 							>
-								<img src="./images/slowmode.svg" width="18px" height="18px" />
+								<svg-icon icon="slowmode"></svg-icon>
 							</div>
 							<div
 								class="room-state-icon action-expand"
 								title="Slowmode time"
 								@click="${this.openSlowModeSettins}"
 							>
-								<img
-									src="./images/expand_more_black_24dp.svg"
-									width="16px"
-									height="16px"
-								/>
+								<svg-icon icon="expand_more_black_24dp"></svg-icon>
 							</div>
 						</div>
 						<div class="chat-action">
@@ -442,18 +438,14 @@ export default class TwitchChatComponent extends Chat {
 								?active="${channel.follwers_only >= 0}"
 								@click="${() => channel.toggleFollowerMode(channel)}"
 							>
-								<img src="./images/follower.svg" width="18px" height="18px" />
+								<svg-icon icon="follower"></svg-icon>
 							</div>
 							<div
 								class="room-state-icon action-expand"
 								title="Follower time"
 								@click="${this.openFollowerModeSettings}"
 							>
-								<img
-									src="./images/expand_more_black_24dp.svg"
-									width="16px"
-									height="16px"
-								/>
+								<svg-icon icon="expand_more_black_24dp"></svg-icon>
 							</div>
 						</div>
 						<div class="chat-action">
@@ -463,7 +455,7 @@ export default class TwitchChatComponent extends Chat {
 								?active="${channel.emote_only}"
 								@click="${() => channel.toggleEmoteOnlyMode(channel)}"
 							>
-								<img src="./images/emote.svg" width="18px" height="18px" />
+								<svg-icon icon="emote"></svg-icon>
 							</div>
 						</div>
 						<div class="chat-action">
@@ -473,7 +465,7 @@ export default class TwitchChatComponent extends Chat {
 								?active="${channel.subscribers_only}"
 								@click="${() => channel.toggleSubOnlyMode(channel)}"
 							>
-								<img src="./images/subscriber.svg" width="18px" height="18px" />
+								<svg-icon icon="subscriber"></svg-icon>
 							</div>
 						</div>
 						<div class="chat-action">
@@ -523,7 +515,7 @@ export default class TwitchChatComponent extends Chat {
 							${channel.chatter_count > 0
 								? html`
 										<div class="tag" title="Chatters">
-											<img src="./images/Viewer.svg" width="16px" />
+											<svg-icon icon="Viewer"></svg-icon>
 											${Format.number(channel.chatter_count)}
 										</div>
 								  `
@@ -538,11 +530,11 @@ export default class TwitchChatComponent extends Chat {
 								<stream-timer starttime="${this.stream_start}"></stream-timer>
 							</div>
 							<div class="tag" title="Game">
-								<img src="./images/Game.svg" width="16px" />
+								<svg-icon icon="Game"></svg-icon>
 								${this.game}
 							</div>
 							<div class="tag" title="Viewercount">
-								<img src="./images/Viewer.svg" width="16px" />
+								<svg-icon icon="Viewer"></svg-icon>
 								${Format.number(this.viewer_count)}
 							</div>
 					  `}
@@ -569,9 +561,7 @@ export default class TwitchChatComponent extends Chat {
 										<div class="profile-name">
 											${this.bio.broadcaster_name}
 											${this.bio.broadcaster_type == "partner"
-												? html`
-														<img src="./images/verified.svg" alt="verified" />
-												  `
+												? html` <svg-icon icon="verified"></svg-icon> `
 												: ""}
 										</div>
 										<div class="game">${this.bio.game_name}</div>

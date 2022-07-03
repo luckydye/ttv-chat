@@ -701,11 +701,10 @@ export default class ChatInput extends LitElement {
 						<!-- <button name="create poll">Y</button>
                         <button name="create prediction">X</button> -->
 						<button name="Emotes" @click="${this.openEmotePicker}">
-							<img
-								src="./images/sentiment_satisfied_alt_white_24dp.svg"
-								width="20px"
-								height="20px"
-							/>
+							<svg-icon
+								icon="sentiment_satisfied_alt_white_24dp"
+								style="--size: 1.6rem;"
+							></svg-icon>
 						</button>
 					</div>
 				</div>

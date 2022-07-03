@@ -18,7 +18,7 @@ async function renderYouTubeVideo(videoId: string) {
 		<div class="clip-title">${title}</div>
 		<div>${channel}</div>
 		<div>
-			<img src="./images/Viewer.svg" width="16px" />
+			<svg-icon icon="Viewer"></svg-icon>
 			${view_count}
 		</div>
 	`;
@@ -34,7 +34,7 @@ async function renderTwitchClip(clipId: string) {
 		</div>
 		<div class="clip-title">${clip.title}</div>
 		<div>
-			<img src="./images/Viewer.svg" width="16px" />
+			<svg-icon icon="Viewer"></svg-icon>
 			${clip.view_count}
 		</div>
 	`;
