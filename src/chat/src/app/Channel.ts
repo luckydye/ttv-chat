@@ -173,18 +173,20 @@ export default class Channel {
 			this.chat.setTitle(null);
 		}
 
-		// await TwitchChat.getUserlist(this.channel_login).then((chatters) => {
-		// 	this.chatters = [
-		// 		...chatters.chatters.broadcaster,
-		// 		...chatters.chatters.vips,
-		// 		...chatters.chatters.moderators,
-		// 		...chatters.chatters.staff,
-		// 		...chatters.chatters.admins,
-		// 		...chatters.chatters.global_mods,
-		// 		...chatters.chatters.viewers,
-		// 	];
-		// 	this.chatter_count = chatters.chatter_count;
-		// });
+		await TwitchChat.requestUserlist(this.channel_login).then(
+			({ chatters }) => {
+				this.chatters = [
+					...chatters.chatters.broadcaster,
+					...chatters.chatters.vips,
+					...chatters.chatters.moderators,
+					...chatters.chatters.staff,
+					...chatters.chatters.admins,
+					...chatters.chatters.global_mods,
+					...chatters.chatters.viewers,
+				];
+				this.chatter_count = chatters.chatter_count;
+			}
+		);
 
 		window.dispatchEvent(new ChannelInfoChanged(this));
 	}

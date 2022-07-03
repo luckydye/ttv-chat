@@ -34,6 +34,7 @@ chat-line .username {
 	color: var(--color);
 	font-weight: 600;
 	margin-right: 2px;
+	margin-left: 3px;
 	padding: 8px 0;
 }
 

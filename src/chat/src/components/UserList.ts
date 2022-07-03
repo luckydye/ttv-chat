@@ -1,7 +1,5 @@
-// http://tmi.twitch.tv/group/user/{{username}}/chatters
-
+import { TwitchChat } from "twitch";
 import { css, html, LitElement } from "lit";
-import IRC from "../services/IRC";
 import Format from "../util/Format";
 
 export default class ChatUserList extends LitElement {
@@ -20,7 +18,7 @@ export default class ChatUserList extends LitElement {
 	}
 
 	async request() {
-		const list = await IRC.getUserlist(this.channel);
+		const list = await TwitchChat.requestUserlist(this.channel);
 		this.list = list.chatters;
 
 		const chatters = list.chatters;

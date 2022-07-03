@@ -1,9 +1,15 @@
 import { generateNonce } from "./nonce";
 
 export class TwitchChat {
-	static async requestHistory(channel) {
-		return await fetch(`https://twitch-chat-history.deno.dev/${channel}`).then(
-			(res) => res.json()
+	static async requestHistory(channel: string) {
+		return await fetch(`https://ttv-chat.deno.dev/history/${channel}`).then(
+			async (res) => (await res.json()).data
+		);
+	}
+
+	static async requestUserlist(channel: string) {
+		return await fetch(`https://ttv-chat.deno.dev/userlist/${channel}`).then(
+			async (res) => (await res.json()).data
 		);
 	}
 
