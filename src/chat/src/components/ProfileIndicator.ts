@@ -123,7 +123,6 @@ export default class ProfileIndicator extends LitElement {
 			.profile-icon .image {
 				overflow: hidden;
 				border-radius: 50%;
-				background: #333333;
 				box-shadow: 1px 2px 8px rgba(0, 0, 0, 0.25);
 			}
 			.profile-icon img {
@@ -147,12 +146,12 @@ export default class ProfileIndicator extends LitElement {
 				?newmessage="${this.new_message}"
 			>
 				<div class="image">
-					<img
+					<async-img
 						?empty="${!this.profile_image_url}"
 						width="24px"
 						src="${this.profile_image_url || ""}"
 						alt="${this.channel}"
-					/>
+					></async-img>
 				</div>
 			</div>
 		`;
