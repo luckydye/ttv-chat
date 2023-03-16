@@ -1,4 +1,6 @@
-# Better Twitch Chat (Alpha)
+# Better Twitch Chat
+
+!! This is very work in progress, though not much work is happening at the moment.
 
 A new Twitch Chat Client with some third party things.
 
